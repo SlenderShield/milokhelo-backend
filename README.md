@@ -1,6 +1,6 @@
 # Milokhelo Backend
 
-A clean modular monolith backend application built with Node.js, Express, MongoDB, and Redis. This architecture follows SOLID, DRY, and KISS principles, featuring event-driven inter-module communication designed for future microservices migration.
+A comprehensive sports platform backend built with Node.js, Express, MongoDB, and Redis. This is a clean modular monolith with Clean Architecture principles, featuring hybrid OAuth authentication, real-time chat with WebSocket, geo-spatial venue search, and event-driven inter-module communication.
 
 ## 🏗️ Architecture Overview
 
@@ -49,27 +49,23 @@ src/
 
 ## 🚀 Features
 
-- ✅ **Modular Architecture**: Each module is self-contained with clear boundaries
-- ✅ **Event-Driven Communication**: Modules communicate via events (in-memory or Redis)
+- ✅ **14 Complete Modules**: Auth, Users, Teams, Matches, Tournaments, Chat, Venues, Maps, Calendar, Notifications, Invitations, Feedback, Admin
+- ✅ **Hybrid OAuth**: Google & Facebook OAuth + Email/Password authentication
+- ✅ **Session Management**: HTTP-only cookies with Redis store
+- ✅ **Real-time Chat**: WebSocket support with Socket.IO
+- ✅ **Geo-spatial Search**: Find nearby venues with 2dsphere indexes
+- ✅ **70+ API Endpoints**: Complete REST API with Swagger documentation
+- ✅ **Event-Driven**: Modules communicate via events (in-memory or Redis)
 - ✅ **Dependency Injection**: Loose coupling with IoC container
-- ✅ **Environment-Based Configuration**: Separate configs for dev, test, production
-- ✅ **Advanced Logging System**: 
-  - Structured logging with Winston
-  - Request correlation with unique IDs
-  - Performance tracking and timers
-  - Security and audit logging
-  - Automatic sensitive data redaction
-  - Log rotation and archiving
-- ✅ **Health Checks**: Built-in health check endpoints
-- ✅ **Docker Support**: Docker Compose for MongoDB and Redis
-- ✅ **Code Quality**: ESLint and Prettier configured
-- ✅ **SOLID Principles**: Clean architecture patterns
+- ✅ **Advanced Logging**: Structured logging with Winston, request correlation, performance tracking
+- ✅ **Clean Architecture**: Domain/Application/Infrastructure layers
+- ✅ **Production Ready**: Docker support, health checks, security middleware
 
 ## 📋 Prerequisites
 
 - Node.js >= 18.x
-- MongoDB >= 7.x
-- Redis >= 7.x (optional, for distributed event bus)
+- MongoDB >= 5.x
+- Redis >= 6.x
 - Docker & Docker Compose (for local development)
 
 ## 🛠️ Installation
@@ -90,8 +86,22 @@ npm install
 3. **Set up environment variables**
 
 ```bash
-cp .env.example .env.development
-# Edit .env.development with your settings
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+Key environment variables:
+
+```env
+# Auth & Sessions
+JWT_SECRET=your-jwt-secret-here
+SESSION_SECRET=your-session-secret-here
+
+# OAuth (optional - for hybrid OAuth)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+FACEBOOK_APP_ID=your-facebook-app-id
+FACEBOOK_APP_SECRET=your-facebook-app-secret
 ```
 
 4. **Start infrastructure services (MongoDB & Redis)**
@@ -111,6 +121,170 @@ npm run dev
 # Using Redis event bus
 npm run dev:redis
 ```
+
+The server will start at:
+- **API**: <http://localhost:4000/api/v1>
+- **API Documentation**: <http://localhost:4000/docs>
+- **WebSocket**: `ws://localhost:4000`
+- **Health Check**: <http://localhost:4000/health>
+
+### Production Mode
+
+```bash
+npm start
+```
+
+### Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Watch mode
+npm run test:watch
+```
+
+## 📡 API Overview
+
+The Milokhelo backend provides 70+ API endpoints across 14 modules:
+
+### 🔐 Authentication (`/api/v1/auth`)
+
+- `GET /providers` - List available OAuth providers
+- `GET /oauth/url` - Get OAuth authorization URL
+- `POST /oauth/callback` - Handle OAuth callback
+- `GET /session` - Get current session
+- `POST /logout` - Logout user
+- `POST /register` - Register with email/password
+- `POST /login` - Login with email/password
+
+### 👤 Users (`/api/v1/users`)
+
+- `GET /me` - Get current user profile
+- `PATCH /me` - Update profile
+- `GET /me/stats` - Get user statistics
+- `GET /me/achievements` - List achievements
+- `GET /:userId` - Get user by ID
+- `GET /search` - Search users
+
+### 👥 Teams (`/api/v1/teams`)
+
+- `POST /` - Create team
+- `GET /` - List teams
+- `GET /:teamId` - Get team details
+- `PATCH /:teamId` - Update team
+- `DELETE /:teamId` - Delete team
+- `POST /:teamId/join` - Join team
+- `POST /:teamId/leave` - Leave team
+
+### ⚽ Matches (`/api/v1/matches`)
+
+- `POST /` - Create match
+- `GET /` - List matches (with filters)
+- `GET /nearby` - Find nearby matches
+- `GET /:matchId` - Get match details
+- `PATCH /:matchId` - Update match
+- `POST /:matchId/join` - Join match
+- `POST /:matchId/leave` - Leave match
+- `POST /:matchId/start` - Start match
+- `POST /:matchId/finish` - Finish match
+
+### 🏆 Tournaments (`/api/v1/tournaments`)
+
+- `POST /` - Create tournament
+- `GET /` - List tournaments
+- `GET /:tournamentId` - Get tournament details
+- `PATCH /:tournamentId` - Update tournament
+- `POST /:tournamentId/register` - Register team
+- `POST /:tournamentId/start` - Start tournament
+- `GET /:tournamentId/bracket` - Get bracket
+
+### 💬 Chat (`/api/v1/chat`)
+
+- `POST /rooms` - Create chat room
+- `GET /rooms` - List rooms
+- `GET /rooms/:roomId/messages` - Get messages
+- `POST /rooms/:roomId/messages` - Send message
+- Real-time events via WebSocket (join_room, send_message, typing)
+
+### 🏟️ Venues (`/api/v1/venues`)
+
+- `GET /` - List all venues
+- `GET /search` - Search venues by name/sport
+- `GET /nearby` - Find venues near coordinates (geo-spatial)
+- `GET /:venueId` - Get venue details
+- `POST /:venueId/bookings` - Create booking request
+- `GET /me/bookings` - List user bookings
+- `PATCH /bookings/:bookingId/cancel` - Cancel booking
+
+### 🔧 Venue Management (`/api/v1/venue-management`)
+
+- `POST /venues` - Register new venue (owner)
+- `PATCH /venues/:venueId` - Update venue
+- `DELETE /venues/:venueId` - Delete venue
+- `GET /venues/:venueId/bookings` - List venue bookings
+- `PATCH /bookings/:bookingId/approve` - Approve booking
+- `PATCH /bookings/:bookingId/reject` - Reject booking
+
+### 🗺️ Maps (`/api/v1/maps`)
+
+- `GET /locations` - List map locations
+- `POST /locations` - Submit new location
+- `PATCH /locations/:locationId` - Update location
+
+### 📅 Calendar (`/api/v1/calendar`)
+
+- `GET /events` - List calendar events
+- `POST /sync` - Sync with Google Calendar
+
+### 🔔 Notifications (`/api/v1/notifications`)
+
+- `GET /` - List notifications
+- `POST /mark-read` - Mark as read
+- `POST /device-tokens` - Register device for push
+- `DELETE /device-tokens/:tokenId` - Unregister device
+
+### 📨 Invitations (`/api/v1/invitations`)
+
+- `POST /` - Send invitation
+- `GET /` - List invitations
+- `POST /:invitationId/respond` - Accept/decline
+
+### 📝 Feedback (`/api/v1/feedback`)
+
+- `POST /` - Submit feedback
+- `GET /` - List feedback (admin)
+
+### 🛡️ Admin (`/api/v1/admin`)
+
+- `GET /users` - List all users
+- `GET /reports` - List reports
+- `POST /reports/:reportId/resolve` - Resolve report
+
+For detailed API documentation with request/response schemas, visit `/docs` when running the server.
+
+## 🔌 WebSocket Events
+
+Connect to `ws://localhost:4000` for real-time features:
+
+### Chat Events
+
+**Client → Server:**
+
+- `join_room` - Join a chat room
+- `leave_room` - Leave a chat room
+- `send_message` - Send a message
+- `typing` - Indicate typing status
+
+**Server → Client:**
+
+- `new_message` - Receive new message
+- `user_typing` - User typing notification
+- `room_joined` - Room join confirmation
+- `error` - Error notification
 
 ### Production Mode
 
@@ -265,37 +439,41 @@ req.logger.info('Processing request', { userId: req.user.id });
 
 ## 🎯 Adding New Modules
 
-1. **Create module structure**
+To add a new module to the Milokhelo sports platform:
 
-```bash
-mkdir -p src/api/v1/modules/your-module/{domain,application,infrastructure/{persistence,http}}
-```
+1. **Create module structure:**
+
+   ```bash
+   mkdir -p src/api/v1/modules/your-module/{domain,application,infrastructure/{persistence,http}}
+   ```
 
 2. **Implement domain layer** (entities, interfaces)
 
 3. **Implement application layer** (services, business logic)
 
-4. **Implement infrastructure layer**
+4. **Implement infrastructure layer:**
    - Persistence: models, repositories
    - HTTP: controllers, routes
 
 5. **Create module initializer** in `src/api/v1/modules/your-module/index.js`
 
-6. **Register in API router** (`src/api/v1/routes.js`)
+6. **Register in API router** (`src/api/v1/routes.js`):
 
-```javascript
-import { createYourModuleRoutes } from './modules/your-module/index.js';
+   ```javascript
+   import { createYourModuleRoutes } from './modules/your-module/index.js';
 
-// In createV1Router function:
-router.use('/your-module', createYourModuleRoutes(container.resolve('yourModuleController')));
-```
+   // In createV1Router function:
+   router.use('/your-module', createYourModuleRoutes(container.resolve('yourModuleController')));
+   ```
 
-7. **Initialize module in bootstrap** (`src/bootstrap.js`)
+7. **Initialize module in bootstrap** (`src/bootstrap.js`):
 
-```javascript
-const { initializeYourModule } = require('./api/v1/modules/your-module');
-initializeYourModule(container);
-```
+   ```javascript
+   const { initializeYourModule } = require('./api/v1/modules/your-module');
+   initializeYourModule(container);
+   ```
+
+See the `example` module for a complete reference implementation.
 
 ## 🧪 Code Quality
 

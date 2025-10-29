@@ -11,6 +11,7 @@ import {
   configureRateLimit,
   configureAuthRateLimit,
 } from './security.js';
+import { createSessionMiddleware } from './sessionMiddleware.js';
 
 export {
   errorHandler,
@@ -20,4 +21,5 @@ export {
   configureCORS,
   configureRateLimit,
   configureAuthRateLimit,
+  createSessionMiddleware,
 };

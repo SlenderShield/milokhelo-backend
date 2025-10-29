@@ -3,6 +3,11 @@
  * Creates and configures the Express application
  */
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import YAML from 'yaml';
 import {
   requestLogger,
   errorHandler,
@@ -13,6 +18,10 @@ import {
 } from './core/http/index.js';
 import { createHealthRoutes } from './core/http/index.js';
 import { createV1Router } from './api/v1/routes.js';
+import { createSessionMiddleware } from './core/http/middlewares/sessionMiddleware.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 async function createApp(config, logger, container) {
   const app = express();
@@ -20,7 +29,10 @@ async function createApp(config, logger, container) {
   // Security middleware - must be first
   app.use(configureHelmet());
   app.use(configureCORS(config));
-  
+
+  // Session middleware (for cookie-based auth)
+  app.use(createSessionMiddleware(config, logger));
+
   // Rate limiting
   if (config.get('security.enableRateLimit') !== false) {
     app.use(configureRateLimit(config));
@@ -32,6 +44,25 @@ async function createApp(config, logger, container) {
 
   // Request logging middleware
   app.use(requestLogger(logger));
+
+  // Swagger UI Documentation
+  try {
+    const openapiPath = join(__dirname, '../docs/openapi.yaml');
+    const openapiFile = readFileSync(openapiPath, 'utf8');
+    const openapiDocument = YAML.parse(openapiFile);
+
+    app.use(
+      '/docs',
+      swaggerUi.serve,
+      swaggerUi.setup(openapiDocument, {
+        customCss: '.swagger-ui .topbar { display: none }',
+        customSiteTitle: 'Milokhelo API Documentation',
+      })
+    );
+    logger.info('Swagger UI documentation available at /docs');
+  } catch (error) {
+    logger.warn('Could not load OpenAPI documentation', { error: error.message });
+  }
 
   // Health check routes
   if (config.get('features.enableHealthCheck')) {

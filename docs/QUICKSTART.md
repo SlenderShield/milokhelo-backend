@@ -1,14 +1,15 @@
 # Quick Start Guide
 
-Get the Milokhelo Backend up and running in minutes!
+Get the Milokhelo Sports Platform Backend up and running in minutes!
 
 ## Prerequisites
 
 Ensure you have the following installed:
 
-- Node.js >= 18.x
-- Docker and Docker Compose (for MongoDB and Redis)
-- Git
+- **Node.js** >= 18.x
+- **MongoDB** >= 5.x (or Docker for local development)
+- **Redis** >= 6.x (or Docker for local development)
+- **Git**
 
 ## Installation Steps
 
@@ -33,7 +34,33 @@ Copy the example environment file:
 cp .env.example .env.development
 ```
 
-The default configuration works out of the box for local development.
+Update the OAuth credentials and other settings:
+
+```env
+# Server
+PORT=4000
+NODE_ENV=development
+
+# Database
+MONGODB_URI=mongodb://localhost:27017/milokhelo_dev
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# Authentication
+JWT_SECRET=your-super-secret-jwt-key-change-in-production
+SESSION_SECRET=your-super-secret-session-key-change-in-production
+
+# OAuth (Get credentials from respective providers)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:4000/api/v1/auth/oauth/callback
+
+FACEBOOK_APP_ID=your-facebook-app-id
+FACEBOOK_APP_SECRET=your-facebook-app-secret
+FACEBOOK_CALLBACK_URL=http://localhost:4000/api/v1/auth/oauth/callback
+```
 
 ### 4. Start Infrastructure Services
 
@@ -59,10 +86,12 @@ npm run dev
 
 You should see output similar to:
 
-```
+```text
 🚀 Starting milokhelo-backend in development mode...
-✅ Server running at http://localhost:3000
-📋 API available at http://localhost:3000/api
+✅ Server running at http://localhost:4000
+📋 API available at http://localhost:4000/api/v1
+📚 API Documentation at http://localhost:4000/docs
+🔌 WebSocket available at ws://localhost:4000
 ```
 
 ## Verify Installation
@@ -70,7 +99,7 @@ You should see output similar to:
 ### Check Health Status
 
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:4000/health
 ```
 
 Expected response:
@@ -84,20 +113,80 @@ Expected response:
 }
 ```
 
-### Test the Example API
+### Access API Documentation
 
-Create a new example:
+Visit <http://localhost:4000/docs> in your browser to explore all 70+ API endpoints with interactive Swagger UI.
+
+### Test Milokhelo API
+
+#### Register a User
 
 ```bash
-curl -X POST http://localhost:3000/api/examples \
+curl -X POST http://localhost:4000/api/v1/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"name": "Test Example", "description": "My first example"}'
+  -d '{
+    "email": "player@example.com",
+    "password": "SecurePass123!",
+    "username": "cool_player",
+    "fullName": "John Doe"
+  }'
 ```
 
-Get all examples:
+#### Login
 
 ```bash
-curl http://localhost:3000/api/examples
+curl -X POST http://localhost:4000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -c cookies.txt \
+  -d '{
+    "email": "player@example.com",
+    "password": "SecurePass123!"
+  }'
+```
+
+#### Get Current User Profile
+
+```bash
+curl http://localhost:4000/api/v1/users/me \
+  -b cookies.txt
+```
+
+#### Create a Match
+
+```bash
+curl -X POST http://localhost:4000/api/v1/matches \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{
+    "sport": "football",
+    "location": {
+      "type": "Point",
+      "coordinates": [-73.935242, 40.730610],
+      "address": "Central Park, New York"
+    },
+    "scheduledTime": "2025-11-15T18:00:00Z",
+    "maxParticipants": 10,
+    "skillLevel": "intermediate"
+  }'
+```
+
+#### Search Nearby Venues
+
+```bash
+curl "http://localhost:4000/api/v1/venues/nearby?lat=40.730610&lng=-73.935242&maxDistance=5000&sport=football"
+```
+
+#### Create a Team
+
+```bash
+curl -X POST http://localhost:4000/api/v1/teams \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{
+    "name": "Thunder Strikers",
+    "sport": "football",
+    "description": "Competitive weekend football team"
+  }'
 ```
 
 ## Available Scripts
@@ -112,59 +201,112 @@ curl http://localhost:3000/api/examples
 
 ## Project Structure
 
-```
+```text
 src/
-├── infrastructure/          # Core infrastructure
-│   ├── config/             # Configuration management
-│   ├── database/           # Database connections
-│   ├── eventBus/           # Event bus implementations
-│   ├── di/                 # Dependency injection
-│   └── logger/             # Logging
-├── modules/                # Business modules
-│   └── example/            # Example module
-│       ├── domain/         # Business entities
-│       ├── application/    # Business logic
-│       └── infrastructure/ # Data access & API
-├── shared/                 # Shared utilities
-│   ├── constants/
-│   ├── types/
-│   └── utils/
-├── app.js                  # Express app setup
-├── bootstrap.js            # App initialization
-└── server.js               # Server entry point
+├── api/
+│   └── v1/
+│       ├── routes.js                    # Central API routing
+│       └── modules/
+│           ├── auth/                    # Authentication (OAuth + email/password)
+│           ├── user/                    # User profiles, stats, achievements
+│           ├── team/                    # Team management
+│           ├── match/                   # Match lifecycle
+│           ├── tournament/              # Tournament brackets
+│           ├── chat/                    # Real-time messaging
+│           ├── venue/                   # Venue search & booking
+│           ├── additional/              # Maps, Calendar, Notifications, etc.
+│           └── example/                 # Example module (reference)
+├── common/                              # Shared utilities
+├── config/                              # Configuration management
+├── core/                                # Core infrastructure
+│   ├── container/                       # Dependency injection
+│   ├── database/                        # MongoDB connection
+│   ├── events/                          # Event bus
+│   ├── http/                            # HTTP middleware
+│   ├── logging/                         # Winston logger
+│   └── websocket/                       # Socket.IO
+├── app.js                               # Express app setup
+├── bootstrap.js                         # Module initialization
+└── server.js                            # Server entry point
 ```
 
 ## Key Features Demonstrated
 
-### 1. Event-Driven Communication
+### 1. Hybrid Authentication
+
+The platform supports both OAuth (Google, Facebook) and traditional email/password:
+
+```javascript
+// Get OAuth URL
+const response = await fetch('http://localhost:4000/api/v1/auth/oauth/url?provider=google');
+const { url } = await response.json();
+// Redirect user to OAuth URL
+
+// After OAuth callback, session is established automatically
+```
+
+### 2. Real-time Chat with WebSocket
+
+Connect to chat rooms for real-time messaging:
+
+```javascript
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:4000');
+
+// Join a chat room
+socket.emit('join_room', { roomId: 'match-123' });
+
+// Send a message
+socket.emit('send_message', { 
+  roomId: 'match-123', 
+  message: 'Ready to play!' 
+});
+
+// Receive messages
+socket.on('new_message', (data) => {
+  console.log('New message:', data);
+});
+```
+
+### 3. Geo-spatial Venue Search
+
+Find venues near a location using MongoDB's 2dsphere index:
+
+```bash
+# Find venues within 5km
+curl "http://localhost:4000/api/v1/venues/nearby?lat=40.730610&lng=-73.935242&maxDistance=5000"
+```
+
+### 4. Event-Driven Communication
 
 Modules communicate via events:
 
 ```javascript
 // Publish event
-await eventBus.publish('example.created', { id, name });
+await eventBus.publish('match.started', { matchId, participants });
 
 // Subscribe to event
-eventBus.subscribe('example.created', async (data) => {
-  // Handle event
+eventBus.subscribe('match.started', async (data) => {
+  // Update user stats, send notifications, etc.
 });
 ```
 
-### 2. Dependency Injection
+### 5. Dependency Injection
 
 Services are registered and resolved through DI container:
 
 ```javascript
 // Register
-container.registerSingleton('exampleService', () => {
-  return new ExampleService(repository, eventBus, logger);
+container.registerSingleton('matchService', () => {
+  return new MatchService(repository, eventBus, logger);
 });
 
 // Resolve
-const service = container.resolve('exampleService');
+const service = container.resolve('matchService');
 ```
 
-### 3. Advanced Logging System
+### 6. Advanced Logging System
 
 The application features a comprehensive logging system with multiple capabilities:
 
@@ -246,7 +388,7 @@ serviceLogger.info('Processing payment');
 
 See [docs/LOGGING.md](./LOGGING.md) for complete documentation.
 
-### 4. Environment-Based Configuration
+### 7. Environment-Based Configuration
 
 Different configs for dev, test, and production:
 

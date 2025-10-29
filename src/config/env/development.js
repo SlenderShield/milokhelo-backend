@@ -46,6 +46,19 @@ export default {
     authRateLimitMax: parseInt(process.env.AUTH_RATE_LIMIT_MAX || '5', 10),
   },
 
+  auth: {
+    jwtSecret: process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production',
+    jwtExpiration: process.env.JWT_EXPIRATION || '7d',
+    sessionSecret: process.env.SESSION_SECRET || 'dev-session-secret-change-in-production',
+    sessionMaxAge: parseInt(process.env.SESSION_MAX_AGE || '604800000', 10), // 7 days
+    googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    facebookAppId: process.env.FACEBOOK_APP_ID || '',
+    facebookAppSecret: process.env.FACEBOOK_APP_SECRET || '',
+    oauthCallbackUrl: process.env.OAUTH_CALLBACK_URL || 'http://localhost:4000/api/v1/auth/oauth/callback',
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+  },
+
   features: {
     enableMetrics: process.env.ENABLE_METRICS === 'true',
     enableHealthCheck: process.env.ENABLE_HEALTH_CHECK !== 'false',

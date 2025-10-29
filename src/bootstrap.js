@@ -11,6 +11,21 @@ import { EVENTS } from './common/constants/index.js';
 
 // Import module initializers
 import { initializeExampleModule } from './api/v1/modules/example/index.js';
+import { initializeAuthModule } from './api/v1/modules/auth/index.js';
+import { initializeUserModule } from './api/v1/modules/user/index.js';
+import { initializeTeamModule } from './api/v1/modules/team/index.js';
+import { initializeMatchModule } from './api/v1/modules/match/index.js';
+import { initializeTournamentModule } from './api/v1/modules/tournament/index.js';
+import { initializeChatModule } from './api/v1/modules/chat/index.js';
+import { initializeVenueModule } from './api/v1/modules/venue/index.js';
+import {
+  initializeMapsModule,
+  initializeCalendarModule,
+  initializeNotificationModule,
+  initializeInvitationModule,
+  initializeFeedbackModule,
+  initializeAdminModule,
+} from './api/v1/modules/additional/index.js';
 
 async function bootstrap() {
   // 1. Load configuration
@@ -56,10 +71,20 @@ async function bootstrap() {
   // Initialize example module (demonstrates the pattern)
   initializeExampleModule(container);
 
-  // Add more modules here as they are created
-  // initializeUserModule(container);
-  // initializeAuthModule(container);
-  // etc.
+  // Initialize all application modules
+  initializeAuthModule(container);
+  initializeUserModule(container);
+  initializeTeamModule(container);
+  initializeMatchModule(container);
+  initializeTournamentModule(container);
+  initializeChatModule(container);
+  initializeVenueModule(container);
+  initializeMapsModule(container);
+  initializeCalendarModule(container);
+  initializeNotificationModule(container);
+  initializeInvitationModule(container);
+  initializeFeedbackModule(container);
+  initializeAdminModule(container);
 
   logger.info('All modules initialized');
 
