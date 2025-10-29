@@ -78,7 +78,7 @@ Expected response:
 {
   "status": "ok",
   "timestamp": "2025-10-29T05:35:29.012Z",
-  "uptime": 24.930344281,
+  "uptime": 24.93,
   "database": "connected"
 }
 ```
