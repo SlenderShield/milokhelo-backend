@@ -75,6 +75,25 @@ export default {
       process.env.GOOGLE_CALENDAR_REDIRECT_URI || 'http://localhost:4000/api/v1/calendar/google/callback',
   },
 
+  pushNotifications: {
+    enabled: process.env.PUSH_NOTIFICATIONS_ENABLED === 'true',
+    fcm: {
+      enabled: process.env.FCM_ENABLED === 'true',
+      projectId: process.env.FCM_PROJECT_ID || '',
+      clientEmail: process.env.FCM_CLIENT_EMAIL || '',
+      privateKey: process.env.FCM_PRIVATE_KEY || '',
+      serviceAccountPath: process.env.FCM_SERVICE_ACCOUNT_PATH || '',
+    },
+    apns: {
+      enabled: process.env.APNS_ENABLED === 'true',
+      keyId: process.env.APNS_KEY_ID || '',
+      teamId: process.env.APNS_TEAM_ID || '',
+      bundleId: process.env.APNS_BUNDLE_ID || '',
+      keyPath: process.env.APNS_KEY_PATH || '',
+      production: process.env.APNS_PRODUCTION === 'true',
+    },
+  },
+
   features: {
     enableMetrics: process.env.ENABLE_METRICS === 'true',
     enableHealthCheck: process.env.ENABLE_HEALTH_CHECK !== 'false',
