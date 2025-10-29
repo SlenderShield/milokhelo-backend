@@ -3,7 +3,7 @@
  */
 import { describe, it, beforeEach } from 'mocha';
 import { createMockLogger } from '../helpers/setup.js';
-import InMemoryEventBus from '../../src/infrastructure/eventBus/inMemoryBus.js';
+import InMemoryEventBus from '../../src/core/events/inMemoryBus.js';
 
 describe('EventBus Integration Tests', () => {
   let eventBus;
