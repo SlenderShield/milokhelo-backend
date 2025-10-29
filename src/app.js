@@ -3,7 +3,7 @@
  * Creates and configures the Express application
  */
 const express = require('express');
-const { HTTP_STATUS, ERROR_CODES } = require('../shared/constants');
+const { HTTP_STATUS, ERROR_CODES } = require('./shared/constants');
 
 function createApp(config, logger, container) {
   const app = express();
@@ -30,7 +30,7 @@ function createApp(config, logger, container) {
   });
 
   // Health check endpoint
-  if (config.features.enableHealthCheck) {
+  if (config.get('features.enableHealthCheck')) {
     app.get('/health', (req, res) => {
       const dbManager = container.resolve('dbManager');
 
@@ -52,12 +52,12 @@ function createApp(config, logger, container) {
   const apiRouter = express.Router();
 
   // Example module routes
-  const { createExampleRoutes } = require('../modules/example');
+  const { createExampleRoutes } = require('./modules/example');
   const exampleController = container.resolve('exampleController');
   apiRouter.use('/examples', createExampleRoutes(exampleController));
 
   // Mount API router
-  app.use(config.app.apiPrefix, apiRouter);
+  app.use(config.get('app.apiPrefix'), apiRouter);
 
   // 404 handler
   app.use((req, res) => {

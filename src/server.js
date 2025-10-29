@@ -11,19 +11,21 @@ async function startServer() {
     const { config, logger, container, dbManager, eventBus } = await bootstrap();
 
     // Create Express app
-    const app = createApp(config.getAll(), logger, container);
+    const app = createApp(config, logger, container);
 
     // Start HTTP server
-    const server = app.listen(config.app.port, config.app.host, () => {
+    const server = app.listen(config.get('app.port'), config.get('app.host'), () => {
       logger.info('Server started successfully', {
-        host: config.app.host,
-        port: config.app.port,
+        host: config.get('app.host'),
+        port: config.get('app.port'),
         environment: config.env,
-        apiPrefix: config.app.apiPrefix,
+        apiPrefix: config.get('app.apiPrefix'),
       });
-      console.log(`✅ Server running at http://${config.app.host}:${config.app.port}`);
       console.log(
-        `📋 API available at http://${config.app.host}:${config.app.port}${config.app.apiPrefix}`
+        `✅ Server running at http://${config.get('app.host')}:${config.get('app.port')}`
+      );
+      console.log(
+        `📋 API available at http://${config.get('app.host')}:${config.get('app.port')}${config.get('app.apiPrefix')}`
       );
     });
 

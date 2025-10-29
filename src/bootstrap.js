@@ -15,15 +15,15 @@ const { initializeExampleModule } = require('./modules/example');
 async function bootstrap() {
   // 1. Load configuration
   const config = getConfig();
-  console.log(`🚀 Starting ${config.app.name} in ${config.env} mode...`);
+  console.log(`🚀 Starting ${config.get('app.name')} in ${config.env} mode...`);
 
   // 2. Initialize logger
   const logger = createLogger({
-    level: config.logging.level,
-    format: config.logging.format,
+    level: config.get('logging.level'),
+    format: config.get('logging.format'),
     env: config.env,
   });
-  logger.info('Logger initialized', { level: config.logging.level });
+  logger.info('Logger initialized', { level: config.get('logging.level') });
 
   // 3. Initialize DI container
   const container = getContainer();
@@ -44,7 +44,7 @@ async function bootstrap() {
     await eventBus.connect();
   }
   container.registerInstance('eventBus', eventBus);
-  logger.info('EventBus initialized', { adapter: config.eventBus.adapter });
+  logger.info('EventBus initialized', { adapter: config.get('eventBus.adapter') });
 
   // 6. Initialize modules
   logger.info('Initializing modules...');
