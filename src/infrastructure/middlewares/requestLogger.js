@@ -22,4 +22,4 @@ function requestLogger(logger) {
   };
 }
 
-module.exports = requestLogger;
+export default requestLogger;

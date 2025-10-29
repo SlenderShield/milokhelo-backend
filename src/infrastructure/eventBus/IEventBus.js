@@ -20,4 +20,4 @@ class IEventBus {
   }
 }
 
-module.exports = IEventBus;
+export default IEventBus;

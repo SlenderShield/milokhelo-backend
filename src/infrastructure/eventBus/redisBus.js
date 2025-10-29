@@ -3,8 +3,8 @@
  * Suitable for distributed applications and microservices
  * Uses Redis Pub/Sub for event distribution
  */
-const Redis = require('ioredis');
-const IEventBus = require('./IEventBus');
+import Redis from 'ioredis';
+import IEventBus from './IEventBus.js';
 
 class RedisEventBus extends IEventBus {
   constructor(config, logger) {
@@ -182,4 +182,4 @@ class RedisEventBus extends IEventBus {
   }
 }
 
-module.exports = RedisEventBus;
+export default RedisEventBus;

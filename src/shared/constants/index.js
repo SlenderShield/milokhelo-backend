@@ -48,7 +48,7 @@ const ERROR_CODES = {
   EXTERNAL_SERVICE_ERROR: 'EXTERNAL_SERVICE_ERROR',
 };
 
-module.exports = {
+export {
   EVENTS,
   HTTP_STATUS,
   ERROR_CODES,

@@ -2,16 +2,17 @@
  * Configuration Module
  * Entry point for configuration management
  */
-const ConfigLoader = require('./configLoader');
+import ConfigLoader from './configLoader.js';
 
 // Singleton instance
 let configInstance = null;
 
-function getConfig() {
+async function getConfig() {
   if (!configInstance) {
     configInstance = new ConfigLoader();
+    await configInstance.initialize();
   }
   return configInstance;
 }
 
-module.exports = { ConfigLoader, getConfig };
+export { ConfigLoader, getConfig };

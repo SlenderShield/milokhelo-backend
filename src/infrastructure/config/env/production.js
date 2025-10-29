@@ -1,7 +1,7 @@
 /**
  * Production Environment Configuration
  */
-module.exports = {
+export default {
   env: 'production',
 
   app: {

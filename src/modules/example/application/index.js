@@ -1,8 +1,10 @@
 /**
  * Example Module - Application Layer
  */
-const ExampleService = require('./ExampleService');
+import ExampleService from './ExampleService.js';
 
-module.exports = {
+export {
+
   ExampleService,
+
 };

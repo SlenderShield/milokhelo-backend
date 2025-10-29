@@ -3,8 +3,8 @@
  * Using Winston for structured logging
  * Supports different formats and levels based on environment
  */
-const winston = require('winston');
-const path = require('path');
+import winston from 'winston';
+import path from 'path';
 
 class Logger {
   constructor(config = {}) {
@@ -145,4 +145,6 @@ function getLogger() {
   return loggerInstance;
 }
 
-module.exports = { Logger, createLogger, getLogger };
+export {
+ Logger, createLogger, getLogger 
+};

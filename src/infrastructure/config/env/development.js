@@ -1,7 +1,7 @@
 /**
  * Development Environment Configuration
  */
-module.exports = {
+export default {
   env: 'development',
 
   app: {

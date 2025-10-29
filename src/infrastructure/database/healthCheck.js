@@ -35,4 +35,4 @@ class DatabaseHealthCheck {
   }
 }
 
-module.exports = DatabaseHealthCheck;
+export default DatabaseHealthCheck;

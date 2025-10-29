@@ -2,6 +2,7 @@
   "name": "milokhelo-backend",
   "version": "1.0.0",
   "description": "Clean modular monolith backend with Node.js, Express, MongoDB, and Redis",
+  "type": "module",
   "main": "src/server.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon src/server.js",

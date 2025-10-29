@@ -2,8 +2,8 @@
  * Health Check Routes
  * Provides health check endpoints
  */
-const express = require('express');
-const { HTTP_STATUS } = require('../../shared/constants');
+import express from 'express';
+import {  HTTP_STATUS  } from '../../shared/constants.js';
 
 function createHealthRoutes(container) {
   const router = express.Router();
@@ -47,4 +47,4 @@ function createHealthRoutes(container) {
   return router;
 }
 
-module.exports = createHealthRoutes;
+export default createHealthRoutes;

@@ -1,10 +1,12 @@
 /**
  * Example Module - Domain Layer
  */
-const ExampleEntity = require('./ExampleEntity');
-const IExampleRepository = require('./IExampleRepository');
+import ExampleEntity from './ExampleEntity.js';
+import IExampleRepository from './IExampleRepository.js';
 
-module.exports = {
+export {
+
   ExampleEntity,
   IExampleRepository,
+
 };

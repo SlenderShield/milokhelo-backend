@@ -2,10 +2,12 @@
  * Database Module
  * Entry point for database infrastructure
  */
-const MongoDBConnection = require('./connection');
-const DatabaseHealthCheck = require('./healthCheck');
+import MongoDBConnection from './connection.js';
+import DatabaseHealthCheck from './healthCheck.js';
 
-module.exports = {
+export {
+
   MongoDBConnection,
   DatabaseHealthCheck,
+
 };

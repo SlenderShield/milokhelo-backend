@@ -2,14 +2,14 @@
  * Example Module
  * Demonstrates module structure and inter-module communication
  */
-const { ExampleEntity, IExampleRepository } = require('./domain');
-const { ExampleService } = require('./application');
-const {
+import {  ExampleEntity, IExampleRepository  } from './domain.js';
+import {  ExampleService  } from './application.js';
+import { 
   ExampleModel,
   ExampleRepository,
   ExampleController,
   createExampleRoutes,
-} = require('./infrastructure');
+ } from './infrastructure.js';
 
 /**
  * Initialize the Example module
@@ -44,7 +44,8 @@ function initializeExampleModule(container) {
   logger.info('Example module initialized');
 }
 
-module.exports = {
+export {
+
   ExampleEntity,
   IExampleRepository,
   ExampleService,
@@ -53,4 +54,5 @@ module.exports = {
   ExampleController,
   createExampleRoutes,
   initializeExampleModule,
+
 };

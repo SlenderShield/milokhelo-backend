@@ -1,14 +1,16 @@
 /**
  * Example Module - Infrastructure Layer
  */
-const ExampleModel = require('./ExampleModel');
-const ExampleRepository = require('./ExampleRepository');
-const ExampleController = require('./ExampleController');
-const createExampleRoutes = require('./ExampleRoutes');
+import ExampleModel from './ExampleModel.js';
+import ExampleRepository from './ExampleRepository.js';
+import ExampleController from './ExampleController.js';
+import createExampleRoutes from './ExampleRoutes.js';
 
-module.exports = {
+export {
+
   ExampleModel,
   ExampleRepository,
   ExampleController,
   createExampleRoutes,
+
 };

@@ -2,8 +2,8 @@
  * EventBus Factory
  * Creates appropriate EventBus implementation based on configuration
  */
-const InMemoryEventBus = require('./inMemoryBus');
-const RedisEventBus = require('./redisBus');
+import InMemoryEventBus from './inMemoryBus.js';
+import RedisEventBus from './redisBus.js';
 
 class EventBusFactory {
   static create(config, logger) {
@@ -24,4 +24,4 @@ class EventBusFactory {
   }
 }
 
-module.exports = EventBusFactory;
+export default EventBusFactory;

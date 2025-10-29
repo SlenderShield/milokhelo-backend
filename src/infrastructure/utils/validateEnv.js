@@ -44,7 +44,9 @@ function validateEnvType(varName, expectedType) {
   }
 }
 
-module.exports = {
+export {
+
   validateEnv,
   validateEnvType,
+
 };
