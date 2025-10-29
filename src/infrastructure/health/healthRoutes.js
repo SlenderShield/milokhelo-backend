@@ -3,7 +3,7 @@
  * Provides health check endpoints
  */
 import express from 'express';
-import {  HTTP_STATUS  } from '../../shared/constants/index.js';
+import { HTTP_STATUS } from '../../shared/constants/index.js';
 
 function createHealthRoutes(container) {
   const router = express.Router();

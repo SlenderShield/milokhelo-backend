@@ -145,6 +145,4 @@ function getLogger() {
   return loggerInstance;
 }
 
-export {
- Logger, createLogger, getLogger 
-};
+export { Logger, createLogger, getLogger };

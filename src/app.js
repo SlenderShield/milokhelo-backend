@@ -3,7 +3,11 @@
  * Creates and configures the Express application
  */
 import express from 'express';
-import { requestLogger, errorHandler, notFoundHandler } from './infrastructure/middlewares/index.js';
+import {
+  requestLogger,
+  errorHandler,
+  notFoundHandler,
+} from './infrastructure/middlewares/index.js';
 import { createHealthRoutes } from './infrastructure/health/index.js';
 
 async function createApp(config, logger, container) {

@@ -5,9 +5,4 @@
 import MongoDBConnection from './connection.js';
 import DatabaseHealthCheck from './healthCheck.js';
 
-export {
-
-  MongoDBConnection,
-  DatabaseHealthCheck,
-
-};
+export { MongoDBConnection, DatabaseHealthCheck };

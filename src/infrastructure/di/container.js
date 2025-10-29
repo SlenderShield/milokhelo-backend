@@ -122,6 +122,4 @@ function createContainer() {
   return new DIContainer();
 }
 
-export {
- DIContainer, getContainer, createContainer 
-};
+export { DIContainer, getContainer, createContainer };

@@ -6,11 +6,4 @@ import ExampleRepository from './ExampleRepository.js';
 import ExampleController from './ExampleController.js';
 import createExampleRoutes from './ExampleRoutes.js';
 
-export {
-
-  ExampleModel,
-  ExampleRepository,
-  ExampleController,
-  createExampleRoutes,
-
-};
+export { ExampleModel, ExampleRepository, ExampleController, createExampleRoutes };

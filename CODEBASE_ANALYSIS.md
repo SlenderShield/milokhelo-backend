@@ -90,6 +90,7 @@ The codebase implements a **Clean Modular Monolith** architecture with the follo
 #### 2.2.1 Entry Points
 
 **`server.js` (72 lines)**
+
 - **Purpose:** Application entry point
 - **Responsibilities:**
   - Bootstraps the application
@@ -103,6 +104,7 @@ The codebase implements a **Clean Modular Monolith** architecture with the follo
   ```
 
 **`bootstrap.js` (113 lines)**
+
 - **Purpose:** Application initialization orchestrator
 - **Responsibilities:**
   1. Load configuration
@@ -117,6 +119,7 @@ The codebase implements a **Clean Modular Monolith** architecture with the follo
 - **Key Pattern:** Sequential initialization with proper dependency order
 
 **`app.js` (42 lines)**
+
 - **Purpose:** Express application factory
 - **Responsibilities:**
   - Create Express app instance
@@ -136,6 +139,7 @@ The codebase implements a **Clean Modular Monolith** architecture with the follo
 **Architecture:** Environment-based configuration with centralized loader
 
 **Files:**
+
 1. `configLoader.js` (87 lines)
 2. `env/development.js` (44 lines)
 3. `env/test.js` (43 lines)
@@ -143,6 +147,7 @@ The codebase implements a **Clean Modular Monolith** architecture with the follo
 5. `index.js` (16 lines)
 
 **Key Features:**
+
 - Environment detection via `NODE_ENV`
 - Dotenv integration with override support
 - Configuration validation
@@ -150,6 +155,7 @@ The codebase implements a **Clean Modular Monolith** architecture with the follo
 - Singleton pattern for global access
 
 **Configuration Structure:**
+
 ```javascript
 {
   env: string,                    // development|test|production
@@ -191,16 +197,19 @@ The codebase implements a **Clean Modular Monolith** architecture with the follo
 ### 3.2 Logger System (`/src/infrastructure/logger`)
 
 **Files:**
+
 1. `logger.js` (127 lines)
 2. `index.js` (6 lines)
 
 **Architecture:** Winston-based structured logging with context support
 
 **Key Classes:**
+
 - `Logger`: Main logger class with transport configuration
 - `ChildLogger`: Context-aware logger instance
 
 **Features:**
+
 - Environment-based formatting (JSON for prod, pretty for dev)
 - Multiple log levels: error, warn, info, debug, verbose
 - File transports for production (error.log, combined.log)
@@ -209,6 +218,7 @@ The codebase implements a **Clean Modular Monolith** architecture with the follo
 - Child loggers with context metadata
 
 **Usage Pattern:**
+
 ```javascript
 // Create main logger
 const logger = createLogger(config);
@@ -225,6 +235,7 @@ childLogger.info('User created', { userId: '123' });
 ### 3.3 Event Bus System (`/src/infrastructure/eventBus`)
 
 **Files:**
+
 1. `IEventBus.js` (17 lines) - Interface
 2. `inMemoryBus.js` (74 lines) - In-memory implementation
 3. `redisBus.js` (181 lines) - Redis implementation
@@ -234,6 +245,7 @@ childLogger.info('User created', { userId: '123' });
 **Architecture:** Strategy Pattern with swappable adapters
 
 **Interface (IEventBus):**
+
 ```javascript
 class IEventBus {
   async publish(event, data)      // Publish event
@@ -244,6 +256,7 @@ class IEventBus {
 ```
 
 **InMemoryEventBus:**
+
 - **Storage:** Map<string, Set<Function>>
 - **Use Case:** Single-instance development
 - **Features:**
@@ -252,6 +265,7 @@ class IEventBus {
   - Event handler tracking
 
 **RedisEventBus:**
+
 - **Storage:** Redis Pub/Sub channels
 - **Use Case:** Distributed systems, microservices
 - **Features:**
@@ -262,12 +276,14 @@ class IEventBus {
   - Error handling per handler
 
 **Factory Pattern:**
+
 ```javascript
 EventBusFactory.create(config, logger)
   → Returns InMemoryEventBus or RedisEventBus based on config.eventBus.adapter
 ```
 
 **Key Design Decisions:**
+
 - Async handlers for non-blocking execution
 - Error isolation: one failing handler doesn't affect others
 - Automatic channel management in Redis implementation
@@ -278,6 +294,7 @@ EventBusFactory.create(config, logger)
 ### 3.4 Dependency Injection (`/src/infrastructure/di`)
 
 **Files:**
+
 1. `container.js` (124 lines)
 2. `index.js` (6 lines)
 
@@ -286,18 +303,20 @@ EventBusFactory.create(config, logger)
 **Class: DIContainer**
 
 **Methods:**
+
 ```javascript
-register(name, factory, options)           // Register service
-registerSingleton(name, factory)          // Register singleton
-registerInstance(name, instance)          // Register instance
-resolve(name)                             // Resolve service
-has(name)                                 // Check registration
-unregister(name)                          // Remove service
-clear()                                   // Clear all
-getRegisteredServices()                   // List services
+register(name, factory, options); // Register service
+registerSingleton(name, factory); // Register singleton
+registerInstance(name, instance); // Register instance
+resolve(name); // Resolve service
+has(name); // Check registration
+unregister(name); // Remove service
+clear(); // Clear all
+getRegisteredServices(); // List services
 ```
 
 **Features:**
+
 - Singleton pattern support
 - Transient instance support
 - Lazy instantiation
@@ -305,6 +324,7 @@ getRegisteredServices()                   // List services
 - Global singleton container via `getContainer()`
 
 **Usage Pattern:**
+
 ```javascript
 // Registration
 container.registerSingleton('logger', () => logger);
@@ -321,6 +341,7 @@ const logger = container.resolve('logger');
 ### 3.5 Database Layer (`/src/infrastructure/database`)
 
 **Files:**
+
 1. `connection.js` (94 lines)
 2. `healthCheck.js` (35 lines)
 3. `index.js` (9 lines)
@@ -328,6 +349,7 @@ const logger = container.resolve('logger');
 **Class: MongoDBConnection**
 
 **Features:**
+
 - Mongoose connection management
 - Connection lifecycle events
 - Graceful shutdown on SIGINT
@@ -336,6 +358,7 @@ const logger = container.resolve('logger');
 - Health check support
 
 **Connection States:**
+
 ```
 0: disconnected
 1: connected
@@ -346,6 +369,7 @@ const logger = container.resolve('logger');
 **Class: DatabaseHealthCheck**
 
 **Methods:**
+
 ```javascript
 async check()
   Returns: { healthy, status, readyState, error? }
@@ -358,23 +382,27 @@ async check()
 ### 3.6 Middleware Layer (`/src/infrastructure/middlewares`)
 
 **Files:**
+
 1. `errorHandler.js` (30 lines)
 2. `notFoundHandler.js` (19 lines)
 3. `requestLogger.js` (23 lines)
 4. `index.js` (10 lines)
 
 **errorHandler:**
+
 - Global error handler
 - Environment-aware error messages (detailed in dev, generic in prod)
 - Structured error responses
 - Stack trace in development only
 
 **notFoundHandler:**
+
 - Handles 404 errors
 - Returns standardized error response
 - Includes path and method in response
 
 **requestLogger:**
+
 - Logs all HTTP requests
 - Captures method, URL, status, duration, IP, user-agent
 - Uses response 'finish' event for accurate timing
@@ -386,12 +414,14 @@ async check()
 ### 3.7 Health Check System (`/src/infrastructure/health`)
 
 **Files:**
+
 1. `healthRoutes.js` (49 lines)
 2. `index.js` (6 lines)
 
 **Endpoints:**
 
 **GET /health**
+
 ```json
 {
   "status": "ok|degraded",
@@ -402,6 +432,7 @@ async check()
 ```
 
 **GET /health/database**
+
 ```json
 {
   "healthy": true,
@@ -417,16 +448,19 @@ async check()
 ### 3.8 Infrastructure Utilities (`/src/infrastructure/utils`)
 
 **Files:**
+
 1. `validateEnv.js` (49 lines)
 2. `index.js` (7 lines)
 
 **Functions:**
 
 **validateEnv(requiredVars)**
+
 - Validates presence of required environment variables
 - Throws error with list of missing variables
 
 **validateEnvType(varName, expectedType)**
+
 - Type validation for environment variables
 - Supports: number, boolean, string
 - Returns typed value or null
@@ -442,6 +476,7 @@ async check()
 **Purpose:** Demonstrates the module structure and patterns
 
 **Structure:**
+
 ```
 example/
 ├── domain/              # Business entities and interfaces
@@ -463,6 +498,7 @@ example/
 #### 4.1.1 Domain Layer
 
 **ExampleEntity.js (27 lines)**
+
 - **Purpose:** Business entity with behavior
 - **Methods:**
   - `constructor()` - Initialize entity
@@ -471,6 +507,7 @@ example/
 - **Design Pattern:** Domain Model Pattern
 
 **IExampleRepository.js (24 lines)**
+
 - **Purpose:** Repository interface (contract)
 - **Methods:**
   - `create(entity)`
@@ -483,6 +520,7 @@ example/
 #### 4.1.2 Application Layer
 
 **ExampleService.js (105 lines)**
+
 - **Purpose:** Business logic orchestration
 - **Dependencies:** repository, eventBus, logger (via DI)
 - **Methods:**
@@ -500,6 +538,7 @@ example/
 #### 4.1.3 Infrastructure Layer
 
 **ExampleModel.js (34 lines)**
+
 - **Purpose:** Mongoose schema definition
 - **Schema:**
   ```javascript
@@ -513,6 +552,7 @@ example/
 - **Indexes:** Index on `name` field
 
 **ExampleRepository.js (75 lines)**
+
 - **Purpose:** Concrete repository implementation
 - **Methods:** Implements IExampleRepository
 - **Data Mapping:** Mongoose document → ExampleEntity
@@ -520,6 +560,7 @@ example/
 - **Design Pattern:** Data Mapper Pattern
 
 **ExampleController.js (71 lines)**
+
 - **Purpose:** HTTP request handlers
 - **Methods:**
   - `create()` - POST handler
@@ -534,6 +575,7 @@ example/
 - **Design Pattern:** Controller Pattern
 
 **ExampleRoutes.js (17 lines)**
+
 - **Purpose:** Route definitions
 - **Endpoints:**
   - `POST /` - Create
@@ -546,6 +588,7 @@ example/
 #### 4.1.4 Module Initialization
 
 **index.js (57 lines)**
+
 - **Function:** `initializeExampleModule(container)`
 - **Responsibilities:**
   1. Resolve logger and eventBus from container
@@ -569,6 +612,7 @@ example/
 **Exports:**
 
 **EVENTS:**
+
 ```javascript
 {
   SYSTEM: {
@@ -585,10 +629,12 @@ example/
 ```
 
 **HTTP_STATUS:**
+
 - Standard HTTP status codes
 - OK, CREATED, NO_CONTENT, BAD_REQUEST, etc.
 
 **ERROR_CODES:**
+
 - Application-specific error codes
 - VALIDATION_ERROR, NOT_FOUND, UNAUTHORIZED, etc.
 
@@ -603,25 +649,32 @@ example/
 **Functions:**
 
 **asyncHandler(fn)**
+
 - Wraps async route handlers
 - Automatically catches and forwards errors to Express error handler
 
 **delay(ms)**
+
 - Promise-based delay utility
 
 **isEmpty(value)**
+
 - Checks if value is empty (null, undefined, empty string/array/object)
 
 **deepClone(obj)**
+
 - Deep clones objects using JSON serialization
 
 **pick(obj, keys)**
+
 - Creates object with only specified keys
 
 **omit(obj, keys)**
+
 - Creates object without specified keys
 
 **retry(fn, maxRetries, baseDelay)**
+
 - Retries function with exponential backoff
 - Use case: Network calls, external services
 
@@ -703,53 +756,64 @@ example/
 ### 7.1 Creational Patterns
 
 **Singleton**
+
 - ConfigLoader
 - Logger
 - DIContainer
 - Used for: Global shared instances
 
 **Factory**
+
 - EventBusFactory: Creates InMemory or Redis EventBus
 - createApp: Creates configured Express app
 - createLogger: Creates logger with config
 
 **Builder**
+
 - Logger configuration building
 - Express app building with middleware chains
 
 ### 7.2 Structural Patterns
 
 **Facade**
+
 - MongoDBConnection: Simplifies Mongoose API
 - ConfigLoader: Simplifies environment config access
 
 **Adapter**
+
 - InMemoryEventBus & RedisEventBus: Adapt different pub/sub mechanisms
 - Pattern: Both implement IEventBus interface
 
 **Module**
+
 - Each business module (example) is self-contained
 - Exports initialization function
 
 ### 7.3 Behavioral Patterns
 
 **Strategy**
+
 - EventBus adapters (memory vs Redis)
 - Environment-specific configs
 
 **Observer**
+
 - EventBus pub/sub system
 - Event handlers subscribe to events
 
 **Chain of Responsibility**
+
 - Express middleware chain
 - Error handling chain
 
 **Repository**
+
 - IExampleRepository → ExampleRepository
 - Abstracts data access
 
 **Service Layer**
+
 - ExampleService: Business logic orchestration
 
 ---
@@ -760,12 +824,12 @@ example/
 
 ```json
 {
-  "dotenv": "^17.2.3",         // Environment variable management
-  "express": "^5.1.0",         // Web framework
-  "ioredis": "^5.8.2",        // Redis client (EventBus)
-  "mongoose": "^8.19.2",       // MongoDB ODM
-  "redis": "^5.9.0",          // Redis client (alternative)
-  "winston": "^3.18.3"        // Logging
+  "dotenv": "^17.2.3", // Environment variable management
+  "express": "^5.1.0", // Web framework
+  "ioredis": "^5.8.2", // Redis client (EventBus)
+  "mongoose": "^8.19.2", // MongoDB ODM
+  "redis": "^5.9.0", // Redis client (alternative)
+  "winston": "^3.18.3" // Logging
 }
 ```
 
@@ -775,13 +839,13 @@ example/
 
 ```json
 {
-  "cross-env": "^10.1.0",           // Cross-platform env vars
-  "eslint": "^9.38.0",              // Code linting
+  "cross-env": "^10.1.0", // Cross-platform env vars
+  "eslint": "^9.38.0", // Code linting
   "eslint-config-prettier": "^10.1.8", // ESLint + Prettier integration
-  "eslint-plugin-node": "^11.1.0",  // Node.js specific rules
-  "globals": "^16.4.0",             // Global variables for ESLint
-  "nodemon": "^3.1.10",            // Auto-restart on changes
-  "prettier": "^3.6.2"              // Code formatting
+  "eslint-plugin-node": "^11.1.0", // Node.js specific rules
+  "globals": "^16.4.0", // Global variables for ESLint
+  "nodemon": "^3.1.10", // Auto-restart on changes
+  "prettier": "^3.6.2" // Code formatting
 }
 ```
 
@@ -792,38 +856,46 @@ example/
 ### 9.1 Environment Variables
 
 **Required:**
+
 - `NODE_ENV` - Environment (development|test|production)
 
 **Application:**
+
 - `APP_NAME` - Application name
 - `PORT` - Server port (default: 4000)
 - `HOST` - Server host (default: localhost)
 - `API_PREFIX` - API route prefix (default: /api)
 
 **MongoDB:**
+
 - `MONGODB_URI` - Connection string
 
 **Redis:**
+
 - `REDIS_HOST` - Redis host
 - `REDIS_PORT` - Redis port
 - `REDIS_PASSWORD` - Redis password (optional)
 - `REDIS_DB` - Redis database number
 
 **Logging:**
+
 - `LOG_LEVEL` - Log level (debug|info|warn|error)
 - `LOG_FORMAT` - Log format (json|pretty)
 - `LOGGING_ENABLED` - Enable/disable logging
 
 **EventBus:**
+
 - `EVENT_BUS_ADAPTER` - Adapter type (memory|redis)
 
 **Features:**
+
 - `ENABLE_METRICS` - Enable metrics collection
 - `ENABLE_HEALTH_CHECK` - Enable health endpoints
 
 ### 9.2 Environment Defaults
 
 **Development:**
+
 - Port: 4000
 - MongoDB: mongodb://localhost:27017/milokhelo_dev
 - Redis: 127.0.0.1:6379, DB 0
@@ -831,6 +903,7 @@ example/
 - EventBus: memory
 
 **Test:**
+
 - Port: 4001
 - MongoDB: mongodb://localhost:27017/milokhelo_test
 - Redis: 127.0.0.1:6379, DB 1
@@ -838,6 +911,7 @@ example/
 - EventBus: memory
 
 **Production:**
+
 - Port: 4000
 - MongoDB: mongodb://mongodb:27017/milokhelo_prod
 - Redis: redis:6379, DB 0
@@ -851,6 +925,7 @@ example/
 ### 10.1 Health Endpoints
 
 **GET /health**
+
 - **Purpose:** Overall system health
 - **Response:** 200 OK or 503 Service Unavailable
 - **Body:**
@@ -864,6 +939,7 @@ example/
   ```
 
 **GET /health/database**
+
 - **Purpose:** Database-specific health
 - **Response:** 200 OK or 503 Service Unavailable
 - **Body:**
@@ -880,6 +956,7 @@ example/
 **Base Path:** `/api/examples`
 
 **POST /**
+
 - **Purpose:** Create example
 - **Body:** `{ name: string, description?: string }`
 - **Response:** 201 Created
@@ -897,6 +974,7 @@ example/
   ```
 
 **GET /**
+
 - **Purpose:** List all examples
 - **Response:** 200 OK
   ```json
@@ -907,15 +985,18 @@ example/
   ```
 
 **GET /:id**
+
 - **Purpose:** Get example by ID
 - **Response:** 200 OK or 404 Not Found
 
 **PUT /:id**
+
 - **Purpose:** Update example
 - **Body:** `{ name?: string, description?: string }`
 - **Response:** 200 OK or 404 Not Found
 
 **DELETE /:id**
+
 - **Purpose:** Delete example
 - **Response:** 204 No Content or 404 Not Found
 
@@ -926,12 +1007,14 @@ example/
 ### 11.1 System Events
 
 **system.startup**
+
 - **Publisher:** bootstrap.js
 - **Payload:** `{ timestamp, environment }`
 - **Subscribers:** Example module (for demo)
 - **Purpose:** Notify modules of system initialization
 
 **system.shutdown**
+
 - **Publisher:** bootstrap.js (during shutdown)
 - **Payload:** `{ timestamp }`
 - **Subscribers:** None (placeholder for cleanup handlers)
@@ -940,18 +1023,21 @@ example/
 ### 11.2 Example Module Events
 
 **example.created**
+
 - **Publisher:** ExampleService.create()
 - **Payload:** `{ id, name }`
 - **Subscribers:** None yet
 - **Use Case:** Notifications, analytics, webhooks
 
 **example.updated**
+
 - **Publisher:** ExampleService.update()
 - **Payload:** `{ id, name }`
 - **Subscribers:** None yet
 - **Use Case:** Audit logs, cache invalidation
 
 **example.deleted**
+
 - **Publisher:** ExampleService.delete()
 - **Payload:** `{ id }`
 - **Subscribers:** None yet
@@ -964,30 +1050,36 @@ example/
 ### 12.1 Strengths
 
 ✅ **Clear Separation of Concerns**
+
 - Infrastructure, modules, and shared code are well-separated
 - Each layer has a single responsibility
 
 ✅ **Consistent Patterns**
+
 - All modules follow the same structure
 - Naming conventions are consistent
 - File organization is uniform
 
 ✅ **Testability**
+
 - Dependency injection enables easy mocking
 - Pure functions in utilities
 - Clear interfaces for repositories
 
 ✅ **Extensibility**
+
 - Easy to add new modules
 - EventBus enables loose coupling
 - Configuration-driven behavior
 
 ✅ **Documentation**
+
 - Comprehensive README, QUICKSTART, ARCHITECTURE docs
 - Inline comments explain complex logic
 - Clear function/class documentation
 
 ✅ **Error Handling**
+
 - Centralized error handling middleware
 - Try-catch in all async operations
 - Meaningful error messages
@@ -995,6 +1087,7 @@ example/
 ### 12.2 Areas for Improvement
 
 ⚠️ **Testing**
+
 - **Current State:** Tests directory exists but is empty
 - **Recommendation:** Add unit and integration tests
 - **Priority:** High
@@ -1005,6 +1098,7 @@ example/
   - Service layer business logic
 
 ⚠️ **Validation**
+
 - **Current State:** No input validation on API endpoints
 - **Recommendation:** Add validation middleware (Joi, express-validator)
 - **Priority:** High
@@ -1013,6 +1107,7 @@ example/
   - Add validation middleware
 
 ⚠️ **Security**
+
 - **Current State:** No security middleware
 - **Recommendation:** Add Helmet, CORS, rate limiting
 - **Priority:** High
@@ -1020,28 +1115,33 @@ example/
   - app.js (add security middleware)
 
 ⚠️ **Error Types**
+
 - **Current State:** Generic Error objects
 - **Recommendation:** Create custom error classes
 - **Priority:** Medium
 - **Location:** src/shared/errors/
 
 ⚠️ **Database Transactions**
+
 - **Current State:** No transaction support
 - **Recommendation:** Add transaction support for multi-document operations
 - **Priority:** Medium
 
 ⚠️ **Caching**
+
 - **Current State:** Redis available but not used for caching
 - **Recommendation:** Implement caching layer
 - **Priority:** Low
 - **Use Cases:** Frequently accessed data, session storage
 
 ⚠️ **API Versioning**
+
 - **Current State:** No versioning
 - **Recommendation:** Add /api/v1 prefix
 - **Priority:** Medium
 
 ⚠️ **Request/Response Transformation**
+
 - **Current State:** Manual transformation
 - **Recommendation:** Add DTO (Data Transfer Object) layer
 - **Priority:** Low
@@ -1053,26 +1153,31 @@ example/
 ### 13.1 Current Scalability Features
 
 ✅ **Horizontal Scaling Ready**
+
 - EventBus can switch to Redis
 - Stateless application design
 - External session storage (Redis-ready)
 
 ✅ **Microservices Migration Path**
+
 - Modules are self-contained
 - Event-driven communication
 - Clear boundaries between modules
 
 ✅ **Database Connection Pooling**
+
 - Mongoose handles connection pooling automatically
 
 ### 13.2 Scaling Recommendations
 
 **Short Term (1-10K users):**
+
 - Current architecture sufficient
 - Use in-memory EventBus
 - Single MongoDB instance
 
 **Medium Term (10K-100K users):**
+
 - Switch to Redis EventBus
 - Add Redis caching layer
 - MongoDB replica set
@@ -1080,6 +1185,7 @@ example/
 - Implement request queuing
 
 **Long Term (100K+ users):**
+
 - Extract modules to microservices
 - Add message queue (RabbitMQ, Kafka)
 - Database sharding
@@ -1093,20 +1199,24 @@ example/
 ### 14.1 Current Security Measures
 
 ✅ **Environment Variables**
+
 - Secrets not in code
 - .env files in .gitignore
 
 ✅ **Error Handling**
+
 - Production mode hides error details
 - Stack traces only in development
 
 ✅ **Input Sanitization**
+
 - Mongoose handles basic sanitization
 - Express body parser with limits
 
 ### 14.2 Security Gaps & Recommendations
 
 🔒 **Add Security Middleware:**
+
 ```javascript
 // Recommended additions to app.js
 const helmet = require('helmet');
@@ -1115,29 +1225,35 @@ const rateLimit = require('express-rate-limit');
 
 app.use(helmet());
 app.use(cors(corsOptions));
-app.use(rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
-}));
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+  })
+);
 ```
 
 🔒 **Add Input Validation:**
+
 ```javascript
 // Recommended: Use Joi or express-validator
 const { body, validationResult } = require('express-validator');
 
-router.post('/', [
-  body('name').notEmpty().trim().escape(),
-  body('description').optional().trim().escape()
-], controller.create);
+router.post(
+  '/',
+  [body('name').notEmpty().trim().escape(), body('description').optional().trim().escape()],
+  controller.create
+);
 ```
 
 🔒 **Add Authentication/Authorization:**
+
 - JWT-based authentication
 - Role-based access control (RBAC)
 - API key authentication for services
 
 🔒 **Add Logging for Security:**
+
 - Failed login attempts
 - Unusual API access patterns
 - Suspicious activity detection
@@ -1149,35 +1265,42 @@ router.post('/', [
 ### 15.1 Current Performance Features
 
 ✅ **Async/Await Throughout**
+
 - Non-blocking I/O
 - Efficient resource usage
 
 ✅ **Database Indexing**
+
 - Example module has index on name field
 - MongoDB indexes properly defined
 
 ✅ **Connection Pooling**
+
 - Mongoose handles connection pooling
 
 ### 15.2 Performance Optimization Opportunities
 
 ⚡ **Add Response Compression:**
+
 ```javascript
 const compression = require('compression');
 app.use(compression());
 ```
 
 ⚡ **Implement Caching:**
+
 - Redis caching for frequent queries
 - HTTP caching headers
 - ETag support
 
 ⚡ **Query Optimization:**
+
 - Use lean() for read-only queries
 - Implement pagination for list endpoints
 - Add field selection (only return needed fields)
 
 ⚡ **Monitoring:**
+
 - Add performance metrics
 - Track response times
 - Monitor database query performance
@@ -1203,12 +1326,14 @@ app.use(compression());
 ### 16.2 Docker Support
 
 **docker-compose.yml** provides:
+
 - MongoDB 7
 - Redis 7-alpine
 - Volume persistence
 - Network isolation
 
 **Usage:**
+
 ```bash
 docker compose up -d    # Start services
 docker compose down     # Stop services
@@ -1218,14 +1343,17 @@ docker compose logs -f  # View logs
 ### 16.3 Logging
 
 **Log Files (Production):**
+
 - `logs/error.log` - Error level logs
 - `logs/combined.log` - All logs
 
 **Log Format:**
+
 - Development: Colorized, human-readable
 - Production: JSON, machine-readable
 
 **Log Levels:**
+
 - error: Errors requiring attention
 - warn: Warnings to investigate
 - info: Important business events
@@ -1317,6 +1445,7 @@ docker compose logs -f  # View logs
 ### 18.2 Development Guidelines
 
 **When Adding New Modules:**
+
 1. Follow the example module structure
 2. Create domain entities and interfaces
 3. Implement application services
@@ -1326,6 +1455,7 @@ docker compose logs -f  # View logs
 7. Add tests
 
 **When Adding New Features:**
+
 1. Check if it fits in existing module
 2. Use events for cross-module communication
 3. Add configuration if needed
@@ -1334,6 +1464,7 @@ docker compose logs -f  # View logs
 6. Write tests
 
 **Code Quality Standards:**
+
 - Follow ESLint rules
 - Use Prettier for formatting
 - Write meaningful commit messages
@@ -1348,6 +1479,7 @@ docker compose logs -f  # View logs
 The Milokhelo Backend codebase is a **well-architected modular monolith** that follows industry best practices and SOLID principles. The infrastructure layer is complete and production-ready, providing a solid foundation for building business modules.
 
 **Key Strengths:**
+
 - Clean, maintainable code structure
 - Comprehensive documentation
 - Event-driven architecture
@@ -1355,6 +1487,7 @@ The Milokhelo Backend codebase is a **well-architected modular monolith** that f
 - Environment-aware configuration
 
 **Areas Needing Attention:**
+
 - Add comprehensive test coverage
 - Implement input validation
 - Add security middleware
@@ -1362,6 +1495,7 @@ The Milokhelo Backend codebase is a **well-architected modular monolith** that f
 - Add monitoring and metrics
 
 **Overall Assessment:** ⭐⭐⭐⭐ (4/5)
+
 - The architecture is excellent
 - Implementation is clean and consistent
 - Missing tests and some production essentials
@@ -1377,6 +1511,7 @@ The Milokhelo Backend codebase is a **well-architected modular monolith** that f
 **Total Lines:** ~2,034 lines of code
 
 ### Infrastructure (20 files, ~800 LOC)
+
 - config: 5 files
 - database: 3 files
 - di: 2 files
@@ -1387,18 +1522,22 @@ The Milokhelo Backend codebase is a **well-architected modular monolith** that f
 - utils: 2 files
 
 ### Modules (17 files, ~700 LOC)
+
 - example: 17 files
 
 ### Shared (2 files, ~150 LOC)
+
 - constants: 1 file
 - utils: 1 file
 
 ### Entry Points (3 files, ~230 LOC)
+
 - app.js
 - bootstrap.js
 - server.js
 
 ### Documentation (3 files)
+
 - README.md
 - QUICKSTART.md
 - ARCHITECTURE.md

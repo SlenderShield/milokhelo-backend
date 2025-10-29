@@ -4,9 +4,4 @@
 import ExampleEntity from './ExampleEntity.js';
 import IExampleRepository from './IExampleRepository.js';
 
-export {
-
-  ExampleEntity,
-  IExampleRepository,
-
-};
+export { ExampleEntity, IExampleRepository };

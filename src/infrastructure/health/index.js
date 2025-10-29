@@ -4,6 +4,4 @@
  */
 import createHealthRoutes from './healthRoutes.js';
 
-export {
- createHealthRoutes 
-};
+export { createHealthRoutes };

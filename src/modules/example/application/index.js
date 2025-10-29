@@ -3,8 +3,4 @@
  */
 import ExampleService from './ExampleService.js';
 
-export {
-
-  ExampleService,
-
-};
+export { ExampleService };

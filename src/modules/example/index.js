@@ -2,9 +2,9 @@
  * Example Module
  * Demonstrates module structure and inter-module communication
  */
-import {  ExampleEntity, IExampleRepository  } from './domain/index.js';
-import {  ExampleService  } from './application/index.js';
-import { 
+import { ExampleEntity, IExampleRepository } from './domain/index.js';
+import { ExampleService } from './application/index.js';
+import {
   ExampleModel,
   ExampleRepository,
   ExampleController,
@@ -45,7 +45,6 @@ function initializeExampleModule(container) {
 }
 
 export {
-
   ExampleEntity,
   IExampleRepository,
   ExampleService,
@@ -54,5 +53,4 @@ export {
   ExampleController,
   createExampleRoutes,
   initializeExampleModule,
-
 };
