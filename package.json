@@ -4,14 +4,13 @@
   "description": "Clean modular monolith backend with Node.js, Express, MongoDB, and Redis",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "NODE_ENV=development nodemon src/server.js",
-    "dev:redis": "NODE_ENV=development EVENT_BUS_ADAPTER=redis nodemon src/server.js",
-    "test": "NODE_ENV=test node src/server.js",
-    "lint": "eslint src/**/*.js",
-    "lint:fix": "eslint src/**/*.js --fix",
-    "format": "prettier --write \"src/**/*.js\"",
-    "format:check": "prettier --check \"src/**/*.js\""
+    "dev": "cross-env NODE_ENV=development nodemon src/server.js",
+    "dev:redis": "cross-env NODE_ENV=development EVENT_BUS_ADAPTER=redis nodemon src/server.js",
+    "test": "cross-env NODE_ENV=test mocha --exit",
+    "start": "cross-env NODE_ENV=production node src/server.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ."
   },
   "keywords": [
     "modular-monolith",
@@ -32,6 +31,7 @@
     "winston": "^3.18.3"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "eslint": "^9.38.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-node": "^11.1.0",

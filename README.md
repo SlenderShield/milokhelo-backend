@@ -120,14 +120,14 @@ Configuration is managed through environment variables. See `.env.example` for a
 
 ### Key Configuration Options
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment (development, test, production) | `development` |
-| `PORT` | Server port | `3000` |
-| `MONGODB_URI` | MongoDB connection string | `mongodb://localhost:27017/milokhelo_dev` |
-| `REDIS_HOST` | Redis host | `localhost` |
-| `EVENT_BUS_ADAPTER` | Event bus adapter (memory, redis) | `memory` |
-| `LOG_LEVEL` | Logging level | `debug` |
+| Variable            | Description                                 | Default                                   |
+| ------------------- | ------------------------------------------- | ----------------------------------------- |
+| `NODE_ENV`          | Environment (development, test, production) | `development`                             |
+| `PORT`              | Server port                                 | `3000`                                    |
+| `MONGODB_URI`       | MongoDB connection string                   | `mongodb://localhost:27017/milokhelo_dev` |
+| `REDIS_HOST`        | Redis host                                  | `localhost`                               |
+| `EVENT_BUS_ADAPTER` | Event bus adapter (memory, redis)           | `memory`                                  |
+| `LOG_LEVEL`         | Logging level                               | `debug`                                   |
 
 ## 📦 Module Structure
 
@@ -158,7 +158,7 @@ Suitable for single-instance applications and development:
 
 ```javascript
 // Set in .env
-EVENT_BUS_ADAPTER=memory
+EVENT_BUS_ADAPTER = memory;
 ```
 
 ### Redis EventBus
@@ -167,7 +167,7 @@ Suitable for distributed applications and production:
 
 ```javascript
 // Set in .env
-EVENT_BUS_ADAPTER=redis
+EVENT_BUS_ADAPTER = redis;
 ```
 
 ### Publishing Events
@@ -286,6 +286,7 @@ This architecture is designed to facilitate future migration to microservices:
 4. **Clean interfaces** - modules communicate through well-defined contracts
 
 To migrate a module:
+
 1. Extract module to separate repository
 2. Change EventBus to Redis adapter
 3. Update service discovery and routing

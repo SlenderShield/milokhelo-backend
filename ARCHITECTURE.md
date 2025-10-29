@@ -54,26 +54,31 @@ This document describes the architecture of the Milokhelo Backend, a modular mon
 Located in `src/infrastructure/`, provides core technical capabilities:
 
 #### Configuration (`config/`)
+
 - Environment-based configuration loading
 - Validation of required settings
 - Type-safe configuration access
 
 #### Database (`database/`)
+
 - MongoDB connection management
 - Connection lifecycle handling
 - Health checks
 
 #### EventBus (`eventBus/`)
+
 - Event-driven communication backbone
 - Multiple adapters (InMemory, Redis)
 - Publisher-Subscriber pattern
 
 #### Dependency Injection (`di/`)
+
 - IoC container for managing dependencies
 - Singleton and transient registrations
 - Service location and resolution
 
 #### Logging (`logger/`)
+
 - Centralized logging with Winston
 - Structured logging support
 - Environment-specific formats
@@ -86,18 +91,21 @@ Located in `src/modules/`, contains business modules:
 Each module follows this structure:
 
 #### Domain Layer
+
 - **Entities**: Core business objects with behavior
 - **Interfaces**: Contracts for repositories and services
 - **Value Objects**: Immutable objects representing concepts
 - **Domain Events**: Business events
 
 #### Application Layer
+
 - **Services**: Orchestrate business logic
 - **Use Cases**: Specific business operations
 - **DTOs**: Data transfer objects
 - **Event Handlers**: React to domain events
 
 #### Infrastructure Layer
+
 - **Models**: Database schemas (Mongoose)
 - **Repositories**: Data access implementations
 - **Controllers**: HTTP request handlers
@@ -142,6 +150,7 @@ eventBus.subscribe('order.created', async (data) => {
 ```
 
 Examples:
+
 - `user.created`
 - `order.completed`
 - `payment.failed`
@@ -235,6 +244,7 @@ Module B (Subscriber)
 ### Direct Communication (Avoid)
 
 ❌ **Don't do this:**
+
 ```javascript
 // Direct dependency between modules
 const userService = require('../user/application/UserService');
@@ -243,6 +253,7 @@ const userService = require('../user/application/UserService');
 ### Event-Driven Communication (Preferred)
 
 ✅ **Do this:**
+
 ```javascript
 // Module A publishes event
 await eventBus.publish('user.created', { userId });
@@ -256,6 +267,7 @@ eventBus.subscribe('user.created', async ({ userId }) => {
 ### Query Communication (When Needed)
 
 ✅ **For queries, use shared interfaces:**
+
 ```javascript
 // Define shared interface
 // src/shared/interfaces/IUserQuery.js
@@ -294,6 +306,7 @@ const userQuery = container.resolve('userQuery');
 ### Structured Logging
 
 All logs include:
+
 - Timestamp
 - Log level
 - Message

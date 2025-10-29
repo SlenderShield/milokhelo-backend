@@ -5,6 +5,7 @@ Get the Milokhelo Backend up and running in minutes!
 ## Prerequisites
 
 Ensure you have the following installed:
+
 - Node.js >= 18.x
 - Docker and Docker Compose (for MongoDB and Redis)
 - Git

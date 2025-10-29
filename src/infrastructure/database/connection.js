@@ -4,7 +4,7 @@
  */
 const mongoose = require('mongoose');
 
-class MongoDBManager {
+class MongoDBConnection {
   constructor(config, logger) {
     this.config = config;
     this.logger = logger;
@@ -87,4 +87,4 @@ class MongoDBManager {
   }
 }
 
-module.exports = MongoDBManager;
+module.exports = MongoDBConnection;

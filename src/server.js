@@ -8,7 +8,7 @@ const createApp = require('./app');
 async function startServer() {
   try {
     // Bootstrap the application
-    const { config, logger, container, dbManager, eventBus } = await bootstrap();
+    const { config, logger, container, dbConnection, eventBus } = await bootstrap();
 
     // Create Express app
     const app = createApp(config, logger, container);
@@ -38,7 +38,7 @@ async function startServer() {
         logger.info('HTTP server closed');
 
         // Shutdown application
-        await shutdown({ logger, dbManager, eventBus });
+        await shutdown({ logger, dbConnection, eventBus });
 
         process.exit(0);
       });

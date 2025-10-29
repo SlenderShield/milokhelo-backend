@@ -5,7 +5,7 @@
 const { getConfig } = require('./infrastructure/config');
 const { createLogger } = require('./infrastructure/logger');
 const { getContainer } = require('./infrastructure/di');
-const { MongoDBManager } = require('./infrastructure/database');
+const { MongoDBConnection, DatabaseHealthCheck } = require('./infrastructure/database');
 const { EventBusFactory } = require('./infrastructure/eventBus');
 const { EVENTS } = require('./shared/constants');
 
@@ -34,9 +34,13 @@ async function bootstrap() {
   container.registerInstance('logger', logger);
 
   // 4. Initialize database
-  const dbManager = new MongoDBManager(config.getAll(), logger);
-  await dbManager.connect();
-  container.registerInstance('dbManager', dbManager);
+  const dbConnection = new MongoDBConnection(config.getAll(), logger);
+  await dbConnection.connect();
+  container.registerInstance('dbConnection', dbConnection);
+
+  // Register database health check
+  const dbHealthCheck = new DatabaseHealthCheck(dbConnection);
+  container.registerInstance('dbHealthCheck', dbHealthCheck);
 
   // 5. Initialize event bus
   const eventBus = EventBusFactory.create(config.getAll(), logger);
@@ -65,14 +69,14 @@ async function bootstrap() {
     environment: config.env,
   });
 
-  return { config, logger, container, dbManager, eventBus };
+  return { config, logger, container, dbConnection, eventBus };
 }
 
 /**
  * Graceful shutdown
  */
 async function shutdown(components) {
-  const { logger, dbManager, eventBus } = components;
+  const { logger, dbConnection, eventBus } = components;
 
   logger.info('Shutting down application...');
 
@@ -95,7 +99,7 @@ async function shutdown(components) {
 
   // Close database connection
   try {
-    await dbManager.disconnect();
+    await dbConnection.disconnect();
     logger.info('Database disconnected');
   } catch (error) {
     logger.error('Error disconnecting database', { error: error.message });
