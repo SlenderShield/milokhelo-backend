@@ -6,7 +6,8 @@ info:
     Milokhelo REST API v1 — sports match & tournament platform.
     Supports matches, tournaments, chat, venues (nearby search & booking), maps (mobile-submitted),
     calendar sync (device & third-party), notifications, invitations, feedback,
-    teams, achievements, and hybrid OAuth (Google & Facebook) with backend token exchange & session cookie.
+    teams, achievements, and OAuth authentication (Google & Facebook) with Passport.js
+    using backend token exchange & session cookies.
 servers:
   - url: https://api.milokhelo.com/v1
     description: Production
@@ -15,7 +16,7 @@ servers:
 
 tags:
   - name: Auth
-    description: Authentication & session management (hybrid OAuth)
+    description: Authentication & session management (OAuth 2.0 with Google & Facebook)
   - name: Users
     description: User profiles, stats, achievements
   - name: Teams
@@ -45,12 +46,13 @@ tags:
 
 paths:
   ################################################################
-  # AUTH / IAM (Hybrid OAuth + Session cookie)                    #
+  # AUTH / IAM (OAuth 2.0 with Google & Facebook + Email/Password) #
   ################################################################
   /auth/providers:
     get:
       tags: [Auth]
       summary: List supported OAuth providers
+      description: Returns available OAuth providers (Google, Facebook) with their authorization URLs
       responses:
         "200":
           description: Providers metadata
@@ -60,46 +62,78 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/OAuthProvider"
+              example:
+                - name: google
+                  displayName: Google
+                  authorizationUrl: /api/v1/auth/oauth/google
+                - name: facebook
+                  displayName: Facebook
+                  authorizationUrl: /api/v1/auth/oauth/facebook
 
-  /auth/oauth/url:
+  /auth/oauth/google:
     get:
       tags: [Auth]
-      summary: Get OAuth authorization URL (frontend should redirect user)
-      parameters:
-        - name: provider
-          in: query
-          required: true
-          schema:
-            type: string
-            enum: [google, facebook]
-      responses:
-        "200":
-          description: Authorization URL returned
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  url:
-                    type: string
-                    format: uri
-
-  /auth/oauth/callback:
-    get:
-      tags: [Auth]
-      summary: OAuth callback (provider -> backend)
+      summary: Initiate Google OAuth flow
       description: >
-        OAuth provider will redirect here with code. Backend exchanges code for provider tokens,
-        stores them securely, creates/updates the user, and sets an HTTP-only session cookie then redirects to frontend.
+        Redirects user to Google OAuth consent screen. After user grants permission,
+        Google redirects back to the callback URL with authorization code.
+      responses:
+        "302":
+          description: Redirect to Google OAuth consent screen
+
+  /auth/oauth/facebook:
+    get:
+      tags: [Auth]
+      summary: Initiate Facebook OAuth flow
+      description: >
+        Redirects user to Facebook OAuth consent screen. After user grants permission,
+        Facebook redirects back to the callback URL with authorization code.
+      responses:
+        "302":
+          description: Redirect to Facebook OAuth consent screen
+
+  /auth/oauth/callback/google:
+    get:
+      tags: [Auth]
+      summary: Google OAuth callback
+      description: >
+        Google redirects here with authorization code. Backend exchanges code for tokens,
+        creates/updates user account, and establishes session with HTTP-only cookie.
+        Finally redirects to frontend with user data.
       parameters:
         - name: code
           in: query
           required: true
           schema: { type: string }
+          description: Authorization code from Google
         - name: state
           in: query
           required: false
           schema: { type: string }
+          description: CSRF protection state parameter
+      responses:
+        "302":
+          description: Redirect to frontend with Set-Cookie header for session
+
+  /auth/oauth/callback/facebook:
+    get:
+      tags: [Auth]
+      summary: Facebook OAuth callback
+      description: >
+        Facebook redirects here with authorization code. Backend exchanges code for tokens,
+        creates/updates user account, and establishes session with HTTP-only cookie.
+        Finally redirects to frontend with user data.
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema: { type: string }
+          description: Authorization code from Facebook
+        - name: state
+          in: query
+          required: false
+          schema: { type: string }
+          description: CSRF protection state parameter
       responses:
         "302":
           description: Redirect to frontend with Set-Cookie header for session
@@ -108,32 +142,44 @@ paths:
     get:
       tags: [Auth]
       summary: Validate/refresh session
+      description: Get current user profile from active session
       security:
         - cookieAuth: []
       responses:
         "200":
-          description: Session valid — user profile
+          description: Session valid — user profile returned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserProfile"
         "401":
           description: Session invalid/expired
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: false }
+                  message: { type: string, example: "No active session" }
 
   /auth/logout:
     post:
       tags: [Auth]
       summary: Log out user and clear session cookie
+      description: Destroys user session and clears session cookie
       security:
         - cookieAuth: []
       responses:
         "204":
-          description: Logged out
+          description: Logged out successfully
 
   /auth/register:
     post:
       tags: [Auth]
-      summary: Register using email/password (optional; supports hybrid OAuth primarily)
+      summary: Register using email/password
+      description: >
+        Create new account with email and password. OAuth authentication is preferred,
+        but email/password registration is also supported.
       requestBody:
         required: true
         content:
@@ -142,16 +188,19 @@ paths:
               $ref: "#/components/schemas/RegisterUser"
       responses:
         "201":
-          description: User created
+          description: User created and session established
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserProfile"
+        "400":
+          description: Invalid input or user already exists
 
   /auth/login:
     post:
       tags: [Auth]
-      summary: Login using email/password (backend sets session cookie)
+      summary: Login using email/password
+      description: Authenticate with email and password, establishes session with HTTP-only cookie
       requestBody:
         required: true
         content:
@@ -160,11 +209,13 @@ paths:
               $ref: "#/components/schemas/LoginUser"
       responses:
         "200":
-          description: Session cookie set + profile returned
+          description: Session cookie set and profile returned
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Invalid credentials
 
   ################################################################
   # USERS                                                         #
@@ -1454,15 +1505,16 @@ components:
         name:
           type: string
           example: google
+          description: Provider identifier (google, facebook)
         displayName:
           type: string
           example: Google
+          description: Human-readable provider name
         authorizationUrl:
           type: string
           format: uri
-        iconUrl:
-          type: string
-          format: uri
+          example: /api/v1/auth/oauth/google
+          description: URL to initiate OAuth flow
 
     RegisterUser:
       type: object
@@ -1503,7 +1555,9 @@ components:
         roles:
           type: array
           items: { type: string }
-        verified: { type: boolean }
+        verified:
+          type: boolean
+          description: True if user verified email or authenticated via OAuth
         privacy:
           type: object
           properties:
@@ -1522,8 +1576,23 @@ components:
               properties:
                 lat: { type: number }
                 lng: { type: number }
+        oauthProviders:
+          type: object
+          description: Linked OAuth providers (not including sensitive data)
+          properties:
+            google:
+              type: object
+              properties:
+                id: { type: string }
+                email: { type: string }
+            facebook:
+              type: object
+              properties:
+                id: { type: string }
+                email: { type: string }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
+        lastLogin: { type: string, format: date-time }
         achievements:
           type: array
           items: { type: string }

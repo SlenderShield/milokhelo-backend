@@ -43,6 +43,20 @@
    - Marked OAuth implementation as complete
    - Added documentation update summary
 
+5. **docs/openapi.yaml** (OpenAPI specification)
+   - Updated API description to mention Passport.js OAuth implementation
+   - Updated Auth tag description to specify "OAuth 2.0 with Google & Facebook"
+   - Replaced generic `/auth/oauth/url` endpoint with provider-specific routes:
+     - Added `GET /auth/oauth/google` - Initiate Google OAuth
+     - Added `GET /auth/oauth/facebook` - Initiate Facebook OAuth
+   - Replaced generic `/auth/oauth/callback` with provider-specific callbacks:
+     - Added `GET /auth/oauth/callback/google` - Google OAuth callback
+     - Added `GET /auth/oauth/callback/facebook` - Facebook OAuth callback
+   - Enhanced endpoint descriptions with OAuth flow details
+   - Updated `UserProfile` schema to include `oauthProviders` field
+   - Updated `OAuthProvider` schema with better descriptions
+   - Improved response examples and descriptions for all auth endpoints
+
 **Removed Documentation:**
 
 - **docs/OAUTH_QUICKREF.md** - Removed (redundant with OAUTH_SETUP.md)
