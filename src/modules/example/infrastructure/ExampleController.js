@@ -2,8 +2,8 @@
  * Example Controller
  * Handles HTTP requests for the example module
  */
-import {  asyncHandler  } from '../../../shared/utils.js';
-import {  HTTP_STATUS  } from '../../../shared/constants.js';
+import {  asyncHandler  } from '../../../shared/utils/index.js';
+import {  HTTP_STATUS  } from '../../../shared/constants/index.js';
 
 class ExampleController {
   constructor(exampleService, logger) {

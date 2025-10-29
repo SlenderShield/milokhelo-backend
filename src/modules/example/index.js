@@ -2,14 +2,14 @@
  * Example Module
  * Demonstrates module structure and inter-module communication
  */
-import {  ExampleEntity, IExampleRepository  } from './domain.js';
-import {  ExampleService  } from './application.js';
+import {  ExampleEntity, IExampleRepository  } from './domain/index.js';
+import {  ExampleService  } from './application/index.js';
 import { 
   ExampleModel,
   ExampleRepository,
   ExampleController,
   createExampleRoutes,
- } from './infrastructure.js';
+} from './infrastructure/index.js';
 
 /**
  * Initialize the Example module
