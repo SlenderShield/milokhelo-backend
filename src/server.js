@@ -1,0 +1,71 @@
+/**
+ * Server Entry Point
+ * Starts the HTTP server
+ */
+const { bootstrap, shutdown } = require('./bootstrap');
+const createApp = require('./app');
+
+async function startServer() {
+  try {
+    // Bootstrap the application
+    const { config, logger, container, dbManager, eventBus } = await bootstrap();
+
+    // Create Express app
+    const app = createApp(config.getAll(), logger, container);
+
+    // Start HTTP server
+    const server = app.listen(config.app.port, config.app.host, () => {
+      logger.info('Server started successfully', {
+        host: config.app.host,
+        port: config.app.port,
+        environment: config.env,
+        apiPrefix: config.app.apiPrefix,
+      });
+      console.log(`✅ Server running at http://${config.app.host}:${config.app.port}`);
+      console.log(
+        `📋 API available at http://${config.app.host}:${config.app.port}${config.app.apiPrefix}`
+      );
+    });
+
+    // Graceful shutdown handlers
+    const gracefulShutdown = async (signal) => {
+      logger.info(`Received ${signal}, starting graceful shutdown`);
+
+      // Stop accepting new connections
+      server.close(async () => {
+        logger.info('HTTP server closed');
+
+        // Shutdown application
+        await shutdown({ logger, dbManager, eventBus });
+
+        process.exit(0);
+      });
+
+      // Force shutdown after 10 seconds
+      setTimeout(() => {
+        logger.error('Forced shutdown after timeout');
+        process.exit(1);
+      }, 10000);
+    };
+
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+    // Handle uncaught errors
+    process.on('uncaughtException', (error) => {
+      logger.error('Uncaught Exception', { error: error.message, stack: error.stack });
+      gracefulShutdown('uncaughtException');
+    });
+
+    process.on('unhandledRejection', (reason, promise) => {
+      logger.error('Unhandled Rejection', { reason, promise });
+      gracefulShutdown('unhandledRejection');
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer();
