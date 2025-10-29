@@ -48,10 +48,14 @@ src/
 
 - ✅ **14 Complete Modules**: Auth, Users, Teams, Matches, Tournaments, Chat, Venues, Maps, Calendar, Notifications, Invitations, Feedback, Admin
 - ✅ **OAuth Authentication**: Full Google & Facebook OAuth 2.0 with Passport.js + Email/Password authentication
+- ✅ **Google Calendar Integration**: Full OAuth2 integration with bidirectional sync and automatic event export
+- ✅ **Push Notifications**: FCM (Firebase) for Android/Web and APNS for iOS with automatic delivery and multi-device support
 - ✅ **Session Management**: HTTP-only cookies with Redis store
 - ✅ **Tournament Brackets**: Automatic bracket generation for knockout and league tournaments
 - ✅ **Stats Auto-Update**: Event-driven automatic stats updates on match completion (ELO, streaks, performance metrics)
 - ✅ **Achievement System**: Automatic achievement evaluation with 31 predefined achievements (milestones, skills, participation)
+- ✅ **Authorization & RBAC**: Role-Based Access Control with 6-level hierarchy (guest→user→venue_owner→moderator→admin→superadmin) and granular permissions
+- ✅ **Input Validation**: Comprehensive request validation with express-validator (17+ schemas across 5 modules, automatic error formatting)
 - ✅ **Booking Conflict Prevention**: Atomic venue bookings with MongoDB transactions and optimistic locking
 - ✅ **Real-time Chat**: WebSocket support with Socket.IO
 - ✅ **Geo-spatial Search**: Find nearby venues with 2dsphere indexes
@@ -155,7 +159,44 @@ npm run test:watch
 
 ## 📡 API Overview
 
-The Milokhelo backend provides 70+ API endpoints across 14 modules:
+The Milokhelo backend provides 70+ API endpoints across 14 modules with comprehensive role-based access control (RBAC).
+
+### 🔐 Security & Authorization
+
+The API implements a 6-level role hierarchy with granular permission system:
+
+- **guest** (0) - Unauthenticated users, public read-only access
+- **user** (1) - Registered users, basic features
+- **venue_owner** (2) - Venue management capabilities
+- **moderator** (3) - Content moderation
+- **admin** (4) - User and system management
+- **superadmin** (5) - Full system access
+
+Each endpoint is protected by appropriate middleware (`requireAuth`, `requireRole`, `requirePermission`, `requireOwnership`) ensuring users can only access authorized resources.
+
+> **📖 For complete RBAC documentation, see [`docs/features/AUTHORIZATION_RBAC.md`](docs/features/AUTHORIZATION_RBAC.md)**
+
+### 🛡️ Input Validation
+
+All API endpoints implement comprehensive input validation with express-validator:
+
+**Validation Coverage:**
+- ✅ **Authentication**: Email format, password strength (8+ chars with uppercase, lowercase, number)
+- ✅ **Users**: Username validation, profile field limits, MongoDB ObjectId verification
+- ✅ **Matches**: Date validation (no past dates), sport type enums, geo-coordinate ranges
+- ✅ **Calendar**: ISO 8601 dates, time range validation (end > start)
+- ✅ **Notifications**: Push token validation, platform types, priority levels
+
+**Validation Features:**
+- Type checking (email, URL, ObjectId, dates, numbers, booleans)
+- Length validation (min/max character limits)
+- Enum validation (whitelisted values)
+- Custom validators (business logic)
+- Automatic sanitization (trim, normalize, escape)
+- Cross-field validation
+- Detailed error responses with field-level feedback
+
+> **📖 For complete validation documentation, see [`docs/features/INPUT_VALIDATION.md`](docs/features/INPUT_VALIDATION.md)**
 
 ### 🔐 Authentication (`/api/v1/auth`)
 
@@ -275,14 +316,40 @@ The Milokhelo backend provides 70+ API endpoints across 14 modules:
 ### 📅 Calendar (`/api/v1/calendar`)
 
 - `GET /events` - List calendar events
-- `POST /sync` - Sync with Google Calendar
+- `POST /events` - Create calendar event
+- `POST /sync` - Sync device events with backend
+- `GET /google/auth` - Get Google Calendar OAuth URL
+- `GET /google/callback` - Google OAuth callback (called by Google)
+- `POST /google/sync` - Import events from Google Calendar
+- `DELETE /google/disconnect` - Disconnect Google Calendar
+
+**Google Calendar Integration Features:**
+
+- ✅ OAuth2 authentication with Google
+- ✅ Import events from Google Calendar to Milokhelo
+- ✅ Automatic export of Milokhelo events to Google Calendar
+- ✅ Bidirectional sync to keep calendars in sync
+- ✅ Per-user token management with auto-refresh
+- ✅ Disconnect capability to revoke access
 
 ### 🔔 Notifications (`/api/v1/notifications`)
 
 - `GET /` - List notifications
-- `POST /mark-read` - Mark as read
-- `POST /device-tokens` - Register device for push
-- `DELETE /device-tokens/:tokenId` - Unregister device
+- `PATCH /:id/read` - Mark notification as read
+- `GET /unread/count` - Get unread count
+- `PATCH /read-all` - Mark all as read
+- `POST /push-token` - Register device for push notifications
+- `DELETE /push-token` - Unregister device
+
+**Push Notification Features:**
+
+- ✅ Firebase Cloud Messaging (FCM) for Android and Web
+- ✅ Apple Push Notification Service (APNS) for iOS
+- ✅ Multi-device support per user
+- ✅ Automatic push when notifications created
+- ✅ Priority levels (urgent, high, normal, low)
+- ✅ Topic messaging for broadcasts
+- ✅ Batch notifications
 
 ### 📨 Invitations (`/api/v1/invitations`)
 
@@ -424,6 +491,19 @@ docs/
 
 - [`docs/features/OAUTH_SETUP.md`](docs/features/OAUTH_SETUP.md) - Complete OAuth setup guide (Google & Facebook)
 - [`docs/features/OAUTH_IMPLEMENTATION.md`](docs/features/OAUTH_IMPLEMENTATION.md) - OAuth implementation architecture
+
+**Calendar:**
+
+- [`docs/features/GOOGLE_CALENDAR.md`](docs/features/GOOGLE_CALENDAR.md) - Google Calendar API integration with OAuth2 and sync
+
+**Notifications:**
+
+- [`docs/features/PUSH_NOTIFICATIONS.md`](docs/features/PUSH_NOTIFICATIONS.md) - Complete push notification system (FCM & APNS)
+
+**Security:**
+
+- [`docs/features/AUTHORIZATION_RBAC.md`](docs/features/AUTHORIZATION_RBAC.md) - Role-Based Access Control with 6-level hierarchy and permissions
+- [`docs/features/INPUT_VALIDATION.md`](docs/features/INPUT_VALIDATION.md) - Comprehensive request validation with express-validator
 
 ### 🔌 API Documentation
 

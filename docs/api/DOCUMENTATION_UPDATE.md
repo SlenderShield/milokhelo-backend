@@ -1,22 +1,274 @@
 # Documentation Update Summary
 
-## Recent Changes (October 29, 2025)
+## Recent Changes (October 30, 2025)
+
+### Input Validation Documentation Added
+
+**New Documentation:**
+
+1. **docs/features/INPUT_VALIDATION.md** - Complete input validation system documentation
+   - Architecture overview with validation middleware layer diagram
+   - Request flow diagram showing validation chain execution
+   - Complete validation middleware documentation
+     - validateRequest() - Error handler with formatted responses
+     - validate() - Wrapper function for validation chains
+   - Comprehensive validation schema documentation (17+ schemas across 5 modules):
+     - **authValidation.js**: registerValidation, loginValidation
+     - **userValidation.js**: updateUserValidation, userIdValidation, searchUsersValidation
+     - **matchValidation.js**: createMatchValidation, updateMatchValidation, finishMatchValidation, nearbyMatchesValidation
+     - **calendarValidation.js**: createEventValidation, syncEventsValidation, getEventsValidation
+     - **notificationValidation.js**: registerPushTokenValidation, markAsReadValidation, getNotificationsValidation, createNotificationValidation
+   - Key validation features:
+     - Type checking (email, URL, MongoDB ObjectId, ISO 8601 dates)
+     - Length validation with min/max limits
+     - Enum validation for whitelisted values
+     - Custom validators for business logic
+     - Cross-field validation
+     - Automatic sanitization (trim, normalize, escape)
+   - 6 comprehensive usage examples (simple, parameter, query, custom, cross-field, multiple)
+   - API integration patterns for notification and calendar routes
+   - Testing guide (unit tests and integration tests)
+   - Best practices (7 guidelines)
+   - Troubleshooting section (5 common issues with solutions)
+   - Security considerations (XSS prevention, rate limiting, SQL/NoSQL injection)
+   - Express-validator API reference
+
+**Updated Documentation:**
+
+1. **docs/api/openapi.yaml** (OpenAPI specification)
+   - Updated API description features list to include "Input Validation: Comprehensive request validation with express-validator (17+ schemas, 5 modules)"
+   - Added comprehensive "Input Validation" section to API description
+   - Documented validation coverage (authentication, users, matches, calendar, notifications)
+   - Listed validation features (type checking, length validation, enum validation, custom validators, sanitization, cross-field)
+   - Provided error response format example with field-level errors
+   - Listed common validation rules (MongoDB IDs, emails, dates, pagination, coordinates)
+
+2. **README.md** (Main project documentation)
+   - Added "Input Validation" to features list with express-validator details
+   - Created new "Input Validation" section in API overview
+   - Listed validation coverage across 5 areas
+   - Listed 7 validation features
+   - Added INPUT_VALIDATION.md to feature documentation section under "Security"
+
+3. **docs/README.md** (Documentation index)
+   - Added INPUT_VALIDATION.md to "Security" section in feature documentation
+   - Updated "Recent Changes" to include input validation (Oct 30, 2025)
+
+**Implementation Details:**
+
+- ✅ **17+ Validation Schemas**: Covering authentication, users, matches, calendar, notifications
+- ✅ **Express-Validator Integration**: Declarative validation chains with automatic error handling
+- ✅ **5 Modules Covered**: Auth, User, Match, Calendar, Notification
+- ✅ **Validation Middleware**: validate() wrapper and validateRequest() error handler
+- ✅ **Comprehensive Type Checking**: Email, URL, MongoDB ObjectId, ISO 8601 dates, integers, floats, booleans
+- ✅ **Custom Validators**: Business logic validation (dates not in past, end time after start time)
+- ✅ **Automatic Sanitization**: Trim whitespace, normalize emails, escape HTML, type coercion
+- ✅ **Field-Level Errors**: Detailed error responses with field, message, and value
+- ✅ **Test Coverage**: Unit tests for middleware, integration tests for API endpoints
+- ✅ **Security Features**: XSS prevention, SQL/NoSQL injection prevention, rate limiting integration
+
+### Authorization & RBAC Documentation Added
+
+**New Documentation:**
+
+1. **docs/features/AUTHORIZATION_RBAC.md** - Complete RBAC system documentation
+   - Architecture overview with authentication and authorization layers
+   - Request flow diagram showing middleware chain
+   - Complete 6-level role hierarchy (guest → user → venue_owner → moderator → admin → superadmin)
+   - Comprehensive permission system documentation
+     - Permission pattern: resource:action:scope
+     - 25+ defined permissions across all resources
+     - User, venue, booking, admin, match, and tournament permissions
+   - Detailed middleware function documentation
+     - requireAuth() - Authentication check
+     - requireRole(roles) - Role-based authorization
+     - requirePermission(permission) - Permission-based authorization
+     - requireMinRole(minRole) - Hierarchical role check
+     - requireOwnership(getResourceUserId) - Ownership verification with admin bypass
+   - 7 comprehensive usage examples
+   - API integration patterns (admin routes, venue management, user routes)
+   - Testing guide (unit tests and integration tests)
+   - Best practices (6 guidelines)
+   - Troubleshooting section (4 common issues with solutions)
+   - Security considerations (session security, rate limiting, audit logging, input validation)
+
+**Updated Documentation:**
+
+1. **docs/api/openapi.yaml** (OpenAPI specification)
+   - Updated API description with comprehensive RBAC section
+   - Added role hierarchy table with 6 levels and descriptions
+   - Documented permission system with resource:action:scope pattern
+   - Listed common permissions for all resources
+   - Added RBAC usage documentation in API description
+   - Updated features list to include "Authorization (RBAC): Role-Based Access Control with 6-level hierarchy and granular permissions"
+
+2. **README.md** (Main project documentation)
+   - Added "Authorization & RBAC" to features list
+   - Added new "Security & Authorization" section to API overview
+     - 6-level role hierarchy table
+     - Middleware explanation
+     - Link to complete RBAC documentation
+   - Added authorization middleware reference in feature documentation section
+   - New "Security" category with AUTHORIZATION_RBAC.md link
+
+3. **docs/README.md** (Documentation index)
+   - Added AUTHORIZATION_RBAC.md to "Security" section in feature documentation
+   - Updated "Recent Changes" to include RBAC (Oct 30, 2025)
+
+**Implementation Details:**
+
+- ✅ **6-Level Role Hierarchy**: guest (0) → user (1) → venue_owner (2) → moderator (3) → admin (4) → superadmin (5)
+- ✅ **Granular Permission System**: 25+ permissions with resource:action:scope pattern
+- ✅ **5 Middleware Functions**: requireAuth, requireRole, requirePermission, requireMinRole, requireOwnership
+- ✅ **2 Utility Functions**: hasRole, hasPermission for programmatic checks
+- ✅ **Admin Bypass**: Admins and moderators automatically bypass ownership checks
+- ✅ **Multiple Roles**: Users can have multiple roles, highest level used for hierarchical checks
+- ✅ **Session-Based**: Integrates with existing session management
+- ✅ **Test Coverage**: 211 lines of comprehensive unit tests
+- ✅ **Type-Safe**: Clear role and permission definitions
+
+### Google Calendar Integration Documentation Added
+
+**New Documentation:**
+
+1. **docs/features/GOOGLE_CALENDAR.md** - Complete Google Calendar integration guide
+   - Architecture overview with OAuth2 flow diagrams
+   - Component diagram showing service integration
+   - Event synchronization flow (bidirectional)
+   - Comprehensive setup guides for Google Cloud Console and environment
+   - OAuth2 flow step-by-step (authorization URL, callback, token exchange)
+   - Usage examples (connecting, importing, exporting, disconnecting)
+   - API endpoint reference with request/response examples
+   - Event mapping and deduplication logic
+   - Automatic export on event creation
+   - Testing guide (manual and integration tests)
+   - Comprehensive troubleshooting section (authorization, sync, token issues)
+   - Production considerations (security, performance, monitoring, scalability, compliance)
+
+**Updated Documentation:**
+
+1. **docs/api/openapi.yaml** (OpenAPI specification)
+   - Updated API description to include Google Calendar integration
+   - Updated Calendar tag description to mention OAuth2 integration
+   - Added `GET /calendar/google/auth` endpoint
+     - Get Google OAuth2 authorization URL
+     - Initiates OAuth flow for user
+   - Added `GET /calendar/google/callback` endpoint
+     - OAuth2 callback from Google
+     - Exchanges authorization code for tokens
+     - Stores tokens in database
+   - Added `POST /calendar/google/sync` endpoint
+     - Import events from Google Calendar
+     - Configurable time range
+     - Returns imported event count
+   - Added `DELETE /calendar/google/disconnect` endpoint
+     - Disconnect Google Calendar integration
+     - Removes stored OAuth tokens
+
+2. **README.md** (Main project documentation)
+   - Added Google Calendar integration to features list
+   - Enhanced Calendar API section with 7 endpoints
+   - Added Google Calendar features list (6 key capabilities)
+   - Added Google Calendar to feature documentation section
+
+3. **docs/README.md** (Documentation index)
+   - Added GOOGLE_CALENDAR.md to feature documentation section
+   - New "Calendar" category in feature docs
+
+**Implementation Details:**
+
+- ✅ **OAuth2 Authentication**: Full Google OAuth2 flow with authorization code exchange
+- ✅ **Token Management**: Access and refresh tokens stored per user with auto-refresh
+- ✅ **Event Import**: Import events from Google Calendar with configurable time range
+- ✅ **Event Export**: Automatic export of Milokhelo events to Google Calendar
+- ✅ **Bidirectional Sync**: Keep both calendars synchronized
+- ✅ **Event Mapping**: Convert between Google Calendar and Milokhelo event formats
+- ✅ **Deduplication**: Track Google event IDs to prevent duplicate imports
+- ✅ **Graceful Degradation**: Works even when Google Calendar is disabled
+- ✅ **Full API Integration**: 4 new REST endpoints for OAuth and sync
+
+### Push Notifications Documentation Added (October 29, 2025)
+
+**New Documentation:**
+
+1. **docs/features/PUSH_NOTIFICATIONS.md** - Complete push notification system guide
+   - Architecture overview with component diagrams
+   - Event flow showing automatic push delivery
+   - Multi-platform support (FCM for Android/Web, APNS for iOS)
+   - Comprehensive setup guides for Firebase and Apple Developer
+   - Usage examples (device registration, sending notifications, topics, batches)
+   - API endpoint reference
+   - Configuration guide with environment variables
+   - 4 notification priority levels (urgent, high, normal, low)
+   - Testing guide (unit tests, manual testing, integration tests)
+   - Comprehensive troubleshooting section
+   - Production considerations (security, performance, monitoring, scalability)
+
+**Updated Documentation:**
+
+1. **docs/api/openapi.yaml** (OpenAPI specification)
+   - Updated API description to include push notifications feature
+   - Added `POST /notifications/push-token` endpoint
+     - Register device tokens for FCM/APNS
+     - Multi-platform support (ios, android, web)
+     - Comprehensive request/response examples
+   - Added `DELETE /notifications/push-token` endpoint
+     - Unregister device tokens
+     - Clean up on logout/uninstall
+   - Added `GET /notifications/unread/count` endpoint
+     - Get count of unread notifications
+   - Added `PATCH /notifications/read-all` endpoint
+     - Mark all notifications as read in one call
+   - Added `DeviceTokenRegister` schema
+     - Token registration payload structure
+     - Platform-specific token formats
+     - Optional device name for identification
+
+2. **README.md** (Main project documentation)
+   - Added push notifications to features list with FCM/APNS details
+   - Enhanced Notifications API section with 7 endpoints
+   - Added push notification features list (7 key capabilities)
+   - Added push notifications to feature documentation section
+
+3. **docs/README.md** (Documentation index)
+   - Added PUSH_NOTIFICATIONS.md to feature documentation section
+   - New "Notifications" category in feature docs
+
+**Implementation Details:**
+
+- ✅ **Multi-Platform Support**: FCM for Android/Web, APNS for iOS
+- ✅ **Multi-Device Support**: Users can register multiple devices
+- ✅ **Automatic Delivery**: Push sent automatically when notifications created
+- ✅ **Priority Levels**: Urgent, high, normal, low with platform-specific behavior
+- ✅ **Topic Messaging**: Broadcast to groups of users
+- ✅ **Batch Notifications**: Efficient multi-user notifications
+- ✅ **Graceful Degradation**: Works even when push not configured
+- ✅ **Test Coverage**: 13 unit tests covering all functionality
+- ✅ **Full API Integration**: 4 new REST endpoints for token management
 
 ### Documentation Consolidation and Cleanup
 
 **Removed Overlapping Documentation:**
 
-1. **PATH_ALIASING_IMPLEMENTATION.md** (deleted from root)
+1. **IMPLEMENTATION_SUMMARY.md** (deleted from root) - **NEW**
+   - Content overlapped with feature-specific documentation
+   - Implementation details already documented in respective feature files:
+     - Google Calendar → Would be in calendar module documentation
+     - Push Notifications → `docs/features/PUSH_NOTIFICATIONS.md`
+     - Authorization Middleware → Core HTTP documentation
+     - Input Validation → Common validation documentation
+
+2. **PATH_ALIASING_IMPLEMENTATION.md** (deleted from root)
    - Content overlapped with `docs/guides/PATH_ALIASING.md`
    - Implementation details preserved in the guide document
 
-2. **docs/features/ACHIEVEMENT_IMPLEMENTATION_SUMMARY.md** (deleted)
+3. **docs/features/ACHIEVEMENT_IMPLEMENTATION_SUMMARY.md** (deleted)
    - Implementation details consolidated into `docs/features/ACHIEVEMENTS.md`
 
-3. **docs/features/BOOKING_CONFLICT_IMPLEMENTATION_SUMMARY.md** (deleted)
+4. **docs/features/BOOKING_CONFLICT_IMPLEMENTATION_SUMMARY.md** (deleted)
    - Implementation details consolidated into `docs/features/BOOKING_CONFLICT_PREVENTION.md`
 
-4. **docs/features/BOOKING_IMPLEMENTATION_CHECKLIST.md** (deleted)
+5. **docs/features/BOOKING_IMPLEMENTATION_CHECKLIST.md** (deleted)
    - Checklist information integrated into main booking documentation
 
 **Updated Documentation:**
@@ -444,8 +696,43 @@ The following business logic implementations are still pending (see inline comme
   - Validation for booking times and durations
   - Full integration tests
   - See `docs/features/BOOKING_CONFLICT_PREVENTION.md` for documentation
-- [ ] Google Calendar API integration (calendar module)
-- [ ] Push notifications (FCM/APNS) implementation (notifications module)
-- [ ] Authorization middleware (RBAC) implementation (core/http)
-- [ ] Input validation implementation (all modules)
+- [x] **Push notifications (FCM/APNS) implementation (notifications module)** - ✅ COMPLETED (Oct 29, 2025)
+  - Implemented FCMService for Android and Web push notifications
+  - Implemented APNSService for iOS push notifications
+  - Unified PushNotificationService for all platforms
+  - Multi-device support per user
+  - Automatic push delivery when notifications created
+  - 4 priority levels (urgent, high, normal, low)
+  - Topic messaging and batch notifications
+  - Graceful degradation when services not configured
+  - 13 unit tests with comprehensive coverage
+  - See `docs/features/PUSH_NOTIFICATIONS.md` for documentation
+- [x] **Google Calendar API integration (calendar module)** - ✅ COMPLETED (Oct 30, 2025)
+  - Implemented GoogleCalendarService with OAuth2 authentication
+  - Full authorization flow with token exchange and storage
+  - Import events from Google Calendar with configurable time range
+  - Automatic export of Milokhelo events to Google Calendar
+  - Bidirectional synchronization support
+  - Event format conversion and mapping
+  - Deduplication via Google event ID tracking
+  - Token refresh handling
+  - Disconnect capability to revoke access
+  - Graceful degradation when disabled
+  - See `docs/features/GOOGLE_CALENDAR.md` for documentation
+- [x] **Authorization middleware (RBAC) implementation (core/http)** - ✅ COMPLETED (Oct 30, 2025)
+  - Implemented 6-level role hierarchy (guest → superadmin)
+  - Implemented granular permission system (25+ permissions)
+  - 5 middleware functions for flexible authorization
+  - Admin bypass for ownership checks
+  - Session-based authentication and authorization
+  - 211 lines of comprehensive unit tests
+  - See `docs/features/AUTHORIZATION_RBAC.md` for documentation
+- [x] **Input validation implementation (all modules)** - ✅ COMPLETED (Oct 30, 2025)
+  - Implemented comprehensive validation with express-validator
+  - 17+ validation schemas across 5 modules (auth, user, match, calendar, notification)
+  - Type checking, length validation, enum validation, custom validators
+  - Automatic sanitization and cross-field validation
+  - Detailed field-level error responses
+  - Unit tests for validation middleware
+  - See `docs/features/INPUT_VALIDATION.md` for documentation
 - [ ] Comprehensive test coverage (test directory)

@@ -55,6 +55,19 @@ Detailed documentation for specific features and implementations:
 - **[OAUTH_SETUP.md](features/OAUTH_SETUP.md)** - Complete OAuth setup guide (Google & Facebook)
 - **[OAUTH_IMPLEMENTATION.md](features/OAUTH_IMPLEMENTATION.md)** - OAuth implementation details and architecture
 
+**Calendar:**
+
+- **[GOOGLE_CALENDAR.md](features/GOOGLE_CALENDAR.md)** - Google Calendar API integration with OAuth2 and bidirectional sync
+
+**Notifications:**
+
+- **[PUSH_NOTIFICATIONS.md](features/PUSH_NOTIFICATIONS.md)** - Complete push notification system with FCM and APNS
+
+**Security:**
+
+- **[AUTHORIZATION_RBAC.md](features/AUTHORIZATION_RBAC.md)** - Role-Based Access Control with 6-level hierarchy and granular permissions
+- **[INPUT_VALIDATION.md](features/INPUT_VALIDATION.md)** - Comprehensive request validation with express-validator (17+ schemas)
+
 ### 🔌 API Documentation (`api/`)
 
 API specifications and documentation updates:
@@ -84,10 +97,14 @@ When adding new documentation:
 
 ## 🔄 Documentation Status
 
-**Last Major Update**: October 29, 2025
+**Last Major Update**: October 30, 2025
 
 **Recent Changes**:
 
+- ✅ **Input Validation** - Comprehensive validation system with express-validator (Oct 30, 2025)
+- ✅ **Authorization & RBAC** - Complete role-based access control documentation with 6-level hierarchy (Oct 30, 2025)
+- ✅ **Google Calendar Integration** - Complete OAuth2 integration with bidirectional sync (Oct 30, 2025)
+- ✅ **Push Notifications** - FCM and APNS implementation documentation (Oct 29, 2025)
 - ✅ **Reorganized into subdirectories** - Better navigation and organization
 - ✅ **Removed overlapping documentation** - Deleted redundant implementation summaries and moved content to main feature docs
 - ✅ Consolidated refactoring history into single REFACTORING_HISTORY.md

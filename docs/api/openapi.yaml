@@ -11,6 +11,10 @@ info:
 
     - **14 Complete Modules**: Auth, Users, Teams, Matches, Tournaments, Chat, Venues, Maps, Calendar, Notifications, Invitations, Feedback, Admin
     - **OAuth Authentication**: Google & Facebook OAuth 2.0 with Passport.js + Email/Password authentication
+    - **Authorization (RBAC)**: Role-Based Access Control with 6-level hierarchy and granular permissions
+    - **Google Calendar Integration**: Full OAuth2 integration with bidirectional sync and event import
+    - **Push Notifications**: FCM (Firebase) for Android/Web and APNS for iOS with multi-device support
+    - **Input Validation**: Comprehensive request validation with express-validator (17+ schemas, 5 modules)
     - **Real-time Features**: WebSocket support with Socket.IO for chat and live updates
     - **Event-Driven Architecture**: Modules communicate via EventBus (in-memory or Redis)
     - **Automatic Stats Updates**: Match results automatically update player statistics via events
@@ -37,6 +41,94 @@ info:
     - **Session Cookies**: HTTP-only cookies with Redis session store
 
     All protected endpoints require authentication via session cookie.
+
+    ## Authorization (RBAC)
+
+    The API implements Role-Based Access Control (RBAC) with a hierarchical role system:
+
+    ### Role Hierarchy (Higher level = More permissions)
+
+    - **guest** (level 0) - Unauthenticated users
+    - **user** (level 1) - Registered users (default)
+    - **venue_owner** (level 2) - Venue owners and managers
+    - **moderator** (level 3) - Content moderators
+    - **admin** (level 4) - System administrators
+    - **superadmin** (level 5) - Super administrators
+
+    ### Permission System
+
+    Permissions follow the pattern `resource:action:scope`:
+    - **resource**: user, venue, booking, match, tournament, admin
+    - **action**: create, read, update, delete, approve, reject
+    - **scope**: own (user's resources), any (all resources)
+
+    ### Common Permissions
+
+    - `user:read` - View user profiles
+    - `venue:create` - Create new venues (venue_owner+)
+    - `booking:approve` - Approve bookings (venue_owner+)
+    - `admin:access` - Access admin panel (admin+)
+    - `match:update:any` - Update any match (moderator+)
+
+    ### Usage in API
+
+    Most endpoints require authentication. Some require specific roles or permissions:
+    - Admin endpoints require `admin` or `superadmin` role
+    - Venue management requires `venue_owner` role or higher
+    - Moderators can manage content across the platform
+    - Users can only modify their own resources unless they have elevated permissions
+
+    ## Input Validation
+
+    All API endpoints implement comprehensive input validation using express-validator:
+
+    ### Validation Coverage
+
+    - **Authentication**: Email format, password strength (8+ chars, uppercase, lowercase, number)
+    - **Users**: Username format (3-30 chars, alphanumeric), profile fields (bio 500 chars max)
+    - **Matches**: Date validation (no past dates), sport types (enum), skill levels, geo-coordinates
+    - **Calendar**: ISO 8601 dates, time range validation (end > start), event types
+    - **Notifications**: Push token length (10-500 chars), platform types (ios/android/web), priority levels
+
+    ### Validation Features
+
+    - **Type Checking**: Email, URL, MongoDB ObjectId, ISO 8601 dates, integers, floats, booleans
+    - **Length Validation**: Min/max character limits for strings, arrays
+    - **Enum Validation**: Whitelist allowed values for sport types, status, roles
+    - **Custom Validators**: Business logic validation (dates not in past, end time after start time)
+    - **Sanitization**: Trim whitespace, normalize emails, escape HTML, type coercion
+    - **Cross-Field**: Validate fields relative to other fields in request
+
+    ### Error Response Format
+
+    When validation fails, the API returns `400 Bad Request` with detailed field-level errors:
+
+    ```json
+    {
+      "status": "error",
+      "message": "Validation failed",
+      "errors": [
+        {
+          "field": "email",
+          "message": "Must be a valid email address",
+          "value": "invalid-email"
+        },
+        {
+          "field": "password",
+          "message": "Password must be at least 8 characters long",
+          "value": "123"
+        }
+      ]
+    }
+    ```
+
+    ### Common Validation Rules
+
+    - **MongoDB IDs**: Must be valid 24-character hex strings
+    - **Emails**: Valid format, automatically normalized
+    - **Dates**: ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)
+    - **Pagination**: limit (1-100), skip (0+)
+    - **Coordinates**: latitude (-90 to 90), longitude (-180 to 180)
 servers:
   - url: https://api.milokhelo.com/api/v1
     description: Production server
@@ -65,7 +157,7 @@ tags:
   - name: Maps
     description: Mobile-submitted map locations & map-based venue pins
   - name: Calendar
-    description: Backend calendar canonical events and sync endpoints
+    description: Backend calendar events, device sync, and Google Calendar OAuth2 integration
   - name: Notifications
     description: Notification listing, device tokens, read tracking
   - name: Invitations
@@ -1564,6 +1656,166 @@ paths:
                     items:
                       $ref: "#/components/schemas/Event"
 
+  /calendar/google/auth:
+    get:
+      tags: [Calendar]
+      summary: Get Google Calendar OAuth authorization URL
+      description: >
+        Returns the Google OAuth2 authorization URL for connecting user's Google Calendar.
+        After authorization, Google redirects to the callback URL with an authorization code.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Authorization URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authUrl:
+                    type: string
+                    format: uri
+                    description: Google OAuth2 authorization URL
+                example:
+                  authUrl: "https://accounts.google.com/o/oauth2/v2/auth?client_id=..."
+        "400":
+          description: Google Calendar integration not enabled
+        "401":
+          description: Not authenticated
+
+  /calendar/google/callback:
+    get:
+      tags: [Calendar]
+      summary: Google Calendar OAuth callback
+      description: >
+        Handles the OAuth2 callback from Google Calendar. Exchanges the authorization
+        code for access and refresh tokens, then stores them for the user. This endpoint
+        is called by Google after user grants calendar permissions.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Authorization code from Google OAuth2
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+          description: User ID passed as state parameter
+      responses:
+        "200":
+          description: Successfully connected to Google Calendar
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: true
+                  message: "Google Calendar connected successfully"
+        "400":
+          description: Invalid authorization code
+        "401":
+          description: Not authenticated
+
+  /calendar/google/sync:
+    post:
+      tags: [Calendar]
+      summary: Sync events with Google Calendar
+      description: >
+        Imports events from user's Google Calendar into the Milokhelo backend calendar.
+        Fetches events within a specified time range and creates corresponding events
+        in the backend. Requires Google Calendar to be connected first.
+      security:
+        - cookieAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timeMin:
+                  type: string
+                  format: date-time
+                  description: Start time for events to import (optional, defaults to now)
+                timeMax:
+                  type: string
+                  format: date-time
+                  description: End time for events to import (optional, defaults to 30 days from now)
+            examples:
+              default:
+                summary: Default sync (next 30 days)
+                value: {}
+              custom_range:
+                summary: Custom time range
+                value:
+                  timeMin: "2025-10-30T00:00:00Z"
+                  timeMax: "2025-12-31T23:59:59Z"
+      responses:
+        "200":
+          description: Events imported successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  importedCount:
+                    type: integer
+                    description: Number of events imported from Google Calendar
+                  events:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+                example:
+                  success: true
+                  message: "Imported 5 events from Google Calendar"
+                  importedCount: 5
+                  events: []
+        "400":
+          description: Google Calendar not connected or sync failed
+        "401":
+          description: Not authenticated
+
+  /calendar/google/disconnect:
+    delete:
+      tags: [Calendar]
+      summary: Disconnect Google Calendar integration
+      description: >
+        Removes Google Calendar access tokens for the user, disconnecting the integration.
+        User will need to re-authorize to sync with Google Calendar again.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Google Calendar disconnected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: true
+                  message: "Google Calendar disconnected successfully"
+        "401":
+          description: Not authenticated
+
   ################################################################
   # NOTIFICATIONS                                                  #
   ################################################################
@@ -1605,25 +1857,159 @@ paths:
         "200":
           description: Marked read
 
+  /notifications/unread/count:
+    get:
+      tags: [Notifications]
+      summary: Get unread notifications count
+      description: Returns the count of unread notifications for the authenticated user
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Unread count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of unread notifications
+                example:
+                  count: 5
+        "401":
+          description: Not authenticated
+
+  /notifications/read-all:
+    patch:
+      tags: [Notifications]
+      summary: Mark all notifications as read
+      description: Marks all unread notifications as read for the authenticated user
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: All notifications marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  modifiedCount:
+                    type: integer
+                    description: Number of notifications marked as read
+                example:
+                  success: true
+                  message: "All notifications marked as read"
+                  modifiedCount: 5
+        "401":
+          description: Not authenticated
+
   /notifications/push-token:
     post:
       tags: [Notifications]
-      summary: Register device push token
+      summary: Register device push token for push notifications
+      description: >
+        Registers a device token (FCM for Android/Web, APNS for iOS) to receive
+        push notifications. The system supports Firebase Cloud Messaging (FCM) for
+        Android and Web platforms, and Apple Push Notification Service (APNS) for iOS.
+        Users can register multiple devices.
       security:
         - cookieAuth: []
       requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeviceTokenRegister"
+            examples:
+              ios:
+                summary: iOS device registration
+                value:
+                  token: "apns-token-here-64-chars-hex"
+                  platform: "ios"
+                  deviceName: "iPhone 14 Pro"
+              android:
+                summary: Android device registration
+                value:
+                  token: "fcm-token-here-152-chars"
+                  platform: "android"
+                  deviceName: "Samsung Galaxy S23"
+              web:
+                summary: Web browser registration
+                value:
+                  token: "fcm-web-token-here-152-chars"
+                  platform: "web"
+                  deviceName: "Chrome on MacBook"
+      responses:
+        "201":
+          description: Device token registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  deviceId:
+                    type: string
+                    description: Unique identifier for the registered device
+                example:
+                  success: true
+                  message: "Device token registered successfully"
+                  deviceId: "device123abc"
+        "400":
+          description: Invalid token or platform
+        "401":
+          description: Not authenticated
+    delete:
+      tags: [Notifications]
+      summary: Unregister device push token
+      description: >
+        Removes a device token from receiving push notifications. This should be called
+        when the user logs out or when the app is uninstalled.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required: [token]
               properties:
-                token: { type: string }
-                platform:
+                token:
                   type: string
-                  enum: [ios, android]
+                  description: The device token to unregister
+            example:
+              token: "fcm-or-apns-token-here"
       responses:
-        "201":
-          description: Token registered
+        "200":
+          description: Device token unregistered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: true
+                  message: "Device token unregistered successfully"
+        "400":
+          description: Invalid request
+        "401":
+          description: Not authenticated
+        "404":
+          description: Token not found
 
   ################################################################
   # INVITATIONS                                                    #
@@ -2635,6 +3021,31 @@ components:
         readAt: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
         expiresAt: { type: string, format: date-time }
+
+    DeviceTokenRegister:
+      type: object
+      description: >
+        Device token registration payload for push notifications. Supports FCM
+        (Firebase Cloud Messaging) for Android and Web, and APNS (Apple Push 
+        Notification Service) for iOS.
+      required: [token, platform]
+      properties:
+        token:
+          type: string
+          description: >
+            The device-specific push token. For iOS this is the APNS token (64 hex chars),
+            for Android/Web this is the FCM registration token (152+ chars).
+          example: "fcm-registration-token-or-apns-token-here"
+        platform:
+          type: string
+          enum: [ios, android, web]
+          description: >
+            Device platform. 'ios' uses APNS, 'android' and 'web' use FCM.
+          example: "android"
+        deviceName:
+          type: string
+          description: Optional human-readable device name for identification
+          example: "iPhone 14 Pro"
 
     InvitationCreate:
       type: object
