@@ -233,7 +233,6 @@ export function requireOwnership(getResourceUserId) {
  */
 export function hasRole(user, roles) {
   if (!user) return false;
-  
   const rolesToCheck = Array.isArray(roles) ? roles : [roles];
   const userRoles = user.roles || ['user'];
   return rolesToCheck.some((role) => userRoles.includes(role));
@@ -247,7 +246,6 @@ export function hasRole(user, roles) {
  */
 export function hasPermission(user, permission) {
   if (!user) return false;
-  
   const userRoles = user.roles || ['user'];
   const allowedRoles = PERMISSIONS[permission];
   
