@@ -50,7 +50,7 @@ src/
 ## 🚀 Features
 
 - ✅ **14 Complete Modules**: Auth, Users, Teams, Matches, Tournaments, Chat, Venues, Maps, Calendar, Notifications, Invitations, Feedback, Admin
-- ✅ **Hybrid OAuth**: Google & Facebook OAuth + Email/Password authentication
+- ✅ **OAuth Authentication**: Full Google & Facebook OAuth 2.0 with Passport.js + Email/Password authentication
 - ✅ **Session Management**: HTTP-only cookies with Redis store
 - ✅ **Real-time Chat**: WebSocket support with Socket.IO
 - ✅ **Geo-spatial Search**: Find nearby venues with 2dsphere indexes
@@ -97,12 +97,16 @@ Key environment variables:
 JWT_SECRET=your-jwt-secret-here
 SESSION_SECRET=your-session-secret-here
 
-# OAuth (optional - for hybrid OAuth)
+# OAuth Configuration (Google & Facebook)
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 FACEBOOK_APP_ID=your-facebook-app-id
 FACEBOOK_APP_SECRET=your-facebook-app-secret
+OAUTH_CALLBACK_URL=http://localhost:4000/api/v1/auth/oauth/callback
+FRONTEND_URL=http://localhost:3000
 ```
+
+> **📖 For detailed OAuth setup instructions, see [`docs/OAUTH_SETUP.md`](docs/OAUTH_SETUP.md)**
 
 4. **Start infrastructure services (MongoDB & Redis)**
 
@@ -154,8 +158,10 @@ The Milokhelo backend provides 70+ API endpoints across 14 modules:
 ### 🔐 Authentication (`/api/v1/auth`)
 
 - `GET /providers` - List available OAuth providers
-- `GET /oauth/url` - Get OAuth authorization URL
-- `POST /oauth/callback` - Handle OAuth callback
+- `GET /oauth/google` - Initiate Google OAuth flow
+- `GET /oauth/facebook` - Initiate Facebook OAuth flow
+- `GET /oauth/callback/google` - Google OAuth callback
+- `GET /oauth/callback/facebook` - Facebook OAuth callback
 - `GET /session` - Get current session
 - `POST /logout` - Logout user
 - `POST /register` - Register with email/password
@@ -344,10 +350,17 @@ modules/[module-name]/
 
 All project documentation is organized in the `docs/` directory:
 
+### Core Documentation
+
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - System architecture and design patterns
 - [`docs/QUICKSTART.md`](docs/QUICKSTART.md) - Quick start guide for developers
 - [`docs/CODEBASE_ANALYSIS.md`](docs/CODEBASE_ANALYSIS.md) - Comprehensive codebase analysis
 - [`docs/IMPROVEMENTS.md`](docs/IMPROVEMENTS.md) - Improvement tracking and technical debt
+
+### Authentication Documentation
+
+- [`docs/OAUTH_SETUP.md`](docs/OAUTH_SETUP.md) - Complete OAuth setup guide (Google & Facebook)
+- [`docs/OAUTH_IMPLEMENTATION.md`](docs/OAUTH_IMPLEMENTATION.md) - OAuth implementation details and architecture
 
 ## 🔌 EventBus
 

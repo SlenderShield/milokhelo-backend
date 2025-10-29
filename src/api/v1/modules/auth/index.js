@@ -4,7 +4,7 @@
  */
 import { IAuthRepository } from './domain/index.js';
 import { AuthService } from './application/index.js';
-import { UserModel, AuthRepository, AuthController, createAuthRoutes } from './infrastructure/index.js';
+import { UserModel, AuthRepository, AuthController, createAuthRoutes, PassportConfig } from './infrastructure/index.js';
 
 /**
  * Initialize the Auth module
@@ -32,6 +32,13 @@ function initializeAuthModule(container) {
     return new AuthController(service, logger);
   });
 
+  // Register and initialize Passport
+  container.registerSingleton('passport', () => {
+    const service = container.resolve('authService');
+    const passportConfig = new PassportConfig(service, logger, config);
+    return passportConfig.initialize();
+  });
+
   logger.info('Auth module initialized');
 }
 
@@ -42,5 +49,6 @@ export {
   AuthRepository,
   AuthController,
   createAuthRoutes,
+  PassportConfig,
   initializeAuthModule,
 };

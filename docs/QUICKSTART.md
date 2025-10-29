@@ -52,15 +52,16 @@ REDIS_PORT=6379
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 SESSION_SECRET=your-super-secret-session-key-change-in-production
 
-# OAuth (Get credentials from respective providers)
+# OAuth Configuration (optional - see docs/OAUTH_SETUP.md for setup)
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_CALLBACK_URL=http://localhost:4000/api/v1/auth/oauth/callback
-
 FACEBOOK_APP_ID=your-facebook-app-id
 FACEBOOK_APP_SECRET=your-facebook-app-secret
-FACEBOOK_CALLBACK_URL=http://localhost:4000/api/v1/auth/oauth/callback
+OAUTH_CALLBACK_URL=http://localhost:4000/api/v1/auth/oauth/callback
+FRONTEND_URL=http://localhost:3000
 ```
+
+> **📖 For detailed OAuth setup (Google & Facebook), see [`OAUTH_SETUP.md`](./OAUTH_SETUP.md)**
 
 ### 4. Start Infrastructure Services
 
@@ -119,7 +120,7 @@ Visit <http://localhost:4000/docs> in your browser to explore all 70+ API endpoi
 
 ### Test Milokhelo API
 
-#### Register a User
+#### Register a User (Email/Password)
 
 ```bash
 curl -X POST http://localhost:4000/api/v1/auth/register \
@@ -132,7 +133,23 @@ curl -X POST http://localhost:4000/api/v1/auth/register \
   }'
 ```
 
-#### Login
+#### OAuth Login (Browser Required)
+
+For Google OAuth:
+```bash
+# Open in browser
+http://localhost:4000/api/v1/auth/oauth/google
+```
+
+For Facebook OAuth:
+```bash
+# Open in browser
+http://localhost:4000/api/v1/auth/oauth/facebook
+```
+
+> **💡 Tip:** See [`OAUTH_SETUP.md`](./OAUTH_SETUP.md) for complete OAuth configuration guide.
+
+#### Login (Email/Password)
 
 ```bash
 curl -X POST http://localhost:4000/api/v1/auth/login \

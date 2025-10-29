@@ -13,12 +13,17 @@ This directory contains all permanent project documentation.
 ### Development Guides
 
 - **QUICKSTART.md** - Quick start guide for developers
-- **LOGGING.md** - Complete logging system documentation and best practices
 - **IMPROVEMENTS.md** - Improvement tracking and technical debt
+
+### Authentication
+
+- **OAUTH_SETUP.md** - Complete OAuth setup guide for Google and Facebook
+- **OAUTH_IMPLEMENTATION.md** - OAuth implementation details and architecture
 
 ### API Documentation
 
-(Add API documentation here as the project grows)
+- **openapi.yaml** - OpenAPI 3.1 specification
+- View interactive docs at `/docs` when server is running
 
 ### Contributing
 

@@ -30,8 +30,24 @@ async function createApp(config, logger, container) {
   app.use(configureHelmet());
   app.use(configureCORS(config));
 
-  // Session middleware (for cookie-based auth)
+  // Session middleware (for cookie-based auth) - MUST be before passport
   app.use(createSessionMiddleware(config, logger));
+
+  // Initialize Passport (if available)
+  try {
+    const passport = container.resolve('passport');
+    app.use(passport.initialize());
+    app.use(passport.session());
+    logger.info('Passport authentication initialized');
+    
+    // Inject passport into auth controller
+    const authController = container.resolve('authController');
+    if (authController && typeof authController.setPassport === 'function') {
+      authController.setPassport(passport);
+    }
+  } catch (error) {
+    logger.warn('Passport not initialized', { error: error.message });
+  }
 
   // Rate limiting
   if (config.get('security.enableRateLimit') !== false) {

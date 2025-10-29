@@ -6,9 +6,17 @@ import { asyncHandler } from '../../../../../../common/utils/index.js';
 import { HTTP_STATUS } from '../../../../../../common/constants/index.js';
 
 class AuthController {
-  constructor(authService, logger) {
+  constructor(authService, logger, passport = null) {
     this.authService = authService;
     this.logger = logger.child({ context: 'AuthController' });
+    this.passport = passport;
+  }
+
+  /**
+   * Set passport instance (for dependency injection after construction)
+   */
+  setPassport(passport) {
+    this.passport = passport;
   }
 
   /**
@@ -20,12 +28,12 @@ class AuthController {
         {
           name: 'google',
           displayName: 'Google',
-          authorizationUrl: '/api/v1/auth/oauth/url?provider=google',
+          authorizationUrl: '/api/v1/auth/oauth/google',
         },
         {
           name: 'facebook',
           displayName: 'Facebook',
-          authorizationUrl: '/api/v1/auth/oauth/url?provider=facebook',
+          authorizationUrl: '/api/v1/auth/oauth/facebook',
         },
       ];
 
@@ -34,40 +42,99 @@ class AuthController {
   }
 
   /**
-   * GET /auth/oauth/url - Get OAuth authorization URL
+   * GET /auth/oauth/google - Initiate Google OAuth
    */
-  getOAuthUrl() {
-    return asyncHandler(async (req, res) => {
-      const { provider } = req.query;
+  initiateGoogleOAuth() {
+    if (!this.passport) {
+      return asyncHandler(async (_req, res) => {
+        res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json({
+          error: 'OAuth not configured',
+        });
+      });
+    }
 
-      // TODO: Generate actual OAuth URL with passport
-      const url = `https://oauth.${provider}.com/authorize?redirect_uri=${encodeURIComponent(
-        process.env.OAUTH_REDIRECT_URI || 'http://localhost:4000/api/v1/auth/oauth/callback'
-      )}`;
-
-      res.status(HTTP_STATUS.OK).json({ url });
+    return this.passport.authenticate('google', {
+      scope: ['profile', 'email'],
     });
   }
 
   /**
-   * GET /auth/oauth/callback - OAuth callback handler
+   * GET /auth/oauth/facebook - Initiate Facebook OAuth
    */
-  handleOAuthCallback() {
-    return asyncHandler(async (req, res) => {
-      // In real implementation, passport middleware would handle this
-      // and attach user to req.user
-      const user = req.user;
+  initiateFacebookOAuth() {
+    if (!this.passport) {
+      return asyncHandler(async (_req, res) => {
+        res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json({
+          error: 'OAuth not configured',
+        });
+      });
+    }
 
-      if (!user) {
-        return res.redirect('/login?error=oauth_failed');
-      }
-
-      // Set session
-      req.session.userId = user.id;
-
-      // Redirect to frontend
-      res.redirect(process.env.FRONTEND_URL || 'http://localhost:3000');
+    return this.passport.authenticate('facebook', {
+      scope: ['email', 'public_profile'],
     });
+  }
+
+  /**
+   * GET /auth/oauth/callback/google - Google OAuth callback
+   */
+  handleGoogleCallback() {
+    if (!this.passport) {
+      return asyncHandler(async (_req, res) => {
+        res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json({
+          error: 'OAuth not configured',
+        });
+      });
+    }
+
+    return [
+      this.passport.authenticate('google', {
+        failureRedirect: '/login?error=oauth_failed',
+        session: true,
+      }),
+      asyncHandler(async (req, res) => {
+        // User is now in req.user thanks to passport
+        const user = req.user;
+
+        // Set session
+        req.session.userId = user.id;
+
+        // Redirect to frontend
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        res.redirect(`${frontendUrl}/auth/success?user=${encodeURIComponent(JSON.stringify(user))}`);
+      }),
+    ];
+  }
+
+  /**
+   * GET /auth/oauth/callback/facebook - Facebook OAuth callback
+   */
+  handleFacebookCallback() {
+    if (!this.passport) {
+      return asyncHandler(async (_req, res) => {
+        res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json({
+          error: 'OAuth not configured',
+        });
+      });
+    }
+
+    return [
+      this.passport.authenticate('facebook', {
+        failureRedirect: '/login?error=oauth_failed',
+        session: true,
+      }),
+      asyncHandler(async (req, res) => {
+        // User is now in req.user thanks to passport
+        const user = req.user;
+
+        // Set session
+        req.session.userId = user.id;
+
+        // Redirect to frontend
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        res.redirect(`${frontendUrl}/auth/success?user=${encodeURIComponent(JSON.stringify(user))}`);
+      }),
+    ];
   }
 
   /**
