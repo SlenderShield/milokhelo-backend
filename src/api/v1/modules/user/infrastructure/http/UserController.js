@@ -1,8 +1,7 @@
 /**
  * User Controller
  */
-import { HTTP_STATUS } from '../../../../../core/http/index.js';
-import asyncHandler from '../../../../../core/http/middlewares/asyncHandler.js';
+import { asyncHandler, HTTP_STATUS } from '../../../../../core/http/index.js';
 
 class UserController {
   constructor(userService, logger) {

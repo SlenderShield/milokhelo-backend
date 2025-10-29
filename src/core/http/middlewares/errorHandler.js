@@ -3,10 +3,31 @@
  * Handles all errors in the application
  */
 import { HTTP_STATUS, ERROR_CODES } from '../../../common/constants/index.js';
+import { BookingConflictError } from '../errors/BookingConflictError.js';
 
 function errorHandler(logger, config) {
   // eslint-disable-next-line no-unused-vars
   return (err, req, res, next) => {
+    // Handle BookingConflictError specifically
+    if (err instanceof BookingConflictError) {
+      logger.warn('Booking conflict detected', {
+        error: err.message,
+        conflictingBookings: err.conflictingBookings,
+        url: req.url,
+        method: req.method,
+      });
+
+      return res.status(HTTP_STATUS.CONFLICT).json({
+        success: false,
+        error: {
+          code: 'BOOKING_CONFLICT',
+          message: err.message,
+          conflictingBookings: err.conflictingBookings,
+        },
+      });
+    }
+
+    // Log all other errors
     logger.error('Unhandled error', {
       error: err.message,
       stack: err.stack,

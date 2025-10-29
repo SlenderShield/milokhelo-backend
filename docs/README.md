@@ -1,51 +1,120 @@
 # 📚 Documentation
 
-This directory contains all permanent project documentation.
+This directory contains all permanent project documentation, organized into logical subdirectories for better maintainability.
 
-## Contents
+## 📂 Directory Structure
 
-### Architecture & Design
+```
+docs/
+├── architecture/       # System design and architecture
+├── guides/            # Development guides and references
+├── features/          # Feature-specific documentation
+├── api/              # API specifications and updates
+└── README.md         # This file
+```
 
-- **ARCHITECTURE.md** - System architecture and design patterns
-- **CODEBASE_ANALYSIS.md** - Comprehensive codebase analysis
-- **RESTRUCTURING.md** - Codebase restructuring documentation and migration guide
+## 📖 Contents
 
-### Development Guides
+### 🏗️ Architecture (`architecture/`)
 
-- **QUICKSTART.md** - Quick start guide for developers
-- **IMPROVEMENTS.md** - Improvement tracking and technical debt
+System design, architecture patterns, and historical context:
 
-### Feature Documentation
+- **[ARCHITECTURE.md](architecture/ARCHITECTURE.md)** - System architecture and design patterns
+- **[CODEBASE_ANALYSIS.md](architecture/CODEBASE_ANALYSIS.md)** - Comprehensive codebase analysis (historical)
+- **[REFACTORING_HISTORY.md](architecture/REFACTORING_HISTORY.md)** - Complete refactoring history (Phase 1 & Phase 2)
+- **[RESTRUCTURING.md](architecture/RESTRUCTURING.md)** - Codebase restructuring documentation and migration guide
 
-- **BRACKET_GENERATION.md** - Tournament bracket generation system (knockout & league)
-- **STATS_AUTO_UPDATE.md** - Automatic stats updates on match completion
-- **ACHIEVEMENTS.md** - Achievement system with automatic evaluation and criteria types
+### 📚 Development Guides (`guides/`)
 
-### Authentication
+Getting started, development patterns, and best practices:
 
-- **OAUTH_SETUP.md** - Complete OAuth setup guide for Google and Facebook
-- **OAUTH_IMPLEMENTATION.md** - OAuth implementation details and architecture
+- **[QUICKSTART.md](guides/QUICKSTART.md)** - Quick start guide for new developers
+- **[DEVELOPMENT_GUIDELINES.md](guides/DEVELOPMENT_GUIDELINES.md)** - Complete development guidelines and patterns
+- **[QUICK_REFERENCE.md](guides/QUICK_REFERENCE.md)** - Quick reference for common patterns
+- **[IMPROVEMENTS.md](guides/IMPROVEMENTS.md)** - Improvement tracking and technical debt
 
-### API Documentation
+**👉 Start here:** If you're new to the project, begin with [QUICKSTART.md](guides/QUICKSTART.md)
 
-- **openapi.yaml** - OpenAPI 3.1 specification
-- View interactive docs at `/docs` when server is running
+### ✨ Feature Documentation (`features/`)
 
-### Contributing
+Detailed documentation for specific features and implementations:
 
-(Add contribution guidelines here)
+**Tournaments & Matches:**
+- **[BRACKET_GENERATION.md](features/BRACKET_GENERATION.md)** - Tournament bracket generation (knockout & league)
+- **[STATS_AUTO_UPDATE.md](features/STATS_AUTO_UPDATE.md)** - Automatic stats updates on match completion
+- **[ACHIEVEMENTS.md](features/ACHIEVEMENTS.md)** - Achievement system with auto-evaluation
+- **[ACHIEVEMENT_IMPLEMENTATION_SUMMARY.md](features/ACHIEVEMENT_IMPLEMENTATION_SUMMARY.md)** - Implementation details
 
-## Organization Rules
+**Venue Bookings:**
+- **[BOOKING_CONFLICT_PREVENTION.md](features/BOOKING_CONFLICT_PREVENTION.md)** - Atomic booking with transactions
+- **[BOOKING_QUICK_REFERENCE.md](features/BOOKING_QUICK_REFERENCE.md)** - Quick reference guide
+- **[BOOKING_IMPLEMENTATION_CHECKLIST.md](features/BOOKING_IMPLEMENTATION_CHECKLIST.md)** - Implementation checklist
+- **[BOOKING_CONFLICT_IMPLEMENTATION_SUMMARY.md](features/BOOKING_CONFLICT_IMPLEMENTATION_SUMMARY.md)** - Summary
+
+**Authentication:**
+- **[OAUTH_SETUP.md](features/OAUTH_SETUP.md)** - Complete OAuth setup guide (Google & Facebook)
+- **[OAUTH_IMPLEMENTATION.md](features/OAUTH_IMPLEMENTATION.md)** - OAuth implementation details
+
+### 🔌 API Documentation (`api/`)
+
+API specifications and documentation updates:
+
+- **[openapi.yaml](api/openapi.yaml)** - OpenAPI 3.1 specification with 70+ endpoints
+- **[DOCUMENTATION_UPDATE.md](api/DOCUMENTATION_UPDATE.md)** - API documentation update history
+
+**👉 View interactive docs:** Run the server and visit `/docs` endpoint
+
+## 📋 Organization Rules
 
 - Keep documentation **up-to-date** with code changes
-- Use **clear headings and structure**
+- Use **clear headings and structure** for readability
 - Include **code examples** where appropriate
-- Link between related documents
+- **Link between related documents** using relative paths
 - Review and update after major refactors
+- Place new docs in the appropriate subdirectory
 
-## Temporary Documentation
+### Adding New Documentation
+
+When adding new documentation:
+
+1. **Architecture docs** → `architecture/` - System design, patterns, refactoring history
+2. **Development guides** → `guides/` - Tutorials, guidelines, references
+3. **Feature docs** → `features/` - Feature-specific implementations and guides
+4. **API docs** → `api/` - API specifications and related updates
+
+## 🔄 Documentation Status
+
+**Last Major Update**: October 29, 2025
+
+**Recent Changes**:
+- ✅ **Reorganized into subdirectories** - Better navigation and organization
+- ✅ Removed overlapping documentation (MODULE_REFACTORING.md, MODULE_REORGANIZATION.md, CODEBASE_REFACTORING_PLAN.md)
+- ✅ Consolidated refactoring history into single REFACTORING_HISTORY.md
+- ✅ Updated ARCHITECTURE.md to reflect module independence (no shared/additional directories)
+- ✅ Enhanced OpenAPI spec with event-driven stats update details
+- ✅ Added comprehensive development guidelines and quick reference
+
+## 📁 File Organization
+
+### Subdirectory Purposes
+
+- **`architecture/`** - High-level system design, architecture patterns, and historical context
+- **`guides/`** - Practical guides for developers (getting started, patterns, references)
+- **`features/`** - Deep dives into specific features (tournaments, bookings, OAuth, achievements)
+- **`api/`** - API specifications (OpenAPI) and API documentation updates
+
+### Temporary Documentation
 
 For scratch work or temporary outputs, use `temp_docs/` instead.
+
+---
+
+## 🔍 Quick Links
+
+**New Developer?** Start with [guides/QUICKSTART.md](guides/QUICKSTART.md)  
+**Understanding the System?** Read [architecture/ARCHITECTURE.md](architecture/ARCHITECTURE.md)  
+**Need API Reference?** Check [api/openapi.yaml](api/openapi.yaml)  
+**Working on a Feature?** Browse [features/](features/) directory
 
 ---
 

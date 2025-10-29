@@ -1,8 +1,7 @@
 /**
  * Team Controller
  */
-import { asyncHandler } from '../../../../../../common/utils/index.js';
-import { HTTP_STATUS } from '../../../../../../common/constants/index.js';
+import { asyncHandler, HTTP_STATUS } from '../../../../../../core/http/index.js';
 
 class TeamController {
   constructor(teamService, logger) {

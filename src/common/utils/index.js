@@ -1,17 +1,10 @@
 /**
  * Utility Functions
  * Common helper functions used across the application
+ * 
+ * Note: asyncHandler has been moved to /src/core/http/middlewares/asyncHandler.js
+ * Import it from there or from /src/core/http/index.js
  */
-
-/**
- * Async error handler wrapper for Express routes
- * @param {Function} fn - Async function to wrap
- */
-function asyncHandler(fn) {
-  return (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-  };
-}
 
 /**
  * Delay execution for specified milliseconds
@@ -90,4 +83,4 @@ async function retry(fn, maxRetries = 3, baseDelay = 1000) {
   throw lastError;
 }
 
-export { asyncHandler, delay, isEmpty, deepClone, pick, omit, retry };
+export { delay, isEmpty, deepClone, pick, omit, retry };

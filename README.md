@@ -55,6 +55,7 @@ src/
 - ✅ **Tournament Brackets**: Automatic bracket generation for knockout and league tournaments
 - ✅ **Stats Auto-Update**: Event-driven automatic stats updates on match completion (ELO, streaks, performance metrics)
 - ✅ **Achievement System**: Automatic achievement evaluation with 31 predefined achievements (milestones, skills, participation)
+- ✅ **Booking Conflict Prevention**: Atomic venue bookings with MongoDB transactions and optimistic locking
 - ✅ **Real-time Chat**: WebSocket support with Socket.IO
 - ✅ **Geo-spatial Search**: Find nearby venues with 2dsphere indexes
 - ✅ **70+ API Endpoints**: Complete REST API with Swagger documentation
@@ -109,7 +110,7 @@ OAUTH_CALLBACK_URL=http://localhost:4000/api/v1/auth/oauth/callback
 FRONTEND_URL=http://localhost:3000
 ```
 
-> **📖 For detailed OAuth setup instructions, see [`docs/OAUTH_SETUP.md`](docs/OAUTH_SETUP.md)**
+> **📖 For detailed OAuth setup instructions, see [`docs/features/OAUTH_SETUP.md`](docs/features/OAUTH_SETUP.md)**
 
 4. **Start infrastructure services (MongoDB & Redis)**
 
@@ -238,7 +239,7 @@ The Milokhelo backend provides 70+ API endpoints across 14 modules:
 - ✅ Real-time standings and progression
 - ✅ Winner advancement and elimination tracking
 
-> **📖 For detailed bracket documentation, see [`docs/BRACKET_GENERATION.md`](docs/BRACKET_GENERATION.md)**
+> **📖 For detailed bracket documentation, see [`docs/features/BRACKET_GENERATION.md`](docs/features/BRACKET_GENERATION.md)**
 
 ### 💬 Chat (`/api/v1/chat`)
 
@@ -359,7 +360,7 @@ Configuration is managed through environment variables. See `.env.example` for a
 
 ## 📦 Module Structure
 
-Each module follows the same clean architecture pattern:
+Each module follows the same clean architecture pattern with **complete ownership** of its persistence layer:
 
 ```
 modules/[module-name]/
@@ -369,37 +370,59 @@ modules/[module-name]/
 ├── application/         # Application logic layer
 │   └── Service.js      # Business services
 └── infrastructure/      # Technical implementation
-    ├── Model.js        # Database model
-    ├── Repository.js   # Repository implementation
-    ├── Controller.js   # HTTP controllers
-    ├── Routes.js       # Route definitions
-    └── index.js        # Module exports
+    ├── persistence/    # Data access layer (module-owned)
+    │   ├── Model.js    # Mongoose schemas and models
+    │   └── Repository.js   # Repository implementation
+    ├── http/           # HTTP layer
+    │   ├── Controller.js   # HTTP controllers
+    │   └── Routes.js       # Route definitions
+    └── index.js        # Module exports and initialization
 ```
 
-> **📖 For detailed architecture guidelines, see [`.copilot-rules.md`](.copilot-rules.md)**
+**Key Principle**: Each module owns its complete domain including all models - no shared persistence layer. This ensures true module independence and supports future microservices migration.
+
+> **📖 For detailed architecture guidelines, see [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) and [`docs/guides/DEVELOPMENT_GUIDELINES.md`](docs/guides/DEVELOPMENT_GUIDELINES.md)**
 
 ## 📚 Documentation
 
-All project documentation is organized in the `docs/` directory:
+All project documentation is organized in the `docs/` directory with logical subdirectories:
 
-### Core Documentation
+```
+docs/
+├── architecture/       # System design and architecture
+├── guides/            # Development guides and references
+├── features/          # Feature-specific documentation
+└── api/              # API specifications
+```
 
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - System architecture and design patterns
-- [`docs/QUICKSTART.md`](docs/QUICKSTART.md) - Quick start guide for developers
-- [`docs/CODEBASE_ANALYSIS.md`](docs/CODEBASE_ANALYSIS.md) - Comprehensive codebase analysis
-- [`docs/IMPROVEMENTS.md`](docs/IMPROVEMENTS.md) - Improvement tracking and technical debt
+### 🏗️ Architecture & Design
 
-### Feature Documentation
+- [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) - System architecture and design patterns
+- [`docs/architecture/REFACTORING_HISTORY.md`](docs/architecture/REFACTORING_HISTORY.md) - Complete refactoring history
+- [`docs/architecture/CODEBASE_ANALYSIS.md`](docs/architecture/CODEBASE_ANALYSIS.md) - Comprehensive codebase analysis (historical)
 
-- [`docs/BRACKET_GENERATION.md`](docs/BRACKET_GENERATION.md) - Tournament bracket generation system
-- [`docs/STATS_AUTO_UPDATE.md`](docs/STATS_AUTO_UPDATE.md) - Stats auto-update system documentation
-- [`docs/ACHIEVEMENTS.md`](docs/ACHIEVEMENTS.md) - Achievement system documentation and criteria
-- [`docs/OAUTH_SETUP.md`](docs/OAUTH_SETUP.md) - Complete OAuth setup guide (Google & Facebook)
-- [`docs/OAUTH_IMPLEMENTATION.md`](docs/OAUTH_IMPLEMENTATION.md) - OAuth implementation details and architecture
+### 📚 Development Guides
 
-### API Documentation
+- [`docs/guides/QUICKSTART.md`](docs/guides/QUICKSTART.md) - **Start here!** Quick start guide for new developers
+- [`docs/guides/DEVELOPMENT_GUIDELINES.md`](docs/guides/DEVELOPMENT_GUIDELINES.md) - Complete development guidelines
+- [`docs/guides/QUICK_REFERENCE.md`](docs/guides/QUICK_REFERENCE.md) - Quick reference for common patterns
+- [`docs/guides/IMPROVEMENTS.md`](docs/guides/IMPROVEMENTS.md) - Improvement tracking and technical debt
 
-- [`docs/openapi.yaml`](docs/openapi.yaml) - Complete OpenAPI 3.1 specification with all endpoints and schemas
+### ✨ Feature Documentation
+
+- [`docs/features/BRACKET_GENERATION.md`](docs/features/BRACKET_GENERATION.md) - Tournament bracket generation system
+- [`docs/features/STATS_AUTO_UPDATE.md`](docs/features/STATS_AUTO_UPDATE.md) - Stats auto-update system
+- [`docs/features/ACHIEVEMENTS.md`](docs/features/ACHIEVEMENTS.md) - Achievement system with criteria
+- [`docs/features/BOOKING_CONFLICT_PREVENTION.md`](docs/features/BOOKING_CONFLICT_PREVENTION.md) - Atomic booking system
+- [`docs/features/BOOKING_QUICK_REFERENCE.md`](docs/features/BOOKING_QUICK_REFERENCE.md) - Booking quick reference
+- [`docs/features/OAUTH_SETUP.md`](docs/features/OAUTH_SETUP.md) - OAuth setup guide (Google & Facebook)
+- [`docs/features/OAUTH_IMPLEMENTATION.md`](docs/features/OAUTH_IMPLEMENTATION.md) - OAuth implementation details
+
+### 🔌 API Documentation
+
+- [`docs/api/openapi.yaml`](docs/api/openapi.yaml) - Complete OpenAPI 3.1 specification with 70+ endpoints
+
+> **📖 Full documentation index:** See [`docs/README.md`](docs/README.md)
 
 ## 🔌 EventBus
 

@@ -18,14 +18,12 @@ import { initializeMatchModule } from './api/v1/modules/match/index.js';
 import { initializeTournamentModule } from './api/v1/modules/tournament/index.js';
 import { initializeChatModule } from './api/v1/modules/chat/index.js';
 import { initializeVenueModule } from './api/v1/modules/venue/index.js';
-import {
-  initializeMapsModule,
-  initializeCalendarModule,
-  initializeNotificationModule,
-  initializeInvitationModule,
-  initializeFeedbackModule,
-  initializeAdminModule,
-} from './api/v1/modules/additional/index.js';
+import { initializeMapsModule } from './api/v1/modules/maps/index.js';
+import { initializeCalendarModule } from './api/v1/modules/calendar/index.js';
+import { initializeNotificationModule } from './api/v1/modules/notification/index.js';
+import { initializeInvitationModule } from './api/v1/modules/invitation/index.js';
+import { initializeFeedbackModule } from './api/v1/modules/feedback/index.js';
+import { initializeAdminModule } from './api/v1/modules/admin/index.js';
 
 async function bootstrap() {
   // 1. Load configuration

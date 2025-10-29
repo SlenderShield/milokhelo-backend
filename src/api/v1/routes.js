@@ -11,14 +11,12 @@ import { createMatchRoutes } from './modules/match/index.js';
 import { createTournamentRoutes } from './modules/tournament/infrastructure/http/TournamentController.js';
 import { createChatRoutes } from './modules/chat/index.js';
 import { createVenueRoutes, createVenueManagementRoutes } from './modules/venue/index.js';
-import {
-  createMapsRoutes,
-  createCalendarRoutes,
-  createNotificationRoutes,
-  createInvitationRoutes,
-  createFeedbackRoutes,
-  createAdminRoutes,
-} from './modules/additional/index.js';
+import { initializeNotificationModule, createNotificationRoutes } from './modules/notification/index.js';
+import { initializeMapsModule, createMapsRoutes } from './modules/maps/index.js';
+import { initializeCalendarModule, createCalendarRoutes } from './modules/calendar/index.js';
+import { initializeInvitationModule, createInvitationRoutes } from './modules/invitation/index.js';
+import { initializeFeedbackModule, createFeedbackRoutes } from './modules/feedback/index.js';
+import { initializeAdminModule, createAdminRoutes } from './modules/admin/index.js';
 
 /**
  * Create API v1 router with all module routes
@@ -61,27 +59,33 @@ export function createV1Router(container) {
   router.use('/venues', createVenueRoutes(venueController));
   router.use('/venue-management', createVenueManagementRoutes(venueController));
 
-  // Maps routes
+  // Initialize and use Maps module
+  initializeMapsModule(container);
   const mapsController = container.resolve('mapsController');
   router.use('/maps', createMapsRoutes(mapsController));
 
-  // Calendar routes
+  // Initialize and use Calendar module
+  initializeCalendarModule(container);
   const calendarController = container.resolve('calendarController');
   router.use('/calendar', createCalendarRoutes(calendarController));
 
-  // Notification routes
+  // Initialize and use Notification module
+  initializeNotificationModule(container);
   const notificationController = container.resolve('notificationController');
   router.use('/notifications', createNotificationRoutes(notificationController));
 
-  // Invitation routes
+  // Initialize and use Invitation module
+  initializeInvitationModule(container);
   const invitationController = container.resolve('invitationController');
   router.use('/invitations', createInvitationRoutes(invitationController));
 
-  // Feedback routes
+  // Initialize and use Feedback module
+  initializeFeedbackModule(container);
   const feedbackController = container.resolve('feedbackController');
   router.use('/feedback', createFeedbackRoutes(feedbackController));
 
-  // Admin routes
+  // Initialize and use Admin module
+  initializeAdminModule(container);
   const adminController = container.resolve('adminController');
   router.use('/admin', createAdminRoutes(adminController));
 

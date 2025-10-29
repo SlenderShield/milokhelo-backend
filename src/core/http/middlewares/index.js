@@ -12,6 +12,7 @@ import {
   configureAuthRateLimit,
 } from './security.js';
 import { createSessionMiddleware } from './sessionMiddleware.js';
+import { asyncHandler } from './asyncHandler.js';
 
 export {
   errorHandler,
@@ -22,4 +23,5 @@ export {
   configureRateLimit,
   configureAuthRateLimit,
   createSessionMiddleware,
+  asyncHandler,
 };

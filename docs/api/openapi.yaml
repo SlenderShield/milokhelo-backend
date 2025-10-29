@@ -281,6 +281,14 @@ paths:
         Returns comprehensive user statistics grouped by sport. Stats are automatically
         updated when matches finish via event-driven system. Includes performance metrics,
         ratings, streaks, and rankings.
+
+        **Automatic Update System:**
+        - Stats updated automatically when `POST /matches/{id}/finish` is called
+        - Event-driven architecture with `match.finished` event
+        - Supports both simple scores and detailed performance metrics
+        - ELO ratings calculated: ±32 for competitive, ±16 for friendly matches
+        - Winning/losing streaks tracked automatically
+        - Per-sport stat tracking with multi-sport support
       parameters:
         - name: id
           in: path
@@ -665,6 +673,14 @@ paths:
         for all participants including wins/losses/draws, ELO ratings, streaks, and
         detailed performance metrics (goals, assists, fouls). Stats are updated via
         event-driven architecture for reliability and scalability.
+
+        **Event-Driven Auto-Update System:**
+        - Publishes `match.finished` event to EventBus
+        - StatsUpdateHandler subscribes and processes updates asynchronously
+        - Parallel processing of all participants for performance
+        - Atomic database updates with MongoDB $inc operator
+        - Graceful error handling per participant
+        - Multi-sport support with separate stat tracking
       security:
         - cookieAuth: []
       parameters:

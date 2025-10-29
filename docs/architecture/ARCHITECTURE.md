@@ -140,11 +140,13 @@ Each module follows this structure:
 ##### Infrastructure Layer (`modules/[module-name]/infrastructure/`)
 
 - **Persistence** (`persistence/`): 
-  - Models: Database schemas (Mongoose)
+  - Models: Database schemas (Mongoose) - **Each module owns its models completely**
   - Repositories: Data access implementations
 - **HTTP** (`http/`):
   - Controllers: HTTP request handlers
   - Routes: API endpoint definitions
+
+**Key Architectural Decision:** As of Phase 2 refactoring (October 2025), all Mongoose models are owned by their respective modules. There is no centralized model storage. This ensures true module independence, better encapsulation, and supports future microservices migration.
 
 ### 4. Common Layer
 
@@ -154,6 +156,8 @@ Located in `src/common/`, contains cross-cutting concerns:
 - **Utils**: Reusable utility functions
 - **Types**: Shared type definitions
 - **Interfaces**: Shared interface contracts
+
+**Note:** The common layer does NOT contain models or domain-specific code. It's strictly for cross-cutting utilities.
 
 ## Event-Driven Architecture
 
@@ -521,7 +525,7 @@ BracketGenerator.updateBracketWithResult(bracket, matchNumber, result)
 - League: O(n²) fixture generation using round-robin rotation
 - Standings: O(n log n) sorting with tie-breaking rules
 
-See [BRACKET_GENERATION.md](./BRACKET_GENERATION.md) for detailed documentation.
+See [BRACKET_GENERATION.md](../features/BRACKET_GENERATION.md) for detailed documentation.
 
 ### Stats Auto-Update Handler
 
@@ -568,7 +572,7 @@ Match Finish → MatchService.finishMatch()
 - Atomic database updates with MongoDB `$inc` operator
 - O(n) complexity where n = number of participants
 
-See [STATS_AUTO_UPDATE.md](./STATS_AUTO_UPDATE.md) for detailed documentation.
+See [STATS_AUTO_UPDATE.md](../features/STATS_AUTO_UPDATE.md) for detailed documentation.
 
 ## Best Practices
 
