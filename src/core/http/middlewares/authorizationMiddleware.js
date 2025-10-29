@@ -215,10 +215,11 @@ export function requireOwnership(getResourceUserId) {
       }
 
       next();
-    } catch (error) {
+    } catch (err) {
       return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         status: 'error',
         message: 'Failed to verify resource ownership',
+        error: err.message,
       });
     }
   };

@@ -60,6 +60,21 @@ export default {
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   },
 
+  // OAuth configuration accessor for consistency
+  oauth: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    },
+  },
+
+  googleCalendar: {
+    enabled: process.env.GOOGLE_CALENDAR_ENABLED === 'true',
+    apiKey: process.env.GOOGLE_CALENDAR_API_KEY || '',
+    redirectUri:
+      process.env.GOOGLE_CALENDAR_REDIRECT_URI || 'http://localhost:4000/api/v1/calendar/google/callback',
+  },
+
   features: {
     enableMetrics: process.env.ENABLE_METRICS === 'true',
     enableHealthCheck: process.env.ENABLE_HEALTH_CHECK !== 'false',
