@@ -1,0 +1,42 @@
+{
+  "name": "milokhelo-backend",
+  "version": "1.0.0",
+  "description": "Clean modular monolith backend with Node.js, Express, MongoDB, and Redis",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development nodemon src/server.js",
+    "dev:redis": "cross-env NODE_ENV=development EVENT_BUS_ADAPTER=redis nodemon src/server.js",
+    "test": "cross-env NODE_ENV=test mocha --exit",
+    "start": "cross-env NODE_ENV=production node src/server.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ."
+  },
+  "keywords": [
+    "modular-monolith",
+    "nodejs",
+    "express",
+    "mongodb",
+    "redis",
+    "clean-architecture"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "ioredis": "^5.8.2",
+    "mongoose": "^8.19.2",
+    "redis": "^5.9.0",
+    "winston": "^3.18.3"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-node": "^11.1.0",
+    "globals": "^16.4.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2"
+  }
+}
