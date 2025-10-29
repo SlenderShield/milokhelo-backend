@@ -8,7 +8,7 @@ export default {
     name: process.env.APP_NAME || 'milokhelo-backend',
     port: parseInt(process.env.PORT || '4001', 10),
     host: process.env.HOST || 'localhost',
-    apiPrefix: process.env.API_PREFIX || '/api',
+    apiPrefix: process.env.API_PREFIX || '/api/v1',
   },
 
   mongodb: {

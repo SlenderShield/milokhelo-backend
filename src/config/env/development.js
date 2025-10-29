@@ -8,7 +8,7 @@ export default {
     name: process.env.APP_NAME || 'milokhelo-backend',
     port: parseInt(process.env.PORT || '4000', 10),
     host: process.env.HOST || 'localhost',
-    apiPrefix: process.env.API_PREFIX || '/api',
+    apiPrefix: process.env.API_PREFIX || '/api/v1',
   },
 
   mongodb: {
@@ -72,7 +72,8 @@ export default {
     enabled: process.env.GOOGLE_CALENDAR_ENABLED === 'true',
     apiKey: process.env.GOOGLE_CALENDAR_API_KEY || '',
     redirectUri:
-      process.env.GOOGLE_CALENDAR_REDIRECT_URI || 'http://localhost:4000/api/v1/calendar/google/callback',
+      process.env.GOOGLE_CALENDAR_REDIRECT_URI ||
+      'http://localhost:4000/api/v1/calendar/google/callback',
   },
 
   pushNotifications: {
