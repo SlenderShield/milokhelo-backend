@@ -1,10 +1,9 @@
 /**
  * Unit Tests for Shared Utilities
-import '../helpers/setup.js';
  */
+import '../helpers/setup.js';
 import { describe, it } from 'mocha';
 import {
-  asyncHandler,
   delay,
   isEmpty,
   deepClone,
@@ -12,6 +11,7 @@ import {
   omit,
   retry,
 } from '../../src/common/utils/index.js';
+import { asyncHandler } from '../../src/core/http/middlewares/asyncHandler.js';
 
 describe('Shared Utilities', () => {
   describe('isEmpty()', () => {

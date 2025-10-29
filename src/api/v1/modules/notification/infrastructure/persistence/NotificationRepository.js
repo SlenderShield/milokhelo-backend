@@ -18,8 +18,13 @@ class NotificationRepository {
     return NotificationModel.findById(id).lean();
   }
 
-  async findByUserId(userId, limit = 50, skip = 0) {
-    return NotificationModel.find({ userId })
+  async findByUserId(userId, limit = 50, skip = 0, unreadOnly = false) {
+    const query = { userId };
+    if (unreadOnly) {
+      query.readAt = null;
+    }
+    
+    return NotificationModel.find(query)
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip)
@@ -31,6 +36,10 @@ class NotificationRepository {
       .sort({ createdAt: -1 })
       .limit(limit)
       .lean();
+  }
+
+  async getUnreadCount(userId) {
+    return NotificationModel.countDocuments({ userId, readAt: null });
   }
 
   async markAsRead(id) {
@@ -60,13 +69,35 @@ class NotificationRepository {
 
   // Device Token Management
   async createDeviceToken(data) {
+    // Update existing token or create new one
+    const existingToken = await DeviceTokenModel.findOne({
+      userId: data.userId,
+      token: data.token,
+    });
+
+    if (existingToken) {
+      existingToken.active = true;
+      existingToken.lastUsed = new Date();
+      await existingToken.save();
+      return existingToken.toObject();
+    }
+
     const deviceToken = new DeviceTokenModel(data);
     await deviceToken.save();
     return deviceToken.toObject();
   }
 
+  async getUserDeviceTokens(userId) {
+    const tokens = await DeviceTokenModel.find({ userId, active: true }).lean();
+    return tokens.map(t => ({ token: t.token, platform: t.platform }));
+  }
+
   async findUserDeviceTokens(userId) {
     return DeviceTokenModel.find({ userId, active: true }).lean();
+  }
+
+  async deleteDeviceToken(userId, token) {
+    return DeviceTokenModel.findOneAndDelete({ userId, token });
   }
 
   async deactivateDeviceToken(token) {
