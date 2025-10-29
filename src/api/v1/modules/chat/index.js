@@ -2,8 +2,8 @@
  * Chat Module - Comprehensive Stubs
  */
 import { ChatRoomModel, ChatMessageModel } from '../shared/models.js';
-import { asyncHandler } from '../../../../../common/utils/index.js';
-import { HTTP_STATUS } from '../../../../../common/constants/index.js';
+import { asyncHandler } from '../../../../common/utils/index.js';
+import { HTTP_STATUS } from '../../../../common/constants/index.js';
 import express from 'express';
 
 // Repository

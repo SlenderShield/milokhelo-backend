@@ -3,7 +3,7 @@
  * Sets up express-session with Redis store
  */
 import session from 'express-session';
-import RedisStore from 'connect-redis';
+import { RedisStore } from 'connect-redis';
 import Redis from 'ioredis';
 
 export function createSessionMiddleware(config, logger) {

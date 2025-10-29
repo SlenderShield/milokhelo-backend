@@ -9,8 +9,8 @@ import {
   InvitationModel,
   FeedbackModel,
 } from '../shared/models.js';
-import { asyncHandler } from '../../../../../common/utils/index.js';
-import { HTTP_STATUS } from '../../../../../common/constants/index.js';
+import { asyncHandler } from '../../../../common/utils/index.js';
+import { HTTP_STATUS } from '../../../../common/constants/index.js';
 import express from 'express';
 
 // ==================== MAPS MODULE ====================
