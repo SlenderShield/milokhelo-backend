@@ -2,7 +2,7 @@
  * Centralized Logging System
  * Using Winston for structured logging
  * Supports different formats, levels, and log rotation based on environment
- * 
+ *
  * Features:
  * - Structured logging with metadata
  * - Environment-specific formatting
@@ -22,44 +22,57 @@ class Logger {
   }
 
   createLogger() {
-    const { 
-      level = 'info', 
-      env = 'development',
-      logDir = 'logs'
-    } = this.config;
+    const { level = 'info', env = 'development', logDir = 'logs', format = 'pretty' } = this.config;
 
     // Define custom formats
-    const customFormat = winston.format.printf(({ timestamp, level, message, context, requestId, duration, ...meta }) => {
-      const parts = [`[${timestamp}]`, `[${level.toUpperCase()}]`];
-      
+    const customFormat = winston.format.printf((info) => {
+      // Winston colorize adds a 'level' with color codes, keep original in [Symbol.for('level')]
+      const { timestamp, message, context, requestId, duration, ...meta } = info;
+      const ts = timestamp || new Date().toISOString();
+      const lvl = info[Symbol.for('level')] || info.level || 'info';
+      const lvlUpper = lvl.toUpperCase();
+
+      const parts = [`[${ts}]`, `[${lvlUpper}]`];
+
       if (context) parts.push(`[${context}]`);
       if (requestId) parts.push(`[ReqID: ${requestId}]`);
-      
+
       parts.push(message);
-      
+
       if (duration !== undefined) parts.push(`(${duration}ms)`);
-      
+
       const metaKeys = Object.keys(meta);
       if (metaKeys.length > 0) {
-        // Filter out Winston internal fields
+        // Filter out Winston internal fields and symbols
         const filteredMeta = Object.fromEntries(
-          Object.entries(meta).filter(([key]) => !['level', 'timestamp', 'message'].includes(key))
+          Object.entries(meta).filter(
+            ([key]) => !['level', 'timestamp', 'message', 'splat'].includes(key)
+          )
         );
         if (Object.keys(filteredMeta).length > 0) {
           parts.push('\n' + JSON.stringify(filteredMeta, null, 2));
         }
       }
-      
+
       return parts.join(' ');
     });
 
-    // Console format for development
-    const consoleFormat = winston.format.combine(
-      winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-      winston.format.errors({ stack: true }),
-      env === 'development' ? winston.format.colorize({ all: true }) : winston.format.uncolorize(),
-      customFormat
-    );
+    // Determine if we should use pretty or JSON format
+    const usePrettyFormat = format === 'pretty' || (env === 'development' && format !== 'json');
+
+    // Console format - respects the format config
+    const consoleFormat = usePrettyFormat
+      ? winston.format.combine(
+          winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+          winston.format.errors({ stack: true }),
+          winston.format.colorize({ all: true }),
+          customFormat
+        )
+      : winston.format.combine(
+          winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+          winston.format.errors({ stack: true }),
+          winston.format.json()
+        );
 
     // JSON format for production/file logs
     const fileFormat = winston.format.combine(

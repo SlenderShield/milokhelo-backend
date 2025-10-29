@@ -27,7 +27,7 @@ export default {
 
   logging: {
     level: process.env.LOG_LEVEL || 'debug',
-    format: process.env.LOG_FORMAT || 'json',
+    format: process.env.LOG_FORMAT || 'pretty',
     enabled: process.env.LOGGING_ENABLED !== 'false',
   },
 
@@ -55,7 +55,8 @@ export default {
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     facebookAppId: process.env.FACEBOOK_APP_ID || '',
     facebookAppSecret: process.env.FACEBOOK_APP_SECRET || '',
-    oauthCallbackUrl: process.env.OAUTH_CALLBACK_URL || 'http://localhost:4000/api/v1/auth/oauth/callback',
+    oauthCallbackUrl:
+      process.env.OAUTH_CALLBACK_URL || 'http://localhost:4000/api/v1/auth/oauth/callback',
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   },
 

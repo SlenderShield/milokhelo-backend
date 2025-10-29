@@ -82,7 +82,7 @@ class VenueRepository {
    */
   async createBookingAtomic(data) {
     const session = await mongoose.startSession();
-    
+
     try {
       session.startTransaction();
 
@@ -95,18 +95,15 @@ class VenueRepository {
 
       if (conflicts.length > 0) {
         await session.abortTransaction();
-        throw new BookingConflictError(
-          'This time slot is already booked',
-          conflicts
-        );
+        throw new BookingConflictError('This time slot is already booked', conflicts);
       }
 
       const booking = new BookingModel(data);
       await booking.save({ session });
 
       await session.commitTransaction();
-      
-      this.logger.info('Booking created successfully', { 
+
+      this.logger.info('Booking created successfully', {
         bookingId: booking._id,
         venueId: data.venueId,
       });
@@ -125,19 +122,19 @@ class VenueRepository {
    */
   async updateBookingAtomic(bookingId, data) {
     const session = await mongoose.startSession();
-    
+
     try {
       session.startTransaction();
 
       const currentBooking = await BookingModel.findById(bookingId).session(session);
-      
+
       if (!currentBooking) {
         await session.abortTransaction();
         throw new Error('Booking not found');
       }
 
       const isTimeChanged = data.startTime || data.endTime || data.date;
-      
+
       if (isTimeChanged) {
         const checkDate = data.date ? new Date(data.date) : currentBooking.date;
         const checkStartTime = data.startTime || currentBooking.startTime;
@@ -161,17 +158,17 @@ class VenueRepository {
       }
 
       const updatedBooking = await BookingModel.findOneAndUpdate(
-        { 
+        {
           _id: bookingId,
-          __v: currentBooking.__v
+          __v: currentBooking.__v,
         },
-        { 
+        {
           ...data,
-          $inc: { __v: 1 }
+          $inc: { __v: 1 },
         },
-        { 
+        {
           new: true,
-          session 
+          session,
         }
       );
 
@@ -201,10 +198,10 @@ class VenueRepository {
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
-      
-      query.date = { 
+
+      query.date = {
         $gte: startOfDay,
-        $lt: endOfDay 
+        $lt: endOfDay,
       };
     }
     return BookingModel.find(query).lean();
@@ -218,20 +215,16 @@ class VenueRepository {
   }
 
   async cancelBooking(bookingId, reason = null) {
-    const updates = { 
+    const updates = {
       status: 'cancelled',
-      $inc: { __v: 1 }
+      $inc: { __v: 1 },
     };
-    
+
     if (reason) {
       updates.notes = reason;
     }
 
-    return BookingModel.findByIdAndUpdate(
-      bookingId,
-      updates,
-      { new: true }
-    ).lean();
+    return BookingModel.findByIdAndUpdate(bookingId, updates, { new: true }).lean();
   }
 }
 

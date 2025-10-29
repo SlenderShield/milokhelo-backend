@@ -46,13 +46,13 @@ export function formatDatabaseQuery(operation, collection, filter = {}) {
  */
 function sanitizeFilter(filter) {
   const sanitized = { ...filter };
-  
+
   // Remove password fields
   if (sanitized.password) sanitized.password = '[FILTERED]';
   if (sanitized.$or) {
-    sanitized.$or = sanitized.$or.map(f => sanitizeFilter(f));
+    sanitized.$or = sanitized.$or.map((f) => sanitizeFilter(f));
   }
-  
+
   return sanitized;
 }
 
@@ -135,7 +135,7 @@ function determineSeverity(event) {
     'xss_attempt',
   ];
 
-  if (highSeverityEvents.some(e => event.toLowerCase().includes(e))) {
+  if (highSeverityEvents.some((e) => event.toLowerCase().includes(e))) {
     return 'high';
   }
 
@@ -168,22 +168,22 @@ export function createCorrelationContext(requestId, userId = null, sessionId = n
  */
 export async function measureOperation(logger, operationName, operation, meta = {}) {
   const startTime = Date.now();
-  
+
   try {
     const result = await operation();
     const duration = Date.now() - startTime;
-    
+
     logger.info(`${operationName} completed`, {
       operation: operationName,
       duration,
       success: true,
       ...meta,
     });
-    
+
     return result;
   } catch (error) {
     const duration = Date.now() - startTime;
-    
+
     logger.error(`${operationName} failed`, {
       operation: operationName,
       duration,
@@ -191,7 +191,7 @@ export async function measureOperation(logger, operationName, operation, meta = 
       error: formatError(error),
       ...meta,
     });
-    
+
     throw error;
   }
 }

@@ -63,7 +63,7 @@ async function createApp(config, logger, container) {
 
   // Swagger UI Documentation
   try {
-    const openapiPath = join(__dirname, '../docs/openapi.yaml');
+    const openapiPath = join(__dirname, '../docs/api/openapi.yaml');
     const openapiFile = readFileSync(openapiPath, 'utf8');
     const openapiDocument = YAML.parse(openapiFile);
 
