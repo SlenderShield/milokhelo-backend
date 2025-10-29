@@ -1,8 +1,8 @@
 /**
  * User Controller
  */
-import { asyncHandler } from '../../../../../../common/utils/index.js';
-import { HTTP_STATUS } from '../../../../../../common/constants/index.js';
+import { HTTP_STATUS } from '../../../../../core/http/index.js';
+import asyncHandler from '../../../../../core/http/middlewares/asyncHandler.js';
 
 class UserController {
   constructor(userService, logger) {
@@ -46,6 +46,25 @@ class UserController {
       const { id } = req.params;
       const stats = await this.userService.getUserStats(id);
       res.status(HTTP_STATUS.OK).json(stats);
+    });
+  }
+
+  getMyAchievements() {
+    return asyncHandler(async (req, res) => {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Not authenticated' });
+      }
+      const achievements = await this.userService.getUserAchievements(userId);
+      res.status(HTTP_STATUS.OK).json(achievements);
+    });
+  }
+
+  getUserAchievements() {
+    return asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const achievements = await this.userService.getUserAchievements(id);
+      res.status(HTTP_STATUS.OK).json(achievements);
     });
   }
 }

@@ -493,6 +493,83 @@ this.logger = logger.child({ context: 'UserService' });
 - Error tracking
 - Audit logs
 
+## Key Domain Services
+
+### Tournament Bracket Generator
+
+A sophisticated domain service that generates tournament brackets for competitive play.
+
+**Location**: `src/api/v1/modules/tournament/domain/BracketGenerator.js`
+
+**Features**:
+
+- **Knockout Tournaments**: Single-elimination brackets with automatic seeding and bye handling
+- **League Tournaments**: Round-robin fixtures with standings calculation
+- **Stateless Design**: Pure functions with no side effects
+- **Event-Driven**: Publishes events for tournament lifecycle
+
+**Key Methods**:
+
+```javascript
+BracketGenerator.generateBracket(tournament)
+BracketGenerator.updateBracketWithResult(bracket, matchNumber, result)
+```
+
+**Algorithms**:
+
+- Knockout: O(n) generation, power-of-2 bracket sizing
+- League: O(n²) fixture generation using round-robin rotation
+- Standings: O(n log n) sorting with tie-breaking rules
+
+See [BRACKET_GENERATION.md](./BRACKET_GENERATION.md) for detailed documentation.
+
+### Stats Auto-Update Handler
+
+An event-driven service that automatically updates user statistics when matches finish.
+
+**Location**: `src/api/v1/modules/user/application/StatsUpdateHandler.js`
+
+**Features**:
+
+- **Event-Driven**: Subscribes to `match.finished` events for automatic updates
+- **Win/Loss/Draw Detection**: Intelligent outcome calculation for individual and team matches
+- **ELO Rating System**: Simplified rating changes (±32 competitive, ±16 friendly)
+- **Streak Tracking**: Winning/losing streaks with proper reset logic
+- **Detailed Stats**: Support for goals, assists, fouls, and custom metrics
+- **Multi-Sport Support**: Separate stat tracking per sport
+- **Error Resilience**: Isolated participant processing with graceful error handling
+
+**Key Methods**:
+
+```javascript
+handleMatchFinished({ matchId, result })  // Event handler
+updateParticipantStats(match, participantId, result)  // Update single participant
+determineOutcome(match, participantId, scores)  // Calculate win/loss/draw
+calculateStatsIncrement(outcome, scores, participantId, match)  // Calculate updates
+```
+
+**Event Flow**:
+
+```
+Match Finish → MatchService.finishMatch()
+                   ↓
+            eventBus.publish('match.finished')
+                   ↓
+         StatsUpdateHandler.handleMatchFinished()
+                   ↓
+      [Process each participant in parallel]
+                   ↓
+         UserRepository.updateStats() [atomic]
+```
+
+**Performance**:
+
+- Parallel participant processing using `Promise.all`
+- Atomic database updates with MongoDB `$inc` operator
+- O(n) complexity where n = number of participants
+
+See [STATS_AUTO_UPDATE.md](./STATS_AUTO_UPDATE.md) for detailed documentation.
+
 ## Best Practices
 
 ### Code Organization

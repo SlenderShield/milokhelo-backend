@@ -262,7 +262,37 @@ const { url } = await response.json();
 // After OAuth callback, session is established automatically
 ```
 
-### 2. Real-time Chat with WebSocket
+### 2. Stats Auto-Update on Match Completion
+
+User statistics are automatically updated when matches finish via event-driven architecture:
+
+```javascript
+// Finish a match with scores
+const response = await fetch(`http://localhost:4000/api/v1/matches/${matchId}/finish`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    scores: {
+      'user1_id': 5,
+      'user2_id': 3
+    }
+  })
+});
+
+// Stats are automatically updated:
+// - Win/loss/draw tracking
+// - ELO rating changes (±32 competitive, ±16 friendly)
+// - Winning/losing streaks
+// - Goals, assists, fouls
+// - Separate tracking per sport
+
+// Get updated stats
+const statsResponse = await fetch(`http://localhost:4000/api/v1/users/${userId}/stats`);
+const stats = await statsResponse.json();
+console.log('Updated stats:', stats);
+```
+
+### 3. Real-time Chat with WebSocket
 
 Connect to chat rooms for real-time messaging:
 
@@ -286,7 +316,7 @@ socket.on('new_message', (data) => {
 });
 ```
 
-### 3. Geo-spatial Venue Search
+### 4. Geo-spatial Venue Search
 
 Find venues near a location using MongoDB's 2dsphere index:
 

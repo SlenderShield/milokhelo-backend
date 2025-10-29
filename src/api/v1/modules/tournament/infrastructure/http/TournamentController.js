@@ -68,6 +68,27 @@ export class TournamentController {
       res.status(HTTP_STATUS.OK).json(result);
     });
   }
+
+  getBracket() {
+    return asyncHandler(async (req, res) => {
+      const bracket = await this.tournamentService.getBracket(req.params.id);
+      res.status(HTTP_STATUS.OK).json(bracket);
+    });
+  }
+
+  updateMatchResult() {
+    return asyncHandler(async (req, res) => {
+      const userId = req.session?.userId;
+      const { matchNumber, result } = req.body;
+      const updatedBracket = await this.tournamentService.updateMatchResult(
+        req.params.id,
+        matchNumber,
+        result,
+        userId
+      );
+      res.status(HTTP_STATUS.OK).json(updatedBracket);
+    });
+  }
 }
 
 export function createTournamentRoutes(controller) {
@@ -80,6 +101,8 @@ export function createTournamentRoutes(controller) {
   router.delete('/:id', controller.cancel());
   router.post('/:id/register', controller.register());
   router.post('/:id/start', controller.start());
+  router.get('/:id/bracket', controller.getBracket());
+  router.post('/:id/match-result', controller.updateMatchResult());
 
   return router;
 }

@@ -38,7 +38,43 @@ class UserRepository {
   }
 
   async updateStats(userId, sport, stats) {
-    return UserStatModel.findOneAndUpdate({ userId, sport }, { $inc: stats }, { new: true, upsert: true }).lean();
+    // Handle streak separately as it has special logic
+    const { streak, ...incrementStats } = stats;
+    
+    const options = { new: true, upsert: true };
+    
+    if (streak !== undefined) {
+      // Get current stats to determine streak update logic
+      const currentStats = await UserStatModel.findOne({ userId, sport });
+      
+      let newStreak;
+      if (!currentStats) {
+        // New stat record
+        newStreak = streak;
+      } else {
+        const currentStreak = currentStats.streak || 0;
+        
+        if (streak > 0) {
+          // Win: increment if positive, start new positive streak if negative
+          newStreak = currentStreak > 0 ? currentStreak + 1 : 1;
+        } else if (streak < 0) {
+          // Loss: decrement if negative, start new negative streak if positive
+          newStreak = currentStreak < 0 ? currentStreak - 1 : -1;
+        } else {
+          // Draw: keep current streak
+          newStreak = currentStreak;
+        }
+      }
+      
+      return UserStatModel.findOneAndUpdate(
+        { userId, sport },
+        { $inc: incrementStats, $set: { streak: newStreak } },
+        options
+      ).lean();
+    }
+    
+    // No streak update, just increment other stats
+    return UserStatModel.findOneAndUpdate({ userId, sport }, { $inc: incrementStats }, options).lean();
   }
 
   async getAchievements(userId) {

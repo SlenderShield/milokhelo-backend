@@ -1,5 +1,6 @@
 /**
  * Unit Tests for Shared Utilities
+import '../helpers/setup.js';
  */
 import { describe, it } from 'mocha';
 import {

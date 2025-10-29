@@ -276,19 +276,123 @@ paths:
   /users/{id}/stats:
     get:
       tags: [Users]
-      summary: Get user stats
+      summary: Get user statistics by sport
+      description: >
+        Returns comprehensive user statistics grouped by sport. Stats are automatically
+        updated when matches finish via event-driven system. Includes performance metrics,
+        ratings, streaks, and rankings.
       parameters:
         - name: id
           in: path
           required: true
           schema: { type: string }
+          description: User ID
       responses:
         "200":
-          description: User stats
+          description: Array of user stats by sport
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserStat"
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserStat"
+              example:
+                - userId: "user123"
+                  sport: "football"
+                  matchesPlayed: 25
+                  wins: 15
+                  losses: 8
+                  draws: 2
+                  goalsScored: 42
+                  assists: 18
+                  fouls: 12
+                  elo: 1250
+                  streak: 3
+                  rating: 4.5
+                  level: 5
+                  updatedAt: "2025-10-29T10:30:00Z"
+                - userId: "user123"
+                  sport: "basketball"
+                  matchesPlayed: 15
+                  wins: 10
+                  losses: 5
+                  draws: 0
+                  goalsScored: 180
+                  assists: 45
+                  fouls: 8
+                  elo: 1180
+                  streak: -1
+                  rating: 4.2
+                  level: 4
+                  updatedAt: "2025-10-28T15:45:00Z"
+        "404":
+          description: User not found
+
+  /users/me/achievements:
+    get:
+      tags: [Users]
+      summary: Get current user's achievements
+      description: >
+        Returns all achievements earned by the authenticated user. Achievements are
+        automatically awarded when users meet specific criteria based on their stats
+        (wins, streaks, ELO ratings, etc.). Supports multiple categories and rarity levels.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Array of user's earned achievements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Achievement"
+              example:
+                - id: "ach_001"
+                  name: "First Victory"
+                  description: "Win your first match in any sport"
+                  category: "milestone"
+                  sport: "all"
+                  rarity: "common"
+                  points: 10
+                  badgeUrl: "https://example.com/badges/first-victory.png"
+                  createdAt: "2025-10-29T10:00:00Z"
+                - id: "ach_015"
+                  name: "On Fire"
+                  description: "Win 3 matches in a row"
+                  category: "skill"
+                  sport: "all"
+                  rarity: "common"
+                  points: 30
+                  badgeUrl: "https://example.com/badges/on-fire.png"
+                  createdAt: "2025-10-29T10:00:00Z"
+        "401":
+          description: Not authenticated
+
+  /users/{id}/achievements:
+    get:
+      tags: [Users]
+      summary: Get achievements for any user
+      description: >
+        Returns all achievements earned by the specified user. Public endpoint to view
+        other users' achievements.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          description: User ID
+      responses:
+        "200":
+          description: Array of user's earned achievements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Achievement"
+        "404":
+          description: User not found
 
   ################################################################
   # TEAMS                                                         #
@@ -555,7 +659,12 @@ paths:
   /matches/{id}/finish:
     post:
       tags: [Matches]
-      summary: Finish match and update stats/achievements
+      summary: Finish match and automatically update participant stats
+      description: >
+        Marks match as finished with final scores. Automatically triggers stats updates
+        for all participants including wins/losses/draws, ELO ratings, streaks, and
+        detailed performance metrics (goals, assists, fouls). Stats are updated via
+        event-driven architecture for reliability and scalability.
       security:
         - cookieAuth: []
       parameters:
@@ -563,14 +672,53 @@ paths:
           in: path
           required: true
           schema: { type: string }
+          description: Match ID
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/MatchResult"
+            examples:
+              simpleScores:
+                summary: Simple numeric scores
+                value:
+                  scores:
+                    "user1_id": 5
+                    "user2_id": 3
+                    "user3_id": 4
+              detailedScores:
+                summary: Detailed performance stats
+                value:
+                  scores:
+                    "user1_id":
+                      goals: 3
+                      assists: 2
+                      fouls: 1
+                    "user2_id":
+                      goals: 1
+                      assists: 0
+                      fouls: 3
       responses:
         "200":
-          description: Match finished, stats & achievements updated
+          description: >
+            Match finished successfully. Stats for all participants have been
+            automatically updated via event system. Updates include match outcome,
+            ELO rating changes, streaks, and detailed performance metrics.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+              example:
+                success: true
+                message: "Match finished, stats updated"
+        "401":
+          description: Unauthorized - must be match organizer
+        "404":
+          description: Match not found
 
   ################################################################
   # TOURNAMENTS                                                    #
@@ -687,7 +835,10 @@ paths:
   /tournaments/{id}/start:
     post:
       tags: [Tournaments]
-      summary: Start tournament (generate brackets)
+      summary: Start tournament and generate bracket
+      description: >
+        Starts the tournament and automatically generates the bracket based on tournament type 
+        (knockout or league) and registered teams. Validates minimum team requirements.
       security:
         - cookieAuth: []
       parameters:
@@ -697,7 +848,78 @@ paths:
           schema: { type: string }
       responses:
         "200":
-          description: Tournament started
+          description: Tournament started with generated bracket
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  bracket:
+                    $ref: "#/components/schemas/TournamentBracket"
+                  totalRounds: { type: integer }
+                  currentRound: { type: integer }
+        "400":
+          description: Bad request (not enough teams, tournament already started, etc.)
+        "401":
+          description: Unauthorized (not tournament organizer)
+        "404":
+          description: Tournament not found
+
+  /tournaments/{id}/bracket:
+    get:
+      tags: [Tournaments]
+      summary: Get tournament bracket
+      description: Retrieve the current bracket state with all rounds, matches, and standings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Tournament bracket
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentBracket"
+        "404":
+          description: Tournament or bracket not found
+
+  /tournaments/{id}/match-result:
+    post:
+      tags: [Tournaments]
+      summary: Update match result
+      description: >
+        Updates a match result in the tournament bracket. For knockout tournaments, 
+        automatically advances the winner to the next round. For league tournaments,
+        updates the standings table.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MatchResultUpdate"
+      responses:
+        "200":
+          description: Match result updated, returns updated bracket
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentBracket"
+        "400":
+          description: Invalid match result
+        "401":
+          description: Unauthorized
+        "404":
+          description: Tournament or match not found
 
   ################################################################
   # CHAT                                                           #
@@ -1703,15 +1925,29 @@ components:
 
     MatchResult:
       type: object
+      required: [scores]
       properties:
         scores:
           type: object
+          description: >
+            Match scores by participant ID. Can be simple numeric scores or detailed
+            objects with performance metrics. Stats auto-update system processes both formats.
           additionalProperties:
-            type: integer
-        stats:
-          type: array
-          items:
-            $ref: "#/components/schemas/UserStat"
+            oneOf:
+              - type: integer
+                description: Simple numeric score
+              - type: object
+                description: Detailed performance stats
+                properties:
+                  goals: { type: integer, description: Goals/points scored }
+                  assists: { type: integer, description: Assists }
+                  fouls: { type: integer, description: Fouls committed }
+          example:
+            "user1_id": 5
+            "user2_id":
+              goals: 3
+              assists: 2
+              fouls: 1
 
     Match:
       allOf:
@@ -1790,13 +2026,249 @@ components:
               items: { type: string }
             rounds: { type: integer }
             currentRound: { type: integer }
-            bracket: { type: object }
+            bracket:
+              $ref: "#/components/schemas/TournamentBracket"
             status:
               type: string
               enum: [registration, ongoing, completed, cancelled]
             chatRoomId: { type: string }
             createdAt: { type: string, format: date-time }
             updatedAt: { type: string, format: date-time }
+
+    TournamentBracket:
+      oneOf:
+        - $ref: "#/components/schemas/KnockoutBracket"
+        - $ref: "#/components/schemas/LeagueBracket"
+
+    KnockoutBracket:
+      type: object
+      description: Single-elimination knockout tournament bracket
+      properties:
+        type:
+          type: string
+          enum: [knockout]
+        totalRounds:
+          type: integer
+          description: Total number of rounds in the tournament
+        currentRound:
+          type: integer
+          description: Current active round
+        rounds:
+          type: array
+          items:
+            $ref: "#/components/schemas/KnockoutRound"
+        teams:
+          type: array
+          items:
+            type: object
+            properties:
+              teamId: { type: string }
+              seed:
+                type: integer
+                description: Team seeding (1-N)
+              eliminated:
+                type: boolean
+                description: Whether team has been eliminated
+        winners:
+          type: object
+          properties:
+            champion:
+              type: string
+              nullable: true
+              description: Tournament champion team ID
+            runnerUp:
+              type: string
+              nullable: true
+              description: Runner-up team ID
+            thirdPlace:
+              type: string
+              nullable: true
+              description: Third place team ID
+
+    KnockoutRound:
+      type: object
+      properties:
+        roundNumber: { type: integer }
+        name:
+          type: string
+          description: Human-readable round name (Final, Semi-Final, etc.)
+        matches:
+          type: array
+          items:
+            $ref: "#/components/schemas/KnockoutMatch"
+        completed:
+          type: boolean
+          description: Whether all matches in this round are completed
+
+    KnockoutMatch:
+      type: object
+      properties:
+        matchNumber:
+          type: integer
+          description: Unique match number in tournament
+        round: { type: integer }
+        team1:
+          type: string
+          nullable: true
+          description: First team ID (null if awaiting previous round)
+        team2:
+          type: string
+          nullable: true
+          description: Second team ID (null if awaiting previous round)
+        winner:
+          type: string
+          nullable: true
+          description: Winner team ID
+        score:
+          type: object
+          properties:
+            team1:
+              type: integer
+              nullable: true
+            team2:
+              type: integer
+              nullable: true
+        status:
+          type: string
+          enum: [pending, completed, bye]
+          description: Match status (bye = team advanced automatically)
+        startTime:
+          type: string
+          format: date-time
+          nullable: true
+        nextMatch:
+          type: integer
+          nullable: true
+          description: Match number in next round for winner
+        nextMatchPosition:
+          type: string
+          enum: [team1, team2]
+          nullable: true
+          description: Position (team1 or team2) in next match
+
+    LeagueBracket:
+      type: object
+      description: Round-robin league tournament bracket
+      properties:
+        type:
+          type: string
+          enum: [league]
+        totalRounds:
+          type: integer
+          description: Total number of rounds (each team plays every other once)
+        currentRound:
+          type: integer
+          description: Current active round
+        rounds:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeagueRound"
+        standings:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeagueStanding"
+
+    LeagueRound:
+      type: object
+      properties:
+        roundNumber: { type: integer }
+        name:
+          type: string
+          description: Round name (e.g., "Round 1")
+        matches:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeagueMatch"
+        completed:
+          type: boolean
+          description: Whether all matches in this round are completed
+
+    LeagueMatch:
+      type: object
+      properties:
+        matchNumber:
+          type: integer
+          description: Unique match number in tournament
+        round: { type: integer }
+        team1: { type: string }
+        team2: { type: string }
+        score:
+          type: object
+          properties:
+            team1:
+              type: integer
+              nullable: true
+            team2:
+              type: integer
+              nullable: true
+        status:
+          type: string
+          enum: [pending, completed]
+        startTime:
+          type: string
+          format: date-time
+          nullable: true
+        played:
+          type: boolean
+          description: Whether the match has been played
+
+    LeagueStanding:
+      type: object
+      description: Team standing in league table
+      properties:
+        teamId: { type: string }
+        position:
+          type: integer
+          description: Current position in table
+        played:
+          type: integer
+          description: Matches played
+        won:
+          type: integer
+          description: Matches won
+        drawn:
+          type: integer
+          description: Matches drawn
+        lost:
+          type: integer
+          description: Matches lost
+        goalsFor:
+          type: integer
+          description: Goals scored
+        goalsAgainst:
+          type: integer
+          description: Goals conceded
+        goalDifference:
+          type: integer
+          description: Goal difference (GF - GA)
+        points:
+          type: integer
+          description: Total points (3 for win, 1 for draw)
+
+    MatchResultUpdate:
+      type: object
+      required: [matchNumber, result]
+      properties:
+        matchNumber:
+          type: integer
+          description: Match number in the bracket
+        result:
+          type: object
+          required: [score]
+          properties:
+            winner:
+              type: string
+              description: Winner team ID (required for knockout, optional for league)
+            score:
+              type: object
+              required: [team1, team2]
+              properties:
+                team1:
+                  type: integer
+                  minimum: 0
+                team2:
+                  type: integer
+                  minimum: 0
 
     #########################################################
     # CHAT SCHEMAS                                           #
@@ -2171,37 +2643,153 @@ components:
     #########################################################
     UserStat:
       type: object
+      description: >
+        User performance statistics per sport. Automatically updated when matches finish
+        via event-driven stats update system. Tracks match outcomes, ratings, and detailed
+        performance metrics.
+      required: [userId, sport]
       properties:
-        userId: { type: string }
-        teamId: { type: string }
-        sport: { type: string }
-        matchesPlayed: { type: integer }
-        wins: { type: integer }
-        losses: { type: integer }
-        goalsScored: { type: integer }
-        assists: { type: integer }
-        fouls: { type: integer }
-        rating: { type: number }
-        elo: { type: number }
-        streak: { type: integer }
-        rank: { type: integer }
-        level: { type: integer }
-        updatedAt: { type: string, format: date-time }
+        userId:
+          type: string
+          description: Reference to user
+        teamId:
+          type: string
+          description: Optional team reference for team-specific stats
+        sport:
+          type: string
+          description: Sport category (e.g., football, basketball, tennis)
+        matchesPlayed:
+          type: integer
+          default: 0
+          description: Total matches played
+        wins:
+          type: integer
+          default: 0
+          description: Number of wins
+        losses:
+          type: integer
+          default: 0
+          description: Number of losses
+        draws:
+          type: integer
+          default: 0
+          description: Number of draws
+        goalsScored:
+          type: integer
+          default: 0
+          description: Total goals/points scored
+        assists:
+          type: integer
+          default: 0
+          description: Total assists
+        fouls:
+          type: integer
+          default: 0
+          description: Total fouls committed
+        rating:
+          type: number
+          default: 0
+          description: Average user rating from community feedback
+        elo:
+          type: number
+          default: 1000
+          description: >
+            ELO rating calculated from match results. Competitive matches: ±32 points,
+            Friendly matches: ±16 points per win/loss. Base rating is 1000.
+        streak:
+          type: integer
+          default: 0
+          description: >
+            Current win/loss streak. Positive values indicate winning streak,
+            negative values indicate losing streak. Draws maintain streak.
+        rank:
+          type: integer
+          description: User rank within sport category (optional)
+        level:
+          type: integer
+          default: 1
+          description: User level based on experience (optional)
+        createdAt:
+          type: string
+          format: date-time
+          description: When stats record was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last stats update timestamp (automatically set on match finish)
 
     Achievement:
       type: object
+      description: >
+        Achievement earned by users for meeting specific criteria. Achievements are
+        automatically evaluated when user stats update via event-driven system.
+      required: [name, category, criteria, rarity, points]
       properties:
-        id: { type: string }
-        name: { type: string }
-        description: { type: string }
-        category: { type: string }
-        criteria: { type: string }
-        badgeUrl: { type: string, format: uri }
+        id:
+          type: string
+          description: Unique achievement identifier
+        name:
+          type: string
+          description: Achievement name (unique)
+        description:
+          type: string
+          description: Description of what the achievement represents
+        category:
+          type: string
+          enum: [milestone, skill, participation, social, special]
+          description: >
+            Achievement category:
+            - milestone: Progress-based (matches played, experience)
+            - skill: Performance-based (wins, win rate, streaks, ELO)
+            - participation: Activity-based (goals, assists)
+            - social: Team/community achievements
+            - special: Unique accomplishments
+        sport:
+          type: string
+          default: all
+          description: >
+            Sport this achievement applies to. Use 'all' for cross-sport achievements.
+        criteria:
+          type: object
+          description: >
+            Flexible criteria object defining achievement requirements.
+            Supports types: stat_threshold, stat_total, ratio, streak, composite.
+            See docs/ACHIEVEMENTS.md for detailed criteria format.
+          additionalProperties: true
+          example:
+            type: stat_threshold
+            field: wins
+            operator: ">="
+            value: 10
+        badgeUrl:
+          type: string
+          format: uri
+          description: URL to achievement badge image
         rarity:
           type: string
           enum: [common, rare, epic, legendary]
-        points: { type: integer }
-        createdAt: { type: string, format: date-time }
+          description: >
+            Achievement rarity level indicating difficulty:
+            - common: Easy to achieve (10-30 points)
+            - rare: Moderate difficulty (50-100 points)
+            - epic: Challenging (150-250 points)
+            - legendary: Extremely difficult (500-1000 points)
+        points:
+          type: integer
+          minimum: 0
+          description: Points awarded when achievement is earned
+        isActive:
+          type: boolean
+          default: true
+          description: Whether this achievement is currently active and can be earned
+        createdAt:
+          type: string
+          format: date-time
+          description: When achievement was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
 
 security:
   - cookieAuth: []

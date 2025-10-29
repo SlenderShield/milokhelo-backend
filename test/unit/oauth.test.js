@@ -1,5 +1,6 @@
 /**
  * OAuth Integration Tests
+import '../helpers/setup.js';
  * Tests for Passport OAuth strategies
  */
 import { describe, it, beforeEach } from 'mocha';

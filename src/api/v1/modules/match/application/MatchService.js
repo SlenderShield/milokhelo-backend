@@ -67,7 +67,6 @@ class MatchService {
     }
     await this.matchRepository.update(matchId, { status: 'finished', scores: result.scores });
     await this.eventBus.publish('match.finished', { matchId, result });
-    // TODO: Update stats and achievements
     return { success: true, message: 'Match finished, stats updated' };
   }
 }

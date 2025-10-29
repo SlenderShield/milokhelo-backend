@@ -15,6 +15,12 @@ This directory contains all permanent project documentation.
 - **QUICKSTART.md** - Quick start guide for developers
 - **IMPROVEMENTS.md** - Improvement tracking and technical debt
 
+### Feature Documentation
+
+- **BRACKET_GENERATION.md** - Tournament bracket generation system (knockout & league)
+- **STATS_AUTO_UPDATE.md** - Automatic stats updates on match completion
+- **ACHIEVEMENTS.md** - Achievement system with automatic evaluation and criteria types
+
 ### Authentication
 
 - **OAUTH_SETUP.md** - Complete OAuth setup guide for Google and Facebook

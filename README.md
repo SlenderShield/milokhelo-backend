@@ -52,6 +52,9 @@ src/
 - ✅ **14 Complete Modules**: Auth, Users, Teams, Matches, Tournaments, Chat, Venues, Maps, Calendar, Notifications, Invitations, Feedback, Admin
 - ✅ **OAuth Authentication**: Full Google & Facebook OAuth 2.0 with Passport.js + Email/Password authentication
 - ✅ **Session Management**: HTTP-only cookies with Redis store
+- ✅ **Tournament Brackets**: Automatic bracket generation for knockout and league tournaments
+- ✅ **Stats Auto-Update**: Event-driven automatic stats updates on match completion (ELO, streaks, performance metrics)
+- ✅ **Achievement System**: Automatic achievement evaluation with 31 predefined achievements (milestones, skills, participation)
 - ✅ **Real-time Chat**: WebSocket support with Socket.IO
 - ✅ **Geo-spatial Search**: Find nearby venues with 2dsphere indexes
 - ✅ **70+ API Endpoints**: Complete REST API with Swagger documentation
@@ -171,9 +174,10 @@ The Milokhelo backend provides 70+ API endpoints across 14 modules:
 
 - `GET /me` - Get current user profile
 - `PATCH /me` - Update profile
-- `GET /me/stats` - Get user statistics
-- `GET /me/achievements` - List achievements
+- `GET /me/stats` - Get user statistics (auto-updated from matches)
+- `GET /me/achievements` - List user's earned achievements
 - `GET /:userId` - Get user by ID
+- `GET /:userId/achievements` - Get user's achievements
 - `GET /search` - Search users
 
 ### 👥 Teams (`/api/v1/teams`)
@@ -196,7 +200,25 @@ The Milokhelo backend provides 70+ API endpoints across 14 modules:
 - `POST /:matchId/join` - Join match
 - `POST /:matchId/leave` - Leave match
 - `POST /:matchId/start` - Start match
-- `POST /:matchId/finish` - Finish match
+- `POST /:matchId/finish` - Finish match (auto-updates participant stats via events)
+
+**Stats Auto-Update Features:**
+
+- ✅ Automatic win/loss/draw tracking
+- ✅ ELO rating system (±32 competitive, ±16 friendly)
+- ✅ Winning/losing streak tracking
+- ✅ Detailed performance metrics (goals, assists, fouls)
+- ✅ Multi-sport support with separate stats
+
+**Achievement System Features:**
+
+- ✅ 31 predefined achievements (milestones, skills, participation)
+- ✅ Automatic evaluation when stats update
+- ✅ 5 criteria types (threshold, total, ratio, streak, composite)
+- ✅ Multiple rarity levels (common, rare, epic, legendary)
+- ✅ Points system for gamification
+- ✅ Sport-specific and cross-sport achievements
+- ✅ Event-driven architecture for reliability
 
 ### 🏆 Tournaments (`/api/v1/tournaments`)
 
@@ -205,8 +227,18 @@ The Milokhelo backend provides 70+ API endpoints across 14 modules:
 - `GET /:tournamentId` - Get tournament details
 - `PATCH /:tournamentId` - Update tournament
 - `POST /:tournamentId/register` - Register team
-- `POST /:tournamentId/start` - Start tournament
-- `GET /:tournamentId/bracket` - Get bracket
+- `POST /:tournamentId/start` - Start tournament and generate bracket
+- `GET /:tournamentId/bracket` - Get tournament bracket
+- `POST /:tournamentId/match-result` - Update match result
+
+**Bracket Features:**
+- ✅ Knockout (single-elimination) tournaments
+- ✅ League (round-robin) tournaments  
+- ✅ Automatic seeding and bye handling
+- ✅ Real-time standings and progression
+- ✅ Winner advancement and elimination tracking
+
+> **📖 For detailed bracket documentation, see [`docs/BRACKET_GENERATION.md`](docs/BRACKET_GENERATION.md)**
 
 ### 💬 Chat (`/api/v1/chat`)
 
@@ -357,10 +389,17 @@ All project documentation is organized in the `docs/` directory:
 - [`docs/CODEBASE_ANALYSIS.md`](docs/CODEBASE_ANALYSIS.md) - Comprehensive codebase analysis
 - [`docs/IMPROVEMENTS.md`](docs/IMPROVEMENTS.md) - Improvement tracking and technical debt
 
-### Authentication Documentation
+### Feature Documentation
 
+- [`docs/BRACKET_GENERATION.md`](docs/BRACKET_GENERATION.md) - Tournament bracket generation system
+- [`docs/STATS_AUTO_UPDATE.md`](docs/STATS_AUTO_UPDATE.md) - Stats auto-update system documentation
+- [`docs/ACHIEVEMENTS.md`](docs/ACHIEVEMENTS.md) - Achievement system documentation and criteria
 - [`docs/OAUTH_SETUP.md`](docs/OAUTH_SETUP.md) - Complete OAuth setup guide (Google & Facebook)
 - [`docs/OAUTH_IMPLEMENTATION.md`](docs/OAUTH_IMPLEMENTATION.md) - OAuth implementation details and architecture
+
+### API Documentation
+
+- [`docs/openapi.yaml`](docs/openapi.yaml) - Complete OpenAPI 3.1 specification with all endpoints and schemas
 
 ## 🔌 EventBus
 

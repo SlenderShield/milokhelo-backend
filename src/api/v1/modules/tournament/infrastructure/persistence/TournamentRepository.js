@@ -33,4 +33,17 @@ export class TournamentRepository {
   async addTeam(tournamentId, teamId) {
     return TournamentModel.findByIdAndUpdate(tournamentId, { $addToSet: { teams: teamId } }, { new: true }).lean();
   }
+
+  async getBracket(tournamentId) {
+    const tournament = await TournamentModel.findById(tournamentId).select('bracket').lean();
+    return tournament?.bracket || null;
+  }
+
+  async updateBracket(tournamentId, bracket) {
+    return TournamentModel.findByIdAndUpdate(tournamentId, { bracket }, { new: true }).lean();
+  }
+
+  async findByIdWithTeams(tournamentId) {
+    return TournamentModel.findById(tournamentId).populate('teams').lean();
+  }
 }
