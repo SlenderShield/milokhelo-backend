@@ -49,15 +49,15 @@ This document describes the architecture of the Milokhelo Backend, a modular mon
 
 ## Architectural Layers
 
-### 1. Infrastructure Layer
+### 1. Core Layer
 
-Located in `src/infrastructure/`, provides core technical capabilities:
+Located in `src/core/`, provides foundational technical capabilities:
 
-#### Configuration (`config/`)
+#### Container (`container/`)
 
-- Environment-based configuration loading
-- Validation of required settings
-- Type-safe configuration access
+- IoC container for managing dependencies
+- Singleton and transient registrations
+- Service location and resolution
 
 #### Database (`database/`)
 
@@ -65,59 +65,95 @@ Located in `src/infrastructure/`, provides core technical capabilities:
 - Connection lifecycle handling
 - Health checks
 
-#### EventBus (`eventBus/`)
+#### Events (`events/`)
 
 - Event-driven communication backbone
 - Multiple adapters (InMemory, Redis)
 - Publisher-Subscriber pattern
 
-#### Dependency Injection (`di/`)
+#### HTTP (`http/`)
 
-- IoC container for managing dependencies
-- Singleton and transient registrations
-- Service location and resolution
+- Middlewares (request logging, error handling, security)
+- Health check endpoints
+- HTTP layer abstractions
 
-#### Logging (`logger/`)
+#### Logging (`logging/`)
 
-- Centralized logging with Winston
-- Structured logging support
-- Environment-specific formats
-- Child loggers with context
+- Advanced centralized logging with Winston
+- Structured logging with metadata
+- Environment-specific formats (JSON for production, pretty for development)
+- Child loggers with inherited context
+- Request correlation with unique IDs
+- Performance tracking and timers
+- Security and audit logging
+- Automatic sensitive data redaction
+- Log rotation and archiving
+- Multiple log files (error, warning, combined)
 
-### 2. Module Layer
+**Key Components:**
+- `logger.js` - Core Logger and ChildLogger classes
+- `config.js` - Environment-based configuration and redaction
+- `utils.js` - Formatting helpers and utilities
+- `index.js` - Centralized exports
 
-Located in `src/modules/`, contains business modules:
+**Features:**
+- `startTimer()` / `endTimer()` - Performance tracking
+- `logWithTiming()` - Automatic async operation timing
+- `security()` - Security event logging
+- `audit()` - Audit trail with timestamps
+- `logEvent()` - Structured business event logging
+- Request-scoped loggers via `req.logger`
+
+See [docs/LOGGING.md](LOGGING.md) for complete documentation.
+
+### 2. Configuration Layer
+
+Located in `src/config/`, handles application configuration:
+
+- Environment-based configuration loading
+- Validation of required settings
+- Type-safe configuration access
+- Environment-specific settings in `environments/`
+
+### 3. API Layer
+
+Located in `src/api/`, contains versioned API implementations:
+
+#### Version 1 (`v1/`)
 
 Each module follows this structure:
 
-#### Domain Layer
+##### Domain Layer (`modules/[module-name]/domain/`)
 
 - **Entities**: Core business objects with behavior
 - **Interfaces**: Contracts for repositories and services
 - **Value Objects**: Immutable objects representing concepts
 - **Domain Events**: Business events
 
-#### Application Layer
+##### Application Layer (`modules/[module-name]/application/`)
 
 - **Services**: Orchestrate business logic
 - **Use Cases**: Specific business operations
 - **DTOs**: Data transfer objects
 - **Event Handlers**: React to domain events
 
-#### Infrastructure Layer
+##### Infrastructure Layer (`modules/[module-name]/infrastructure/`)
 
-- **Models**: Database schemas (Mongoose)
-- **Repositories**: Data access implementations
-- **Controllers**: HTTP request handlers
-- **Routes**: API endpoint definitions
+- **Persistence** (`persistence/`): 
+  - Models: Database schemas (Mongoose)
+  - Repositories: Data access implementations
+- **HTTP** (`http/`):
+  - Controllers: HTTP request handlers
+  - Routes: API endpoint definitions
 
-### 3. Shared Layer
+### 4. Common Layer
 
-Located in `src/shared/`, contains cross-cutting concerns:
+Located in `src/common/`, contains cross-cutting concerns:
 
 - **Constants**: Application-wide constants
 - **Utils**: Reusable utility functions
 - **Types**: Shared type definitions
+- **Interfaces**: Shared interface contracts
 
 ## Event-Driven Architecture
 
@@ -214,13 +250,23 @@ Configuration is loaded based on `NODE_ENV`:
 ```
 HTTP Request
   ↓
-Routes
+Express App (app.js)
   ↓
-Controller (Infrastructure)
+Security Middlewares (Helmet, CORS, Rate Limit)
   ↓
-Service (Application)
+Body Parser Middleware
   ↓
-Repository (Infrastructure)
+Request Logger Middleware
+  ↓
+API Router (v1/routes.js)
+  ↓
+Module Router
+  ↓
+Controller (infrastructure/http)
+  ↓
+Service (application)
+  ↓
+Repository (infrastructure/persistence)
   ↓
 Database
 ```

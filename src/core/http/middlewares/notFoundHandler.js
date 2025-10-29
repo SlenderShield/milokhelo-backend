@@ -2,7 +2,7 @@
  * Not Found Handler Middleware
  * Handles 404 errors for undefined routes
  */
-import { HTTP_STATUS, ERROR_CODES } from '../../shared/constants/index.js';
+import { HTTP_STATUS, ERROR_CODES } from '../../../common/constants/index.js';
 
 function notFoundHandler() {
   return (req, res) => {

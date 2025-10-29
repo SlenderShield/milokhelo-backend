@@ -2,7 +2,7 @@
  * Example Service - Application Layer
  * Contains business logic and orchestrates domain operations
  */
-import { EVENTS } from '../../../shared/constants/index.js';
+import { EVENTS } from '../../../../../common/constants/index.js';
 
 class ExampleService {
   constructor(repository, eventBus, logger) {

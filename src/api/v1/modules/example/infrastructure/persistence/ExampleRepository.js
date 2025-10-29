@@ -2,8 +2,8 @@
  * Example Repository Implementation
  * Concrete implementation of IExampleRepository using MongoDB
  */
-import IExampleRepository from '../domain/IExampleRepository.js';
-import ExampleEntity from '../domain/ExampleEntity.js';
+import IExampleRepository from '../../domain/IExampleRepository.js';
+import ExampleEntity from '../../domain/ExampleEntity.js';
 import ExampleModel from './ExampleModel.js';
 
 class ExampleRepository extends IExampleRepository {

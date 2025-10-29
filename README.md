@@ -17,24 +17,34 @@ This project implements a **Modular Monolith** architecture that provides:
 
 ```
 src/
-├── infrastructure/          # Core infrastructure services
-│   ├── config/             # Configuration loader
-│   ├── database/           # Database connection management
-│   ├── eventBus/           # Event bus implementations
-│   ├── di/                 # Dependency injection container
-│   └── logger/             # Centralized logging
-├── modules/                # Business modules (bounded contexts)
-│   └── example/
-│       ├── domain/         # Business entities & interfaces
-│       ├── application/    # Business logic & services
-│       └── infrastructure/ # Data access, routes, controllers
-├── shared/                 # Shared utilities and constants
-│   ├── constants/
-│   ├── types/
-│   └── utils/
-├── app.js                  # Express app configuration
-├── bootstrap.js            # Application initialization
-└── server.js               # Server entry point
+├── core/                      # Core infrastructure services
+│   ├── container/            # Dependency injection container
+│   ├── database/             # Database connection management
+│   ├── events/               # Event bus implementations
+│   ├── http/                 # HTTP layer (middlewares, health checks)
+│   │   ├── middlewares/     # Express middlewares
+│   │   └── errors/          # Error handling
+│   └── logging/              # Centralized logging
+├── config/                   # Configuration management
+│   └── environments/         # Environment-specific configs
+├── api/                      # API layer
+│   └── v1/                  # API version 1
+│       ├── modules/         # Business modules (bounded contexts)
+│       │   └── example/
+│       │       ├── domain/              # Business entities & interfaces
+│       │       ├── application/         # Business logic & services
+│       │       └── infrastructure/      # Technical implementation
+│       │           ├── persistence/    # Data access layer
+│       │           └── http/           # Routes & controllers
+│       └── routes.js        # API v1 router configuration
+├── common/                   # Shared code across modules
+│   ├── constants/           # Application constants
+│   ├── utils/               # Utility functions
+│   ├── types/               # Type definitions
+│   └── interfaces/          # Shared interfaces
+├── app.js                    # Express app configuration
+├── bootstrap.js              # Application initialization
+└── server.js                 # Server entry point
 ```
 
 ## 🚀 Features
@@ -43,7 +53,13 @@ src/
 - ✅ **Event-Driven Communication**: Modules communicate via events (in-memory or Redis)
 - ✅ **Dependency Injection**: Loose coupling with IoC container
 - ✅ **Environment-Based Configuration**: Separate configs for dev, test, production
-- ✅ **Centralized Logging**: Winston-based structured logging
+- ✅ **Advanced Logging System**: 
+  - Structured logging with Winston
+  - Request correlation with unique IDs
+  - Performance tracking and timers
+  - Security and audit logging
+  - Automatic sensitive data redaction
+  - Log rotation and archiving
 - ✅ **Health Checks**: Built-in health check endpoints
 - ✅ **Docker Support**: Docker Compose for MongoDB and Redis
 - ✅ **Code Quality**: ESLint and Prettier configured
@@ -148,6 +164,17 @@ modules/[module-name]/
     └── index.js        # Module exports
 ```
 
+> **📖 For detailed architecture guidelines, see [`.copilot-rules.md`](.copilot-rules.md)**
+
+## 📚 Documentation
+
+All project documentation is organized in the `docs/` directory:
+
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - System architecture and design patterns
+- [`docs/QUICKSTART.md`](docs/QUICKSTART.md) - Quick start guide for developers
+- [`docs/CODEBASE_ANALYSIS.md`](docs/CODEBASE_ANALYSIS.md) - Comprehensive codebase analysis
+- [`docs/IMPROVEMENTS.md`](docs/IMPROVEMENTS.md) - Improvement tracking and technical debt
+
 ## 🔌 EventBus
 
 The EventBus enables decoupled inter-module communication.
@@ -184,26 +211,89 @@ eventBus.subscribe('user.created', async (data) => {
 });
 ```
 
+## 📝 Logging
+
+The application features an advanced logging system built on Winston. See [docs/LOGGING.md](docs/LOGGING.md) for complete documentation.
+
+### Quick Start
+
+```javascript
+import { getLogger } from './core/logging/index.js';
+
+const logger = getLogger();
+
+// Basic logging
+logger.info('User logged in', { userId: '123' });
+logger.error('Operation failed', { error: error.message });
+
+// Child logger with context
+const serviceLogger = logger.child({ service: 'PaymentService' });
+serviceLogger.info('Processing payment', { amount: 99.99 });
+
+// Performance tracking
+const trackingId = logger.startTimer('database-query');
+// ... perform operation ...
+logger.endTimer(trackingId);
+
+// Security logging
+logger.security('failed-login-attempt', { email, ip, attempts: 3 });
+
+// Audit logging
+logger.audit('user-deleted', { performedBy: adminId, targetUser: userId });
+```
+
+### Request Logging
+
+Each HTTP request automatically gets:
+- Unique request ID for correlation
+- Request-scoped logger (`req.logger`)
+- Automatic performance metrics
+
+```javascript
+// In controllers
+req.logger.info('Processing request', { userId: req.user.id });
+```
+
+### Features
+
+- **Structured Logging**: JSON in production, pretty format in development
+- **Request Correlation**: Track requests with unique IDs
+- **Performance Tracking**: Built-in timers and metrics
+- **Security & Audit**: Dedicated methods for security events and audit trails
+- **Auto Redaction**: Sensitive data (passwords, tokens) automatically redacted
+- **Log Rotation**: Automatic file rotation (5MB max, 5 files)
+
 ## 🎯 Adding New Modules
 
 1. **Create module structure**
 
 ```bash
-mkdir -p src/modules/your-module/{domain,application,infrastructure}
+mkdir -p src/api/v1/modules/your-module/{domain,application,infrastructure/{persistence,http}}
 ```
 
 2. **Implement domain layer** (entities, interfaces)
 
 3. **Implement application layer** (services, business logic)
 
-4. **Implement infrastructure layer** (models, repositories, controllers, routes)
+4. **Implement infrastructure layer**
+   - Persistence: models, repositories
+   - HTTP: controllers, routes
 
-5. **Create module initializer** in `src/modules/your-module/index.js`
+5. **Create module initializer** in `src/api/v1/modules/your-module/index.js`
 
-6. **Register in bootstrap** (`src/bootstrap.js`)
+6. **Register in API router** (`src/api/v1/routes.js`)
 
 ```javascript
-const { initializeYourModule } = require('./modules/your-module');
+import { createYourModuleRoutes } from './modules/your-module/index.js';
+
+// In createV1Router function:
+router.use('/your-module', createYourModuleRoutes(container.resolve('yourModuleController')));
+```
+
+7. **Initialize module in bootstrap** (`src/bootstrap.js`)
+
+```javascript
+const { initializeYourModule } = require('./api/v1/modules/your-module');
 initializeYourModule(container);
 ```
 

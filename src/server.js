@@ -11,7 +11,7 @@ async function startServer() {
     const { config, logger, container, dbConnection, eventBus } = await bootstrap();
 
     // Create Express app
-    const app = createApp(config, logger, container);
+    const app = await createApp(config, logger, container);
 
     // Start HTTP server
     const server = app.listen(config.get('app.port'), config.get('app.host'), () => {

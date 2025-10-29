@@ -164,13 +164,87 @@ container.registerSingleton('exampleService', () => {
 const service = container.resolve('exampleService');
 ```
 
-### 3. Centralized Logging
+### 3. Advanced Logging System
 
-All logs are structured and context-aware:
+The application features a comprehensive logging system with multiple capabilities:
+
+#### Basic Logging
 
 ```javascript
-logger.info('Creating example entity', { data });
+import { getLogger } from './core/logging/index.js';
+
+const logger = getLogger();
+
+logger.info('User action', { userId: '123', action: 'login' });
+logger.error('Operation failed', { error: error.message });
+logger.warn('Rate limit approaching', { current: 95, limit: 100 });
+logger.debug('Processing data', { records: 42 });
 ```
+
+#### Request Logging
+
+Each HTTP request automatically includes:
+
+```javascript
+// In controllers - req.logger has request context
+req.logger.info('Processing payment', { amount: 99.99 });
+// Logs include: requestId, method, path, and your data
+```
+
+#### Performance Tracking
+
+```javascript
+// Start a timer
+const trackingId = logger.startTimer('database-query', { collection: 'users' });
+const users = await userRepository.findAll();
+logger.endTimer(trackingId, { count: users.length });
+
+// Or use automatic timing
+const result = await logger.logWithTiming('fetch-data', async () => {
+  return await fetchData();
+});
+```
+
+#### Specialized Logging
+
+```javascript
+// Security events
+logger.security('failed-login-attempt', { email, ip, attempts: 3 });
+
+// Audit trail
+logger.audit('user-deleted', { 
+  performedBy: adminId, 
+  targetUser: userId 
+});
+
+// Business events
+logger.logEvent('payment.completed', { 
+  orderId, 
+  amount, 
+  currency 
+});
+```
+
+#### Child Loggers with Context
+
+```javascript
+// Create a child logger with service context
+const serviceLogger = logger.child({ service: 'PaymentService' });
+
+// All logs from this logger include the context
+serviceLogger.info('Processing payment'); 
+// { service: 'PaymentService', message: 'Processing payment', ... }
+```
+
+**Features:**
+- Request correlation with unique IDs
+- Automatic sensitive data redaction
+- Environment-specific formatting
+- Log rotation (production)
+- Performance metrics
+- Security and audit logging
+
+See [docs/LOGGING.md](./LOGGING.md) for complete documentation.
 
 ### 4. Environment-Based Configuration
 
@@ -247,10 +321,19 @@ PORT=3001
 ### Adding a New Module
 
 ```bash
-mkdir -p src/modules/your-module/{domain,application,infrastructure}
+mkdir -p src/api/v1/modules/your-module/{domain,application,infrastructure/{persistence,http}}
 ```
 
-Then follow the pattern established in `src/modules/example/`.
+Then follow the pattern established in `src/api/v1/modules/example/`.
+
+Key steps:
+1. Create domain entities and interfaces in `domain/`
+2. Create application services in `application/`
+3. Create models and repositories in `infrastructure/persistence/`
+4. Create controllers and routes in `infrastructure/http/`
+5. Export module initializer in `index.js`
+6. Register module routes in `src/api/v1/routes.js`
+7. Initialize module in `src/bootstrap.js`
 
 ### Switching to Redis EventBus
 

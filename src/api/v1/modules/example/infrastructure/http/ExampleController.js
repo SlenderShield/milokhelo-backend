@@ -1,9 +1,9 @@
 /**
- * Example Controller
- * Handles HTTP requests for the example module
+ * Example Controller - Infrastructure Layer
+ * Handles HTTP requests and responses
  */
-import { asyncHandler } from '../../../shared/utils/index.js';
-import { HTTP_STATUS } from '../../../shared/constants/index.js';
+import { asyncHandler } from '../../../../../../common/utils/index.js';
+import { HTTP_STATUS } from '../../../../../../common/constants/index.js';
 
 class ExampleController {
   constructor(exampleService, logger) {

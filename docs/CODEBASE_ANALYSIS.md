@@ -194,28 +194,77 @@ The codebase implements a **Clean Modular Monolith** architecture with the follo
 
 ---
 
-### 3.2 Logger System (`/src/infrastructure/logger`)
+### 3.2 Logger System (`/src/core/logging`)
 
 **Files:**
 
-1. `logger.js` (127 lines)
-2. `index.js` (6 lines)
+1. `logger.js` (~300 lines) - Core Logger and ChildLogger classes
+2. `config.js` (~120 lines) - Configuration and redaction utilities
+3. `utils.js` (~200 lines) - Formatting helpers and utilities
+4. `index.js` (45 lines) - Centralized exports
 
-**Architecture:** Winston-based structured logging with context support
+**Architecture:** Winston-based advanced structured logging with extensive features
 
 **Key Classes:**
 
-- `Logger`: Main logger class with transport configuration
-- `ChildLogger`: Context-aware logger instance
+- `Logger`: Enhanced main logger with performance tracking and specialized methods
+- `ChildLogger`: Context-aware logger with inherited functionality
 
-**Features:**
+**Enhanced Features:**
 
+**Core Logging:**
 - Environment-based formatting (JSON for prod, pretty for dev)
-- Multiple log levels: error, warn, info, debug, verbose
-- File transports for production (error.log, combined.log)
-- Console transport for all environments
-- Colorized output in development
-- Child loggers with context metadata
+- Multiple log levels: error, warn, info, http, verbose, debug, silly
+- File transports with rotation (error.log, warnings.log, combined.log)
+- Console transport with colorization
+- Automatic error serialization with stack traces
+
+**Performance Tracking:**
+- `startTimer(label, meta)` - Start operation timer
+- `endTimer(trackingId, meta)` - End timer and log duration
+- `logWithTiming(label, fn, meta)` - Automatic async operation timing
+- Performance summaries and metrics
+
+**Specialized Logging:**
+- `security(action, details)` - Security event logging with severity
+- `audit(action, details)` - Audit trail with timestamps
+- `logEvent(eventName, data)` - Structured business event logging
+- `http(message, meta)` - HTTP-specific logging level
+
+**Request Correlation:**
+- Automatic unique request ID generation (UUID)
+- Request-scoped loggers (`req.logger`)
+- X-Request-ID header support
+- Distributed tracing context
+
+**Data Protection:**
+- Automatic sensitive data redaction (passwords, tokens, etc.)
+- Configurable sensitive field list
+- Recursive object sanitization
+
+**Log Management:**
+- Automatic log rotation (5MB max file size)
+- Retention policy (5 files per type)
+- Separate files by level (errors, warnings, combined)
+- Environment-specific configurations
+
+**Utilities (`utils.js`):**
+- `formatError()` - Structured error formatting
+- `formatDatabaseQuery()` - DB query logging with sanitization
+- `formatApiCall()` - API call logging
+- `formatEvent()` - Business event formatting
+- `formatAuditLog()` - Audit trail formatting
+- `formatSecurityEvent()` - Security event with severity
+- `measureOperation()` - Measure and log async operations
+- `createCorrelationContext()` - Distributed tracing context
+
+**Configuration (`config.js`):**
+- Environment-specific settings (dev, test, prod)
+- Log level configuration
+- Sensitive field definitions
+- HTTP status to log level mapping
+- `redactSensitiveInfo()` - Automatic data redaction
+- `getLogLevelForStatus()` - Status code level mapping
 
 **Usage Pattern:**
 
@@ -223,16 +272,30 @@ The codebase implements a **Clean Modular Monolith** architecture with the follo
 // Create main logger
 const logger = createLogger(config);
 
-// Create child logger with context
-const childLogger = logger.child({ context: 'UserService' });
-childLogger.info('User created', { userId: '123' });
+// Child logger with context
+const serviceLogger = logger.child({ service: 'UserService' });
+
+// Performance tracking
+const trackingId = serviceLogger.startTimer('database-query');
+const users = await repository.findAll();
+serviceLogger.endTimer(trackingId, { count: users.length });
+
+// Specialized logging
+serviceLogger.security('unauthorized-access', { userId, resource });
+serviceLogger.audit('user-deleted', { performedBy, targetUser });
+serviceLogger.logEvent('payment.completed', { orderId, amount });
+
+// Request logging (automatic via middleware)
+req.logger.info('Processing request', { userId: req.user.id });
 ```
 
-**Design Pattern:** Singleton + Factory + Builder
+**Design Pattern:** Singleton + Factory + Builder + Strategy
+
+**Documentation:** Complete guide available in [docs/LOGGING.md](LOGGING.md)
 
 ---
 
-### 3.3 Event Bus System (`/src/infrastructure/eventBus`)
+### 3.3 Event Bus System (`/src/core/events`)
 
 **Files:**
 

@@ -10,8 +10,9 @@ import {
   configureHelmet,
   configureCORS,
   configureRateLimit,
-} from './infrastructure/middlewares/index.js';
-import { createHealthRoutes } from './infrastructure/health/index.js';
+} from './core/http/index.js';
+import { createHealthRoutes } from './core/http/index.js';
+import { createV1Router } from './api/v1/routes.js';
 
 async function createApp(config, logger, container) {
   const app = express();
@@ -38,12 +39,7 @@ async function createApp(config, logger, container) {
   }
 
   // API routes will be mounted here
-  const apiRouter = express.Router();
-
-  // Example module routes
-  const { createExampleRoutes } = await import('./modules/example/index.js');
-  const exampleController = container.resolve('exampleController');
-  apiRouter.use('/examples', createExampleRoutes(exampleController));
+  const apiRouter = createV1Router(container);
 
   // Mount API router
   app.use(config.get('app.apiPrefix'), apiRouter);

@@ -2,15 +2,15 @@
  * Application Bootstrap
  * Initializes all infrastructure and modules
  */
-import { getConfig } from './infrastructure/config/index.js';
-import { createLogger } from './infrastructure/logger/index.js';
-import { getContainer } from './infrastructure/di/index.js';
-import { MongoDBConnection, DatabaseHealthCheck } from './infrastructure/database/index.js';
-import { EventBusFactory } from './infrastructure/eventBus/index.js';
-import { EVENTS } from './shared/constants/index.js';
+import { getConfig } from './config/index.js';
+import { createLogger } from './core/logging/index.js';
+import { getContainer } from './core/container/index.js';
+import { MongoDBConnection, DatabaseHealthCheck } from './core/database/index.js';
+import { EventBusFactory } from './core/events/index.js';
+import { EVENTS } from './common/constants/index.js';
 
 // Import module initializers
-import { initializeExampleModule } from './modules/example/index.js';
+import { initializeExampleModule } from './api/v1/modules/example/index.js';
 
 async function bootstrap() {
   // 1. Load configuration
