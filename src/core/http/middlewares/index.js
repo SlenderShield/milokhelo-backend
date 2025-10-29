@@ -13,6 +13,18 @@ import {
 } from './security.js';
 import { createSessionMiddleware } from './sessionMiddleware.js';
 import { asyncHandler } from './asyncHandler.js';
+import { validateRequest, validate } from './validationMiddleware.js';
+import {
+  requireAuth,
+  requireRole,
+  requirePermission,
+  requireMinRole,
+  requireOwnership,
+  hasRole,
+  hasPermission,
+  ROLE_HIERARCHY,
+  PERMISSIONS,
+} from './authorizationMiddleware.js';
 
 export {
   errorHandler,
@@ -24,4 +36,15 @@ export {
   configureAuthRateLimit,
   createSessionMiddleware,
   asyncHandler,
+  validateRequest,
+  validate,
+  requireAuth,
+  requireRole,
+  requirePermission,
+  requireMinRole,
+  requireOwnership,
+  hasRole,
+  hasPermission,
+  ROLE_HIERARCHY,
+  PERMISSIONS,
 };
