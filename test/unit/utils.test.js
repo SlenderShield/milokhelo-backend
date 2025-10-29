@@ -10,7 +10,7 @@ import {
   pick,
   omit,
   retry,
-} from '../../src/shared/utils/index.js';
+} from '../../src/common/utils/index.js';
 
 describe('Shared Utilities', () => {
   describe('isEmpty()', () => {
