@@ -2,9 +2,6 @@
  * Infrastructure Utils Module
  * Entry point for infrastructure utilities
  */
-const { validateEnv, validateEnvType } = require('./validateEnv');
+import { validateEnv, validateEnvType } from './validateEnv.js';
 
-module.exports = {
-  validateEnv,
-  validateEnvType,
-};
+export { validateEnv, validateEnvType };

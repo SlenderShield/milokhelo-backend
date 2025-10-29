@@ -2,8 +2,8 @@
  * Example Controller
  * Handles HTTP requests for the example module
  */
-const { asyncHandler } = require('../../../shared/utils');
-const { HTTP_STATUS } = require('../../../shared/constants');
+import { asyncHandler } from '../../../shared/utils/index.js';
+import { HTTP_STATUS } from '../../../shared/constants/index.js';
 
 class ExampleController {
   constructor(exampleService, logger) {
@@ -73,4 +73,4 @@ class ExampleController {
   }
 }
 
-module.exports = ExampleController;
+export default ExampleController;

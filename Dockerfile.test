@@ -1,0 +1,16 @@
+# Test Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies including dev dependencies
+RUN npm install
+
+# Copy application code
+COPY . .
+
+# Run tests
+CMD ["npm", "test"]

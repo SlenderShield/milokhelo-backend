@@ -2,7 +2,7 @@
  * MongoDB Connection Manager
  * Handles MongoDB connection lifecycle
  */
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 class MongoDBConnection {
   constructor(config, logger) {
@@ -87,4 +87,4 @@ class MongoDBConnection {
   }
 }
 
-module.exports = MongoDBConnection;
+export default MongoDBConnection;

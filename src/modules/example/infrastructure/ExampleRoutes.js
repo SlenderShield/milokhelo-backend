@@ -1,7 +1,7 @@
 /**
  * Example Module Routes
  */
-const express = require('express');
+import express from 'express';
 
 function createExampleRoutes(controller) {
   const router = express.Router();
@@ -15,4 +15,4 @@ function createExampleRoutes(controller) {
   return router;
 }
 
-module.exports = createExampleRoutes;
+export default createExampleRoutes;

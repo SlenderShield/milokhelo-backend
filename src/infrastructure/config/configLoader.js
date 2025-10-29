@@ -3,14 +3,19 @@
  * Loads and validates configuration based on NODE_ENV
  * Supports: development, test, production
  */
-const dotenv = require('dotenv');
+import dotenv from 'dotenv';
 
 class ConfigLoader {
   constructor() {
     this.env = process.env.NODE_ENV || 'development';
     this.loadEnvironmentVariables();
-    this.config = this.loadConfig();
+    this.config = null;
+  }
+
+  async initialize() {
+    this.config = await this.loadConfig();
     this.validateConfig();
+    return this;
   }
 
   loadEnvironmentVariables() {
@@ -22,11 +27,11 @@ class ConfigLoader {
     dotenv.config({ path: envFile, override: true });
   }
 
-  loadConfig() {
+  async loadConfig() {
     try {
-      // Load environment-specific configuration
-      const envConfig = require(`./env/${this.env}`);
-      return envConfig;
+      // Load environment-specific configuration using dynamic import
+      const envConfig = await import(`./env/${this.env}.js`);
+      return envConfig.default;
     } catch (error) {
       console.error(`Failed to load config for environment: ${this.env}`);
       throw error;
@@ -81,4 +86,4 @@ class ConfigLoader {
   }
 }
 
-module.exports = ConfigLoader;
+export default ConfigLoader;

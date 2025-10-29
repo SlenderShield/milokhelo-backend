@@ -1,7 +1,7 @@
 /**
  * Test Environment Configuration
  */
-module.exports = {
+export default {
   env: 'test',
 
   app: {
@@ -33,6 +33,15 @@ module.exports = {
 
   eventBus: {
     adapter: process.env.EVENT_BUS_ADAPTER || 'memory',
+  },
+
+  security: {
+    corsOrigins: ['http://localhost:3000'],
+    enableRateLimit: false, // Disable rate limiting in tests
+    rateLimitWindowMs: 900000,
+    rateLimitMax: 1000,
+    authRateLimitWindowMs: 900000,
+    authRateLimitMax: 50,
   },
 
   features: {

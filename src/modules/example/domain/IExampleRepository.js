@@ -24,4 +24,4 @@ class IExampleRepository {
   }
 }
 
-module.exports = IExampleRepository;
+export default IExampleRepository;

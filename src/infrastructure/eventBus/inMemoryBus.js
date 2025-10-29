@@ -2,7 +2,7 @@
  * In-Memory EventBus Implementation
  * Suitable for single-instance applications and development
  */
-const IEventBus = require('./IEventBus');
+import IEventBus from './IEventBus.js';
 
 class InMemoryEventBus extends IEventBus {
   constructor(logger) {
@@ -79,4 +79,4 @@ class InMemoryEventBus extends IEventBus {
   }
 }
 
-module.exports = InMemoryEventBus;
+export default InMemoryEventBus;

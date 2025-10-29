@@ -2,6 +2,6 @@
  * Health Module
  * Entry point for health check infrastructure
  */
-const createHealthRoutes = require('./healthRoutes');
+import createHealthRoutes from './healthRoutes.js';
 
-module.exports = { createHealthRoutes };
+export { createHealthRoutes };

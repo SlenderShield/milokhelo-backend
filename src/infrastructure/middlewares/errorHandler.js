@@ -2,7 +2,7 @@
  * Global Error Handler Middleware
  * Handles all errors in the application
  */
-const { HTTP_STATUS, ERROR_CODES } = require('../../shared/constants');
+import { HTTP_STATUS, ERROR_CODES } from '../../shared/constants/index.js';
 
 function errorHandler(logger, config) {
   // eslint-disable-next-line no-unused-vars
@@ -28,4 +28,4 @@ function errorHandler(logger, config) {
   };
 }
 
-module.exports = errorHandler;
+export default errorHandler;

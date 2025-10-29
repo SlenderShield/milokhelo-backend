@@ -1,10 +1,10 @@
-const globals = require('globals');
+import globals from 'globals';
 
-module.exports = [
+export default [
   {
     languageOptions: {
       ecmaVersion: 2021,
-      sourceType: 'commonjs',
+      sourceType: 'module',
       globals: {
         ...globals.node,
         ...globals.es2021,

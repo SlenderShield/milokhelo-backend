@@ -2,9 +2,9 @@
  * Example Repository Implementation
  * Concrete implementation of IExampleRepository using MongoDB
  */
-const IExampleRepository = require('../domain/IExampleRepository');
-const ExampleEntity = require('../domain/ExampleEntity');
-const ExampleModel = require('./ExampleModel');
+import IExampleRepository from '../domain/IExampleRepository.js';
+import ExampleEntity from '../domain/ExampleEntity.js';
+import ExampleModel from './ExampleModel.js';
 
 class ExampleRepository extends IExampleRepository {
   constructor(logger) {
@@ -76,4 +76,4 @@ class ExampleRepository extends IExampleRepository {
   }
 }
 
-module.exports = ExampleRepository;
+export default ExampleRepository;

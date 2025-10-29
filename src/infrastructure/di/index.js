@@ -2,6 +2,6 @@
  * Dependency Injection Module
  * Entry point for DI container
  */
-const { DIContainer, getContainer, createContainer } = require('./container');
+import { DIContainer, getContainer, createContainer } from './container.js';
 
-module.exports = { DIContainer, getContainer, createContainer };
+export { DIContainer, getContainer, createContainer };

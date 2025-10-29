@@ -2,19 +2,19 @@
  * Application Bootstrap
  * Initializes all infrastructure and modules
  */
-const { getConfig } = require('./infrastructure/config');
-const { createLogger } = require('./infrastructure/logger');
-const { getContainer } = require('./infrastructure/di');
-const { MongoDBConnection, DatabaseHealthCheck } = require('./infrastructure/database');
-const { EventBusFactory } = require('./infrastructure/eventBus');
-const { EVENTS } = require('./shared/constants');
+import { getConfig } from './infrastructure/config/index.js';
+import { createLogger } from './infrastructure/logger/index.js';
+import { getContainer } from './infrastructure/di/index.js';
+import { MongoDBConnection, DatabaseHealthCheck } from './infrastructure/database/index.js';
+import { EventBusFactory } from './infrastructure/eventBus/index.js';
+import { EVENTS } from './shared/constants/index.js';
 
 // Import module initializers
-const { initializeExampleModule } = require('./modules/example');
+import { initializeExampleModule } from './modules/example/index.js';
 
 async function bootstrap() {
   // 1. Load configuration
-  const config = getConfig();
+  const config = await getConfig();
   console.log(`🚀 Starting ${config.get('app.name')} in ${config.env} mode...`);
 
   // 2. Initialize logger
@@ -108,4 +108,4 @@ async function shutdown(components) {
   logger.info('Application shutdown complete');
 }
 
-module.exports = { bootstrap, shutdown };
+export { bootstrap, shutdown };

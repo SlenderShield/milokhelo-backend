@@ -2,14 +2,9 @@
  * EventBus Module
  * Entry point for event bus infrastructure
  */
-const IEventBus = require('./IEventBus');
-const InMemoryEventBus = require('./inMemoryBus');
-const RedisEventBus = require('./redisBus');
-const EventBusFactory = require('./EventBusFactory');
+import IEventBus from './IEventBus.js';
+import InMemoryEventBus from './inMemoryBus.js';
+import RedisEventBus from './redisBus.js';
+import EventBusFactory from './EventBusFactory.js';
 
-module.exports = {
-  IEventBus,
-  InMemoryEventBus,
-  RedisEventBus,
-  EventBusFactory,
-};
+export { IEventBus, InMemoryEventBus, RedisEventBus, EventBusFactory };

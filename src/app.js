@@ -2,12 +2,28 @@
  * Express Application Factory
  * Creates and configures the Express application
  */
-const express = require('express');
-const { requestLogger, errorHandler, notFoundHandler } = require('./infrastructure/middlewares');
-const { createHealthRoutes } = require('./infrastructure/health');
+import express from 'express';
+import {
+  requestLogger,
+  errorHandler,
+  notFoundHandler,
+  configureHelmet,
+  configureCORS,
+  configureRateLimit,
+} from './infrastructure/middlewares/index.js';
+import { createHealthRoutes } from './infrastructure/health/index.js';
 
-function createApp(config, logger, container) {
+async function createApp(config, logger, container) {
   const app = express();
+
+  // Security middleware - must be first
+  app.use(configureHelmet());
+  app.use(configureCORS(config));
+  
+  // Rate limiting
+  if (config.get('security.enableRateLimit') !== false) {
+    app.use(configureRateLimit(config));
+  }
 
   // Body parsing middleware
   app.use(express.json());
@@ -25,7 +41,7 @@ function createApp(config, logger, container) {
   const apiRouter = express.Router();
 
   // Example module routes
-  const { createExampleRoutes } = require('./modules/example');
+  const { createExampleRoutes } = await import('./modules/example/index.js');
   const exampleController = container.resolve('exampleController');
   apiRouter.use('/examples', createExampleRoutes(exampleController));
 
@@ -41,4 +57,4 @@ function createApp(config, logger, container) {
   return app;
 }
 
-module.exports = createApp;
+export default createApp;

@@ -28,4 +28,4 @@ class ExampleEntity {
   }
 }
 
-module.exports = ExampleEntity;
+export default ExampleEntity;

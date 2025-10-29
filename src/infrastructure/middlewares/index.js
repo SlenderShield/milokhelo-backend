@@ -2,12 +2,22 @@
  * Middlewares Module
  * Entry point for global middlewares
  */
-const errorHandler = require('./errorHandler');
-const notFoundHandler = require('./notFoundHandler');
-const requestLogger = require('./requestLogger');
+import errorHandler from './errorHandler.js';
+import notFoundHandler from './notFoundHandler.js';
+import requestLogger from './requestLogger.js';
+import {
+  configureHelmet,
+  configureCORS,
+  configureRateLimit,
+  configureAuthRateLimit,
+} from './security.js';
 
-module.exports = {
+export {
   errorHandler,
   notFoundHandler,
   requestLogger,
+  configureHelmet,
+  configureCORS,
+  configureRateLimit,
+  configureAuthRateLimit,
 };

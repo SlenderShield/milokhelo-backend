@@ -2,7 +2,7 @@
  * Example Service - Application Layer
  * Contains business logic and orchestrates domain operations
  */
-const { EVENTS } = require('../../../shared/constants');
+import { EVENTS } from '../../../shared/constants/index.js';
 
 class ExampleService {
   constructor(repository, eventBus, logger) {
@@ -99,4 +99,4 @@ class ExampleService {
   }
 }
 
-module.exports = ExampleService;
+export default ExampleService;

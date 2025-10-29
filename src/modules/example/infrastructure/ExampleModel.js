@@ -2,7 +2,7 @@
  * Example Mongoose Schema
  * Data persistence layer
  */
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const exampleSchema = new mongoose.Schema(
   {
@@ -34,4 +34,4 @@ exampleSchema.index({ name: 1 });
 
 const ExampleModel = mongoose.model('Example', exampleSchema);
 
-module.exports = ExampleModel;
+export default ExampleModel;

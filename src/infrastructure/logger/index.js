@@ -2,6 +2,6 @@
  * Logger Module
  * Entry point for logging infrastructure
  */
-const { Logger, createLogger, getLogger } = require('./logger');
+import { Logger, createLogger, getLogger } from './logger.js';
 
-module.exports = { Logger, createLogger, getLogger };
+export { Logger, createLogger, getLogger };

@@ -2,8 +2,8 @@
  * Server Entry Point
  * Starts the HTTP server
  */
-const { bootstrap, shutdown } = require('./bootstrap');
-const createApp = require('./app');
+import { bootstrap, shutdown } from './bootstrap.js';
+import createApp from './app.js';
 
 async function startServer() {
   try {
