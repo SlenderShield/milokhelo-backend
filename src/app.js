@@ -7,11 +7,23 @@ import {
   requestLogger,
   errorHandler,
   notFoundHandler,
+  configureHelmet,
+  configureCORS,
+  configureRateLimit,
 } from './infrastructure/middlewares/index.js';
 import { createHealthRoutes } from './infrastructure/health/index.js';
 
 async function createApp(config, logger, container) {
   const app = express();
+
+  // Security middleware - must be first
+  app.use(configureHelmet());
+  app.use(configureCORS(config));
+  
+  // Rate limiting
+  if (config.get('security.enableRateLimit') !== false) {
+    app.use(configureRateLimit(config));
+  }
 
   // Body parsing middleware
   app.use(express.json());

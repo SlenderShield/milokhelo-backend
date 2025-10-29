@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: milokhelo-mongodb-test
+    restart: on-failure
+    ports:
+      - '27018:27017'
+    environment:
+      - MONGO_INITDB_DATABASE=milokhelo_test
+    networks:
+      - milokhelo-test-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: milokhelo-redis-test
+    restart: on-failure
+    ports:
+      - '6380:6379'
+    command: redis-server --databases 16
+    networks:
+      - milokhelo-test-network
+    healthcheck:
+      test: redis-cli ping
+      interval: 5s
+      timeout: 2s
+      retries: 3
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: milokhelo-app-test
+    environment:
+      - NODE_ENV=test
+      - MONGODB_URI=mongodb://mongodb:27017/milokhelo_test
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=1
+      - EVENT_BUS_ADAPTER=memory
+      - LOG_LEVEL=error
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - milokhelo-test-network
+    command: npm test
+
+networks:
+  milokhelo-test-network:
+    driver: bridge

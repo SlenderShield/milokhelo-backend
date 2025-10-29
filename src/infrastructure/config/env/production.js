@@ -35,6 +35,15 @@ export default {
     adapter: process.env.EVENT_BUS_ADAPTER || 'redis', // Use Redis in production
   },
 
+  security: {
+    corsOrigins: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : [],
+    enableRateLimit: process.env.ENABLE_RATE_LIMIT !== 'false',
+    rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes
+    rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
+    authRateLimitWindowMs: parseInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS || '900000', 10),
+    authRateLimitMax: parseInt(process.env.AUTH_RATE_LIMIT_MAX || '5', 10),
+  },
+
   features: {
     enableMetrics: process.env.ENABLE_METRICS === 'true',
     enableHealthCheck: process.env.ENABLE_HEALTH_CHECK !== 'false',

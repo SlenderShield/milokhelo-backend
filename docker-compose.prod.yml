@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: milokhelo-mongodb-prod
+    restart: always
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_prod_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d:ro
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=milokhelo_prod
+    networks:
+      - milokhelo-prod-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: milokhelo-redis-prod
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_prod_data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    networks:
+      - milokhelo-prod-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    healthcheck:
+      test: redis-cli --pass ${REDIS_PASSWORD} ping
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: milokhelo-app-prod
+    restart: always
+    ports:
+      - '4000:4000'
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/milokhelo_prod?authSource=admin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - EVENT_BUS_ADAPTER=redis
+      - LOG_LEVEL=info
+      - CORS_ORIGINS=${CORS_ORIGINS}
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - milokhelo-prod-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+      replicas: 2
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:4000/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  mongodb_prod_data:
+  redis_prod_data:
+
+networks:
+  milokhelo-prod-network:
+    driver: bridge
