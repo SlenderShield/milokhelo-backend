@@ -2,7 +2,7 @@
  * Authorization Middleware (RBAC - Role-Based Access Control)
  * Handles role-based and permission-based authorization
  */
-import { HTTP_STATUS } from '../errors/index.js';
+import { HTTP_STATUS } from '@/common/constants/index.js';
 
 /**
  * Default role hierarchy (higher value = more permissions)
@@ -232,8 +232,10 @@ export function requireOwnership(getResourceUserId) {
  * @returns {boolean}
  */
 export function hasRole(user, roles) {
+  if (!user) return false;
+  
   const rolesToCheck = Array.isArray(roles) ? roles : [roles];
-  const userRoles = user?.roles || ['user'];
+  const userRoles = user.roles || ['user'];
   return rolesToCheck.some((role) => userRoles.includes(role));
 }
 
@@ -244,7 +246,9 @@ export function hasRole(user, roles) {
  * @returns {boolean}
  */
 export function hasPermission(user, permission) {
-  const userRoles = user?.roles || ['user'];
+  if (!user) return false;
+  
+  const userRoles = user.roles || ['user'];
   const allowedRoles = PERMISSIONS[permission];
   
   if (!allowedRoles) return false;

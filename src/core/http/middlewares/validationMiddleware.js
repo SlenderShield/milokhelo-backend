@@ -3,7 +3,7 @@
  * Handles request validation using express-validator
  */
 import { validationResult } from 'express-validator';
-import { HTTP_STATUS } from '../errors/index.js';
+import { HTTP_STATUS } from '@/common/constants/index.js';
 
 /**
  * Middleware to check validation results
