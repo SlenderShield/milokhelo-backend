@@ -2,7 +2,7 @@
  * Tournament Controller
  */
 import express from 'express';
-import { asyncHandler, HTTP_STATUS } from '../../../../../../core/http/index.js';
+import { asyncHandler, HTTP_STATUS } from '@/core/http/index.js';
 
 export class TournamentController {
   constructor(tournamentService, logger) {

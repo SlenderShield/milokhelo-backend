@@ -3,16 +3,47 @@ info:
   title: Milokhelo API
   version: "v1"
   description: >
-    Milokhelo REST API v1 — sports match & tournament platform.
-    Supports matches, tournaments, chat, venues (nearby search & booking), maps (mobile-submitted),
-    calendar sync (device & third-party), notifications, invitations, feedback,
-    teams, achievements, and OAuth authentication (Google & Facebook) with Passport.js
-    using backend token exchange & session cookies.
+    # Milokhelo REST API v1
+
+    A comprehensive sports platform API built with Node.js, Express, MongoDB, and Redis.
+
+    ## Features
+
+    - **14 Complete Modules**: Auth, Users, Teams, Matches, Tournaments, Chat, Venues, Maps, Calendar, Notifications, Invitations, Feedback, Admin
+    - **OAuth Authentication**: Google & Facebook OAuth 2.0 with Passport.js + Email/Password authentication
+    - **Real-time Features**: WebSocket support with Socket.IO for chat and live updates
+    - **Event-Driven Architecture**: Modules communicate via EventBus (in-memory or Redis)
+    - **Automatic Stats Updates**: Match results automatically update player statistics via events
+    - **Achievement System**: 31 predefined achievements with automatic evaluation
+    - **Geo-spatial Search**: Find nearby venues and matches with MongoDB 2dsphere indexes
+    - **Tournament Brackets**: Automatic generation for knockout and league tournaments
+    - **Atomic Bookings**: Transaction-based venue booking with conflict prevention
+    - **Session Management**: HTTP-only cookies with Redis store for security
+
+    ## Architecture
+
+    This API follows Clean Architecture principles with:
+    - **Modular Monolith** architecture for maintainability and future microservices migration
+    - **Dependency Injection** for loose coupling
+    - **Domain-Driven Design** with bounded contexts per module
+    - **Event-driven communication** between modules
+    - **SOLID principles** throughout the codebase
+
+    ## Authentication
+
+    The API supports multiple authentication methods:
+    - **OAuth 2.0**: Google and Facebook via Passport.js strategies
+    - **Email/Password**: Traditional authentication with bcrypt hashing
+    - **Session Cookies**: HTTP-only cookies with Redis session store
+
+    All protected endpoints require authentication via session cookie.
 servers:
-  - url: https://api.milokhelo.com/v1
-    description: Production
-  - url: http://localhost:4000/v1
-    description: Local development
+  - url: https://api.milokhelo.com/api/v1
+    description: Production server
+  - url: http://localhost:4000/api/v1
+    description: Local development server
+  - url: http://localhost:4000
+    description: Local server root (for health checks and docs)
 
 tags:
   - name: Auth
@@ -2811,5 +2842,5 @@ security:
   - cookieAuth: []
 
 externalDocs:
-  description: Implementation notes & examples
-  url: https://github.com/your-org/milokhelo
+  description: Full documentation including architecture, guides, and feature details
+  url: https://github.com/SlenderShield/milokhelo-backend/tree/main/docs

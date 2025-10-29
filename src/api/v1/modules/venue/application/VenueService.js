@@ -1,7 +1,7 @@
 /**
  * Venue Service
  */
-import { BookingConflictError } from '../../../../../core/http/errors/BookingConflictError.js';
+import { BookingConflictError } from '@/core/http/errors/BookingConflictError.js';
 
 class VenueService {
   constructor(venueRepository, eventBus, logger) {

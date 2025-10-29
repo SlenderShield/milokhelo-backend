@@ -31,6 +31,7 @@ Getting started, development patterns, and best practices:
 - **[QUICKSTART.md](guides/QUICKSTART.md)** - Quick start guide for new developers
 - **[DEVELOPMENT_GUIDELINES.md](guides/DEVELOPMENT_GUIDELINES.md)** - Complete development guidelines and patterns
 - **[QUICK_REFERENCE.md](guides/QUICK_REFERENCE.md)** - Quick reference for common patterns
+- **[PATH_ALIASING.md](guides/PATH_ALIASING.md)** - Path aliasing setup and usage
 - **[IMPROVEMENTS.md](guides/IMPROVEMENTS.md)** - Improvement tracking and technical debt
 
 **👉 Start here:** If you're new to the project, begin with [QUICKSTART.md](guides/QUICKSTART.md)
@@ -42,18 +43,17 @@ Detailed documentation for specific features and implementations:
 **Tournaments & Matches:**
 - **[BRACKET_GENERATION.md](features/BRACKET_GENERATION.md)** - Tournament bracket generation (knockout & league)
 - **[STATS_AUTO_UPDATE.md](features/STATS_AUTO_UPDATE.md)** - Automatic stats updates on match completion
-- **[ACHIEVEMENTS.md](features/ACHIEVEMENTS.md)** - Achievement system with auto-evaluation
-- **[ACHIEVEMENT_IMPLEMENTATION_SUMMARY.md](features/ACHIEVEMENT_IMPLEMENTATION_SUMMARY.md)** - Implementation details
+- **[ACHIEVEMENTS.md](features/ACHIEVEMENTS.md)** - Complete achievement system documentation with auto-evaluation
 
 **Venue Bookings:**
-- **[BOOKING_CONFLICT_PREVENTION.md](features/BOOKING_CONFLICT_PREVENTION.md)** - Atomic booking with transactions
-- **[BOOKING_QUICK_REFERENCE.md](features/BOOKING_QUICK_REFERENCE.md)** - Quick reference guide
-- **[BOOKING_IMPLEMENTATION_CHECKLIST.md](features/BOOKING_IMPLEMENTATION_CHECKLIST.md)** - Implementation checklist
-- **[BOOKING_CONFLICT_IMPLEMENTATION_SUMMARY.md](features/BOOKING_CONFLICT_IMPLEMENTATION_SUMMARY.md)** - Summary
+
+- **[BOOKING_CONFLICT_PREVENTION.md](features/BOOKING_CONFLICT_PREVENTION.md)** - Complete atomic booking system with transactions
+- **[BOOKING_QUICK_REFERENCE.md](features/BOOKING_QUICK_REFERENCE.md)** - Quick reference guide for developers
 
 **Authentication:**
+
 - **[OAUTH_SETUP.md](features/OAUTH_SETUP.md)** - Complete OAuth setup guide (Google & Facebook)
-- **[OAUTH_IMPLEMENTATION.md](features/OAUTH_IMPLEMENTATION.md)** - OAuth implementation details
+- **[OAUTH_IMPLEMENTATION.md](features/OAUTH_IMPLEMENTATION.md)** - OAuth implementation details and architecture
 
 ### 🔌 API Documentation (`api/`)
 
@@ -87,12 +87,13 @@ When adding new documentation:
 **Last Major Update**: October 29, 2025
 
 **Recent Changes**:
+
 - ✅ **Reorganized into subdirectories** - Better navigation and organization
-- ✅ Removed overlapping documentation (MODULE_REFACTORING.md, MODULE_REORGANIZATION.md, CODEBASE_REFACTORING_PLAN.md)
+- ✅ **Removed overlapping documentation** - Deleted redundant implementation summaries and moved content to main feature docs
 - ✅ Consolidated refactoring history into single REFACTORING_HISTORY.md
 - ✅ Updated ARCHITECTURE.md to reflect module independence (no shared/additional directories)
-- ✅ Enhanced OpenAPI spec with event-driven stats update details
-- ✅ Added comprehensive development guidelines and quick reference
+- ✅ Enhanced OpenAPI spec with comprehensive endpoint documentation and schemas
+- ✅ Added comprehensive development guidelines and quick reference guides
 
 ## 📁 File Organization
 

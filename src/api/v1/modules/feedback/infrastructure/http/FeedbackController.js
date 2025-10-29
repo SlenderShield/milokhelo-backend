@@ -1,7 +1,7 @@
 /**
  * Feedback Controller - HTTP request handlers
  */
-import { asyncHandler, HTTP_STATUS } from '../../../../../../core/http/index.js';
+import { asyncHandler, HTTP_STATUS } from '@/core/http/index.js';
 
 class FeedbackController {
   constructor(feedbackService, logger) {

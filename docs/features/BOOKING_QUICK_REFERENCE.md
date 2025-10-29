@@ -436,7 +436,6 @@ const latestBooking = await venueRepository.findById(bookingId);
 
 ## Need Help?
 
-- **Full Documentation:** `docs/BOOKING_CONFLICT_PREVENTION.md`
-- **Implementation Summary:** `docs/BOOKING_CONFLICT_IMPLEMENTATION_SUMMARY.md`
-- **Tests:** `test/integration/venueBookingConflict.test.js`
-- **Code:** `src/api/v1/modules/venue/index.js`
+- **Full Documentation:** `docs/features/BOOKING_CONFLICT_PREVENTION.md` - Complete guide with implementation details
+- **Tests:** `test/integration/venueBookingConflict.test.js` - Integration test examples
+- **Code:** `src/api/v1/modules/venue/index.js` - Source implementation

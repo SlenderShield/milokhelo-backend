@@ -15,10 +15,10 @@ import {
   configureHelmet,
   configureCORS,
   configureRateLimit,
-} from './core/http/index.js';
-import { createHealthRoutes } from './core/http/index.js';
-import { createV1Router } from './api/v1/routes.js';
-import { createSessionMiddleware } from './core/http/middlewares/sessionMiddleware.js';
+} from '@/core/http/index.js';
+import { createHealthRoutes } from '@/core/http/index.js';
+import { createV1Router } from '@/api/v1/routes.js';
+import { createSessionMiddleware } from '@/core/http/middlewares/sessionMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -39,7 +39,7 @@ async function createApp(config, logger, container) {
     app.use(passport.initialize());
     app.use(passport.session());
     logger.info('Passport authentication initialized');
-    
+
     // Inject passport into auth controller
     const authController = container.resolve('authController');
     if (authController && typeof authController.setPassport === 'function') {

@@ -8,8 +8,6 @@ const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      unique: true,
-      sparse: true,
     },
     name: {
       type: String,
@@ -18,7 +16,6 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
       lowercase: true,
     },
     password: {
@@ -89,8 +86,8 @@ const userSchema = new mongoose.Schema(
 );
 
 // Indexes
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ username: 1 }, { unique: true, sparse: true });
 userSchema.index({ 'oauthProviders.google.id': 1 });
 userSchema.index({ 'oauthProviders.facebook.id': 1 });
 userSchema.index({ 'location.coordinates': '2dsphere' });

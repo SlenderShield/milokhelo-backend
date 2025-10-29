@@ -4,7 +4,7 @@
  */
 
 // Import UserModel from auth module (shared model)
-import UserModel from '../auth/infrastructure/persistence/UserModel.js';
+import UserModel from '@/modules/auth/infrastructure/persistence/UserModel.js';
 
 // Domain exports (default exports)
 import UserEntity from './domain/UserEntity.js';
@@ -77,7 +77,7 @@ export function initializeUserModule(container) {
   // Set up event subscriptions
   const statsUpdateHandler = container.resolve('statsUpdateHandler');
   const achievementEvaluator = container.resolve('achievementEvaluator');
-  
+
   // Subscribe to match.finished event
   eventBus.subscribe('match.finished', async (data) => {
     // Resolve match repository at runtime to avoid circular dependency

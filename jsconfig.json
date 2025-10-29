@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "baseUrl": ".",
+    "paths": {
+      "@/core/*": ["src/core/*"],
+      "@/api/*": ["src/api/*"],
+      "@/common/*": ["src/common/*"],
+      "@/config/*": ["src/config/*"],
+      "@/modules/*": ["src/api/v1/modules/*"],
+      "@/test/*": ["test/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "logs", "temp_docs"]
+}

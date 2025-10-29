@@ -30,12 +30,9 @@ src/
 ├── api/                      # API layer
 │   └── v1/                  # API version 1
 │       ├── modules/         # Business modules (bounded contexts)
-│       │   └── example/
-│       │       ├── domain/              # Business entities & interfaces
-│       │       ├── application/         # Business logic & services
-│       │       └── infrastructure/      # Technical implementation
-│       │           ├── persistence/    # Data access layer
-│       │           └── http/           # Routes & controllers
+│       │   ├── auth/        # Authentication module
+│       │   ├── user/        # User management module
+│       │   └── ...          # Other modules (team, match, tournament, etc.)
 │       └── routes.js        # API v1 router configuration
 ├── common/                   # Shared code across modules
 │   ├── constants/           # Application constants
@@ -62,6 +59,7 @@ src/
 - ✅ **Event-Driven**: Modules communicate via events (in-memory or Redis)
 - ✅ **Dependency Injection**: Loose coupling with IoC container
 - ✅ **Advanced Logging**: Structured logging with Winston, request correlation, performance tracking
+- ✅ **Path Aliasing**: Clean imports with `@/core`, `@/modules`, `@/common` aliases
 - ✅ **Clean Architecture**: Domain/Application/Infrastructure layers
 - ✅ **Production Ready**: Docker support, health checks, security middleware
 
@@ -406,17 +404,26 @@ docs/
 - [`docs/guides/QUICKSTART.md`](docs/guides/QUICKSTART.md) - **Start here!** Quick start guide for new developers
 - [`docs/guides/DEVELOPMENT_GUIDELINES.md`](docs/guides/DEVELOPMENT_GUIDELINES.md) - Complete development guidelines
 - [`docs/guides/QUICK_REFERENCE.md`](docs/guides/QUICK_REFERENCE.md) - Quick reference for common patterns
+- [`docs/guides/PATH_ALIASING.md`](docs/guides/PATH_ALIASING.md) - Path aliasing setup and usage
 - [`docs/guides/IMPROVEMENTS.md`](docs/guides/IMPROVEMENTS.md) - Improvement tracking and technical debt
 
 ### ✨ Feature Documentation
 
-- [`docs/features/BRACKET_GENERATION.md`](docs/features/BRACKET_GENERATION.md) - Tournament bracket generation system
-- [`docs/features/STATS_AUTO_UPDATE.md`](docs/features/STATS_AUTO_UPDATE.md) - Stats auto-update system
-- [`docs/features/ACHIEVEMENTS.md`](docs/features/ACHIEVEMENTS.md) - Achievement system with criteria
-- [`docs/features/BOOKING_CONFLICT_PREVENTION.md`](docs/features/BOOKING_CONFLICT_PREVENTION.md) - Atomic booking system
-- [`docs/features/BOOKING_QUICK_REFERENCE.md`](docs/features/BOOKING_QUICK_REFERENCE.md) - Booking quick reference
-- [`docs/features/OAUTH_SETUP.md`](docs/features/OAUTH_SETUP.md) - OAuth setup guide (Google & Facebook)
-- [`docs/features/OAUTH_IMPLEMENTATION.md`](docs/features/OAUTH_IMPLEMENTATION.md) - OAuth implementation details
+**Tournaments & Matches:**
+
+- [`docs/features/BRACKET_GENERATION.md`](docs/features/BRACKET_GENERATION.md) - Tournament bracket generation (knockout & league)
+- [`docs/features/STATS_AUTO_UPDATE.md`](docs/features/STATS_AUTO_UPDATE.md) - Automatic stats updates on match completion
+- [`docs/features/ACHIEVEMENTS.md`](docs/features/ACHIEVEMENTS.md) - Complete achievement system with auto-evaluation
+
+**Venue Bookings:**
+
+- [`docs/features/BOOKING_CONFLICT_PREVENTION.md`](docs/features/BOOKING_CONFLICT_PREVENTION.md) - Atomic booking with transactions & conflict prevention
+- [`docs/features/BOOKING_QUICK_REFERENCE.md`](docs/features/BOOKING_QUICK_REFERENCE.md) - Quick reference for developers
+
+**Authentication:**
+
+- [`docs/features/OAUTH_SETUP.md`](docs/features/OAUTH_SETUP.md) - Complete OAuth setup guide (Google & Facebook)
+- [`docs/features/OAUTH_IMPLEMENTATION.md`](docs/features/OAUTH_IMPLEMENTATION.md) - OAuth implementation architecture
 
 ### 🔌 API Documentation
 
@@ -548,7 +555,7 @@ To add a new module to the Milokhelo sports platform:
    initializeYourModule(container);
    ```
 
-See the `example` module for a complete reference implementation.
+Refer to existing modules (auth, user, team, etc.) for reference implementations.
 
 ## 🧪 Code Quality
 
@@ -600,15 +607,7 @@ docker-compose logs -f
 GET /health
 ```
 
-### Example Module
-
-```
-POST   /api/examples       - Create new example
-GET    /api/examples       - Get all examples
-GET    /api/examples/:id   - Get example by ID
-PUT    /api/examples/:id   - Update example
-DELETE /api/examples/:id   - Delete example
-```
+For detailed API documentation with all 70+ endpoints, visit `/docs` when running the server or check the OpenAPI specification at `docs/api/openapi.yaml`.
 
 ## 🔐 Security Best Practices
 

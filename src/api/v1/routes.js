@@ -3,7 +3,6 @@
  * Central routing configuration for API version 1
  */
 import express from 'express';
-import { createExampleRoutes } from './modules/example/index.js';
 import { createAuthRoutes } from './modules/auth/index.js';
 import { createUserRoutes } from './modules/user/infrastructure/http/UserRoutes.js';
 import { createTeamRoutes } from './modules/team/index.js';
@@ -11,7 +10,10 @@ import { createMatchRoutes } from './modules/match/index.js';
 import { createTournamentRoutes } from './modules/tournament/infrastructure/http/TournamentController.js';
 import { createChatRoutes } from './modules/chat/index.js';
 import { createVenueRoutes, createVenueManagementRoutes } from './modules/venue/index.js';
-import { initializeNotificationModule, createNotificationRoutes } from './modules/notification/index.js';
+import {
+  initializeNotificationModule,
+  createNotificationRoutes,
+} from './modules/notification/index.js';
 import { initializeMapsModule, createMapsRoutes } from './modules/maps/index.js';
 import { initializeCalendarModule, createCalendarRoutes } from './modules/calendar/index.js';
 import { initializeInvitationModule, createInvitationRoutes } from './modules/invitation/index.js';
@@ -25,10 +27,6 @@ import { initializeAdminModule, createAdminRoutes } from './modules/admin/index.
  */
 export function createV1Router(container) {
   const router = express.Router();
-
-  // Example module routes (demo)
-  const exampleController = container.resolve('exampleController');
-  router.use('/examples', createExampleRoutes(exampleController));
 
   // Auth routes
   const authController = container.resolve('authController');

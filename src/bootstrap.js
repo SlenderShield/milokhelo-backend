@@ -2,28 +2,27 @@
  * Application Bootstrap
  * Initializes all infrastructure and modules
  */
-import { getConfig } from './config/index.js';
-import { createLogger } from './core/logging/index.js';
-import { getContainer } from './core/container/index.js';
-import { MongoDBConnection, DatabaseHealthCheck } from './core/database/index.js';
-import { EventBusFactory } from './core/events/index.js';
-import { EVENTS } from './common/constants/index.js';
+import { getConfig } from '@/config/index.js';
+import { createLogger } from '@/core/logging/index.js';
+import { getContainer } from '@/core/container/index.js';
+import { MongoDBConnection, DatabaseHealthCheck } from '@/core/database/index.js';
+import { EventBusFactory } from '@/core/events/index.js';
+import { EVENTS } from '@/common/constants/index.js';
 
 // Import module initializers
-import { initializeExampleModule } from './api/v1/modules/example/index.js';
-import { initializeAuthModule } from './api/v1/modules/auth/index.js';
-import { initializeUserModule } from './api/v1/modules/user/index.js';
-import { initializeTeamModule } from './api/v1/modules/team/index.js';
-import { initializeMatchModule } from './api/v1/modules/match/index.js';
-import { initializeTournamentModule } from './api/v1/modules/tournament/index.js';
-import { initializeChatModule } from './api/v1/modules/chat/index.js';
-import { initializeVenueModule } from './api/v1/modules/venue/index.js';
-import { initializeMapsModule } from './api/v1/modules/maps/index.js';
-import { initializeCalendarModule } from './api/v1/modules/calendar/index.js';
-import { initializeNotificationModule } from './api/v1/modules/notification/index.js';
-import { initializeInvitationModule } from './api/v1/modules/invitation/index.js';
-import { initializeFeedbackModule } from './api/v1/modules/feedback/index.js';
-import { initializeAdminModule } from './api/v1/modules/admin/index.js';
+import { initializeAuthModule } from '@/modules/auth/index.js';
+import { initializeUserModule } from '@/modules/user/index.js';
+import { initializeTeamModule } from '@/modules/team/index.js';
+import { initializeMatchModule } from '@/modules/match/index.js';
+import { initializeTournamentModule } from '@/modules/tournament/index.js';
+import { initializeChatModule } from '@/modules/chat/index.js';
+import { initializeVenueModule } from '@/modules/venue/index.js';
+import { initializeMapsModule } from '@/modules/maps/index.js';
+import { initializeCalendarModule } from '@/modules/calendar/index.js';
+import { initializeNotificationModule } from '@/modules/notification/index.js';
+import { initializeInvitationModule } from '@/modules/invitation/index.js';
+import { initializeFeedbackModule } from '@/modules/feedback/index.js';
+import { initializeAdminModule } from '@/modules/admin/index.js';
 
 async function bootstrap() {
   // 1. Load configuration
@@ -65,9 +64,6 @@ async function bootstrap() {
 
   // 6. Initialize modules
   logger.info('Initializing modules...');
-
-  // Initialize example module (demonstrates the pattern)
-  initializeExampleModule(container);
 
   // Initialize all application modules
   initializeAuthModule(container);

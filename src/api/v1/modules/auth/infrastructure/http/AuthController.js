@@ -2,7 +2,7 @@
  * Auth Controller - Infrastructure Layer
  * Handles HTTP requests for authentication
  */
-import { asyncHandler, HTTP_STATUS } from '../../../../../../core/http/index.js';
+import { asyncHandler, HTTP_STATUS } from '@/core/http/index.js';
 
 class AuthController {
   constructor(authService, logger, passport = null) {

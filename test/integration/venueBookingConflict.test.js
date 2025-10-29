@@ -4,9 +4,9 @@
  */
 import { describe, it, beforeAll, afterAll, beforeEach, expect } from '@jest/globals';
 import mongoose from 'mongoose';
-import { VenueRepository, VenueService } from '../../src/api/v1/modules/venue/index.js';
-import { VenueModel, BookingModel } from '../../src/api/v1/modules/venue/infrastructure/persistence/VenueModel.js';
-import { BookingConflictError } from '../../src/core/http/errors/BookingConflictError.js';
+import { VenueRepository, VenueService } from '@/modules/venue/index.js';
+import { VenueModel, BookingModel } from '@/modules/venue/infrastructure/persistence/VenueModel.js';
+import { BookingConflictError } from '@/core/http/errors/BookingConflictError.js';
 
 // Mock logger
 const mockLogger = {

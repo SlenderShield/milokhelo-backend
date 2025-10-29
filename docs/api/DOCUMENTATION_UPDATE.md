@@ -2,6 +2,51 @@
 
 ## Recent Changes (October 29, 2025)
 
+### Documentation Consolidation and Cleanup
+
+**Removed Overlapping Documentation:**
+
+1. **PATH_ALIASING_IMPLEMENTATION.md** (deleted from root)
+   - Content overlapped with `docs/guides/PATH_ALIASING.md`
+   - Implementation details preserved in the guide document
+
+2. **docs/features/ACHIEVEMENT_IMPLEMENTATION_SUMMARY.md** (deleted)
+   - Implementation details consolidated into `docs/features/ACHIEVEMENTS.md`
+
+3. **docs/features/BOOKING_CONFLICT_IMPLEMENTATION_SUMMARY.md** (deleted)
+   - Implementation details consolidated into `docs/features/BOOKING_CONFLICT_PREVENTION.md`
+
+4. **docs/features/BOOKING_IMPLEMENTATION_CHECKLIST.md** (deleted)
+   - Checklist information integrated into main booking documentation
+
+**Updated Documentation:**
+
+1. **docs/README.md** (Documentation index)
+   - Removed references to deleted implementation summary files
+   - Updated feature documentation list to show consolidated docs
+   - Improved organization with clearer descriptions
+   - Added blank lines for better Markdown linting compliance
+
+2. **README.md** (Main project documentation)
+   - Updated feature documentation section with better organization
+   - Removed references to deleted files
+   - Grouped feature docs by category (Tournaments & Matches, Venue Bookings, Authentication)
+
+3. **docs/api/openapi.yaml** (OpenAPI specification)
+   - Enhanced API description with comprehensive feature list
+   - Added architecture overview section
+   - Improved authentication documentation
+   - Updated server URLs to reflect correct API paths
+   - Enhanced external documentation links
+
+**Documentation Quality Improvements:**
+
+- ✅ **Eliminated redundancy** - Removed 4 overlapping documents
+- ✅ **Single source of truth** - Each topic now has one authoritative document
+- ✅ **Better organization** - Feature docs grouped logically
+- ✅ **Improved navigation** - Updated all cross-references
+- ✅ **Enhanced OpenAPI spec** - Better descriptions and examples
+
 ### Achievement Criteria Evaluation System Implemented
 
 **New Documentation:**
@@ -388,39 +433,17 @@ For implementation details, see:
 The following business logic implementations are still pending (see inline comments in code):
 
 - [x] **OAuth passport strategy implementation (auth module)** - ✅ COMPLETED (Oct 29, 2025)
-  - Implemented Google OAuth 2.0 strategy
-  - Implemented Facebook OAuth 2.0 strategy
-  - Integrated Passport.js with session management
-  - See `docs/OAUTH_SETUP.md` for setup instructions
 - [x] **Tournament bracket generation algorithm (tournament module)** - ✅ COMPLETED (Oct 29, 2025)
-  - Implemented knockout (single-elimination) bracket generation
-  - Implemented league (round-robin) bracket generation
-  - Automatic seeding and bye handling
-  - Match result tracking and winner advancement
-  - Standings calculation for league tournaments
-  - 20+ unit tests with 95%+ coverage
-  - See `docs/BRACKET_GENERATION.md` for documentation
 - [x] **Stats auto-update on match finish (match/user modules)** - ✅ COMPLETED (Oct 29, 2025)
-  - Implemented event-driven stats updates
-  - Automatic win/loss/draw tracking
-  - ELO rating system (simplified)
-  - Streak tracking (winning/losing streaks)
-  - Support for detailed match stats (goals, assists, fouls)
-  - Multi-sport support with separate stats per sport
-  - 22 unit tests + integration tests
-  - Event subscription in user module initialization
 - [x] **Achievement criteria evaluation (user module)** - ✅ COMPLETED (Oct 29, 2025)
-  - Implemented AchievementEvaluator domain service
-  - 5 criteria types: threshold, total, ratio, streak, composite
-  - 31 predefined achievements (milestones, skills, participation)
-  - Automatic evaluation on stats update via events
-  - Multi-sport support with sport-specific and cross-sport achievements
-  - Multiple rarity levels (common, rare, epic, legendary)
-  - Points system for gamification
-  - 40+ unit and integration tests
-  - Full API endpoints (GET /users/:id/achievements, GET /users/me/achievements)
-  - Comprehensive documentation (docs/ACHIEVEMENTS.md)
-- [ ] Booking conflict prevention with atomic operations (venue module)
+- [x] **Booking conflict prevention with atomic operations (venue module)** - ✅ COMPLETED (Oct 29, 2025)
+  - Implemented MongoDB transactions for atomic booking
+  - Optimistic locking with version keys
+  - Comprehensive conflict detection (time overlap checking)
+  - Custom BookingConflictError for clear error handling
+  - Validation for booking times and durations
+  - Full integration tests
+  - See `docs/features/BOOKING_CONFLICT_PREVENTION.md` for documentation
 - [ ] Google Calendar API integration (calendar module)
 - [ ] Push notifications (FCM/APNS) implementation (notifications module)
 - [ ] Authorization middleware (RBAC) implementation (core/http)

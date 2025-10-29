@@ -2,7 +2,7 @@
  * Venue Repository
  */
 import { VenueModel, BookingModel } from './VenueModel.js';
-import { BookingConflictError } from '../../../../../../core/http/errors/BookingConflictError.js';
+import { BookingConflictError } from '@/core/http/errors/BookingConflictError.js';
 import mongoose from 'mongoose';
 
 class VenueRepository {

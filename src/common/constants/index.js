@@ -12,13 +12,6 @@ const EVENTS = {
     HEALTH_CHECK: 'system.health_check',
   },
 
-  // Example module events (for demonstration)
-  EXAMPLE: {
-    CREATED: 'example.created',
-    UPDATED: 'example.updated',
-    DELETED: 'example.deleted',
-  },
-
   // Add your module events here
 };
 

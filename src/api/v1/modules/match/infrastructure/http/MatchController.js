@@ -1,7 +1,7 @@
 /**
  * Match Controller
  */
-import { asyncHandler, HTTP_STATUS } from '../../../../../../core/http/index.js';
+import { asyncHandler, HTTP_STATUS } from '@/core/http/index.js';
 
 class MatchController {
   constructor(matchService, logger) {

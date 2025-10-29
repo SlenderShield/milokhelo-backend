@@ -2,8 +2,8 @@
  * Global Error Handler Middleware
  * Handles all errors in the application
  */
-import { HTTP_STATUS, ERROR_CODES } from '../../../common/constants/index.js';
-import { BookingConflictError } from '../errors/BookingConflictError.js';
+import { HTTP_STATUS, ERROR_CODES } from '@/common/constants/index.js';
+import { BookingConflictError } from '@/core/http/errors/BookingConflictError.js';
 
 function errorHandler(logger, config) {
   // eslint-disable-next-line no-unused-vars
