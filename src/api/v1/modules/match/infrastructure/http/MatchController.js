@@ -54,17 +54,71 @@ class MatchController {
 
   join() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
       await this.matchService.joinMatch(req.params.id, userId);
-      res.status(HTTP_STATUS.OK).json({ message: 'Joined match' });
+      res.status(HTTP_STATUS.OK).json({
+        status: 'success',
+        message: 'Successfully joined match',
+      });
     });
   }
 
   leave() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
       await this.matchService.leaveMatch(req.params.id, userId);
-      res.status(HTTP_STATUS.OK).json({ message: 'Left match' });
+      res.status(HTTP_STATUS.OK).json({
+        status: 'success',
+        message: 'Successfully left match',
+      });
+    });
+  }
+
+  updateScore() {
+    return asyncHandler(async (req, res) => {
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+      const match = await this.matchService.updateScore(req.params.id, req.body.scores, userId);
+      res.status(HTTP_STATUS.OK).json({
+        status: 'success',
+        message: 'Score updated successfully',
+        data: match,
+      });
+    });
+  }
+
+  updateStatus() {
+    return asyncHandler(async (req, res) => {
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+      const match = await this.matchService.updateStatus(req.params.id, req.body.status, userId);
+      res.status(HTTP_STATUS.OK).json({
+        status: 'success',
+        message: 'Match status updated successfully',
+        data: match,
+      });
     });
   }
 

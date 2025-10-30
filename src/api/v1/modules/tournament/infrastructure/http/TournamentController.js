@@ -2,7 +2,14 @@
  * Tournament Controller
  */
 import express from 'express';
-import { asyncHandler, HTTP_STATUS } from '@/core/http/index.js';
+import { asyncHandler, HTTP_STATUS, requireAuth, validate } from '@/core/http/index.js';
+import {
+  createTournamentValidation,
+  updateTournamentValidation,
+  joinTournamentValidation,
+  tournamentIdValidation,
+  startTournamentValidation,
+} from '@/common/validation/index.js';
 
 export class TournamentController {
   constructor(tournamentService, logger) {
@@ -38,17 +45,76 @@ export class TournamentController {
 
   update() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
-      const tournament = await this.tournamentService.updateTournament(req.params.id, req.body, userId);
-      res.status(HTTP_STATUS.OK).json(tournament);
+      const userId = req.user?.id || req.session?.userId;
+      const userRoles = req.user?.roles || req.session?.user?.roles || ['user'];
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+      const tournament = await this.tournamentService.updateTournament(
+        req.params.id,
+        req.body,
+        userId,
+        userRoles
+      );
+      res.status(HTTP_STATUS.OK).json({
+        status: 'success',
+        message: 'Tournament updated successfully',
+        data: tournament,
+      });
     });
   }
 
   cancel() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
-      await this.tournamentService.cancelTournament(req.params.id, userId);
+      const userId = req.user?.id || req.session?.userId;
+      const userRoles = req.user?.roles || req.session?.user?.roles || ['user'];
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+      await this.tournamentService.cancelTournament(req.params.id, userId, userRoles);
       res.status(HTTP_STATUS.NO_CONTENT).send();
+    });
+  }
+
+  join() {
+    return asyncHandler(async (req, res) => {
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+      const { teamId } = req.body;
+      await this.tournamentService.joinTournament(req.params.id, teamId, userId);
+      res.status(HTTP_STATUS.OK).json({
+        status: 'success',
+        message: 'Successfully joined tournament',
+      });
+    });
+  }
+
+  leave() {
+    return asyncHandler(async (req, res) => {
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+      const { teamId } = req.body;
+      await this.tournamentService.leaveTournament(req.params.id, teamId, userId);
+      res.status(HTTP_STATUS.OK).json({
+        status: 'success',
+        message: 'Successfully left tournament',
+      });
     });
   }
 
@@ -62,9 +128,18 @@ export class TournamentController {
 
   start() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
       const result = await this.tournamentService.startTournament(req.params.id, userId);
-      res.status(HTTP_STATUS.OK).json(result);
+      res.status(HTTP_STATUS.OK).json({
+        status: 'success',
+        ...result,
+      });
     });
   }
 
@@ -93,15 +168,30 @@ export class TournamentController {
 export function createTournamentRoutes(controller) {
   const router = express.Router();
 
-  router.post('/', controller.create());
+  // Public endpoints
   router.get('/', controller.list());
   router.get('/:id', controller.getById());
-  router.patch('/:id', controller.update());
-  router.delete('/:id', controller.cancel());
-  router.post('/:id/register', controller.register());
-  router.post('/:id/start', controller.start());
   router.get('/:id/bracket', controller.getBracket());
-  router.post('/:id/match-result', controller.updateMatchResult());
+
+  // Protected endpoints - require authentication
+  router.post('/', requireAuth(), validate(createTournamentValidation), controller.create());
+
+  router.put('/:id', requireAuth(), validate(updateTournamentValidation), controller.update());
+
+  // Delete endpoint - organizer or admin only (checked in service)
+  router.delete('/:id', requireAuth(), validate(tournamentIdValidation), controller.cancel());
+
+  // Tournament participation endpoints
+  router.post('/:id/join', requireAuth(), validate(joinTournamentValidation), controller.join());
+
+  router.post('/:id/leave', requireAuth(), validate(joinTournamentValidation), controller.leave());
+
+  // Tournament management endpoints
+  router.put('/:id/start', requireAuth(), validate(startTournamentValidation), controller.start());
+
+  // Legacy/additional endpoints
+  router.post('/:id/register', requireAuth(), controller.register());
+  router.post('/:id/match-result', requireAuth(), controller.updateMatchResult());
 
   return router;
 }

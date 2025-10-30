@@ -2,6 +2,123 @@
 
 ## Recent Changes (October 30, 2025)
 
+### Match and Tournament Endpoints Enhanced
+
+**Updated Implementation:**
+
+1. **Match Endpoints** - Enhanced with new endpoints for granular control
+   - ✅ **POST /matches/{id}/join** - Enhanced with comprehensive validation
+     - Can only join scheduled matches
+     - Checks for duplicate participants
+     - Validates match capacity (maxPlayers)
+     - Returns proper error codes (400, 404)
+   - ✅ **POST /matches/{id}/leave** - Enhanced with business logic
+     - Participants can leave scheduled matches only
+     - Organizers cannot leave (must cancel instead)
+     - Cannot leave live or finished matches
+   - ✅ **PUT /matches/{id}/score** - NEW endpoint for score updates
+     - Organizer or participants can update
+     - Only for live or finished matches
+     - Publishes `match.score_updated` event
+   - ✅ **PUT /matches/{id}/status** - NEW endpoint for status management
+     - Organizer-only access
+     - Validates state transitions (scheduled→live→finished)
+     - Cannot change finished/cancelled matches
+     - Publishes `match.status_updated` event
+   - ✅ **DELETE /matches/{id}** - Enhanced with tighter authorization
+     - Restricted to match organizer only
+     - Proper authorization checks in service layer
+     - Returns 403 if not authorized
+
+2. **Tournament Endpoints** - Enhanced with join/leave and better authorization
+   - ✅ **POST /tournaments/{id}/join** - NEW endpoint for team registration
+     - Must be in registration phase
+     - Validates registration window (start/end dates)
+     - Checks for duplicate teams
+     - Validates tournament capacity (maxTeams)
+     - Publishes `tournament.team_joined` event
+   - ✅ **POST /tournaments/{id}/leave** - NEW endpoint for team withdrawal
+     - Must be registered
+     - Can only leave before tournament starts
+     - Cannot leave ongoing/completed tournaments
+     - Publishes `tournament.team_left` event
+   - ✅ **PUT /tournaments/{id}** - Enhanced with comprehensive validation and RBAC
+     - Changed from PATCH to PUT with full schema
+     - Comprehensive validation for all fields
+     - Authorization: Organizer OR admin (role-based)
+     - Cannot modify structure (type, sport, limits) after start
+     - Proper error handling with status codes
+   - ✅ **PUT /tournaments/{id}/start** - Changed from POST to PUT
+     - RESTful best practice (PUT for state changes)
+     - Enhanced response structure
+     - Organizer-only access
+   - ✅ **DELETE /tournaments/{id}** - Enhanced with role-based access
+     - Restricted to organizer OR admin
+     - Service layer checks user roles
+     - Cannot cancel completed tournaments
+     - Returns proper error codes
+
+**Updated Documentation:**
+
+1. **docs/api/openapi.yaml** (OpenAPI specification)
+   - Enhanced match endpoints with detailed descriptions and examples
+   - Added `PUT /matches/{id}/score` endpoint documentation
+   - Added `PUT /matches/{id}/status` endpoint documentation
+   - Updated `POST /matches/{id}/join` and `POST /matches/{id}/leave` with better descriptions
+   - Updated `DELETE /matches/{id}` to clarify organizer-only access
+   - Enhanced tournament endpoints with comprehensive documentation
+   - Added `POST /tournaments/{id}/join` endpoint documentation
+   - Added `POST /tournaments/{id}/leave` endpoint documentation
+   - Updated `PUT /tournaments/{id}` with complete request body schema
+   - Updated `PUT /tournaments/{id}/start` (changed from POST)
+   - Updated `DELETE /tournaments/{id}` to clarify organizer/admin access
+   - Marked legacy endpoints (POST /start, POST /finish for matches)
+
+2. **README.md** (Main project documentation)
+   - Updated Matches API section with new endpoints
+     - Added `PUT /:matchId/score` - Update match score
+     - Added `PUT /:matchId/status` - Update match status
+     - Updated `DELETE /:matchId` to show organizer-only restriction
+     - Marked legacy endpoints (start, finish)
+   - Updated Tournaments API section with new endpoints
+     - Added `PUT /:tournamentId` to show organizer/admin access
+     - Added `DELETE /:tournamentId` to show organizer/admin access
+     - Added `POST /:tournamentId/join` - Join tournament
+     - Added `POST /:tournamentId/leave` - Leave tournament
+     - Updated `PUT /:tournamentId/start` (changed from POST)
+     - Marked legacy register endpoint
+
+3. **src/common/validation/matchValidation.js** (NEW validations)
+   - Added `updateScoreValidation` - Validates score updates with required scores object
+   - Added `updateStatusValidation` - Validates status updates with enum validation
+
+4. **src/common/validation/tournamentValidation.js** (NEW file)
+   - Created comprehensive validation schemas:
+     - `createTournamentValidation` - Full tournament creation with all fields
+     - `updateTournamentValidation` - Tournament updates with optional fields
+     - `tournamentIdValidation` - MongoDB ObjectId validation
+     - `joinTournamentValidation` - Team ID validation for join/leave
+     - `startTournamentValidation` - Start tournament validation
+
+**Implementation Details:**
+
+- ✅ **Enhanced Business Logic**: Comprehensive validation in service layer
+- ✅ **Role-Based Authorization**: Admin bypass for tournament management
+- ✅ **State Management**: Proper state transitions for matches and tournaments
+- ✅ **Event Publishing**: All operations publish appropriate events
+- ✅ **Error Handling**: Custom error objects with proper HTTP status codes
+- ✅ **RESTful Design**: Changed state operations from POST to PUT
+- ✅ **Backward Compatibility**: Legacy endpoints maintained with deprecation notes
+- ✅ **Input Validation**: Express-validator schemas for all new endpoints
+- ✅ **Repository Updates**: Added removeTeam() method for tournaments
+
+**Documentation Consolidation:**
+
+- ❌ **Removed docs/api/AUTH_ENDPOINTS.md** - Redundant with openapi.yaml spec
+  - All auth endpoint documentation already exists in OpenAPI specification
+  - Maintaining single source of truth for API documentation
+  - Interactive Swagger UI at `/docs` provides better documentation experience
+
 ### User Endpoints & Friend Management Added
 
 **Updated Documentation:**

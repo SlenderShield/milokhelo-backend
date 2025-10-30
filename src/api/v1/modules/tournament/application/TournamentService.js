@@ -24,21 +24,138 @@ export class TournamentService {
     return this.tournamentRepository.find(filters);
   }
 
-  async updateTournament(id, data, userId) {
+  async updateTournament(id, data, userId, userRoles = []) {
     const tournament = await this.tournamentRepository.findById(id);
-    if (!tournament || tournament.organizerId.toString() !== userId) {
-      throw new Error('Not authorized');
+    if (!tournament) {
+      const error = new Error('Tournament not found');
+      error.statusCode = 404;
+      throw error;
     }
-    return this.tournamentRepository.update(id, data);
+
+    // Check authorization: must be organizer or admin
+    const isOrganizer = tournament.organizerId.toString() === userId;
+    const isAdmin = userRoles.includes('admin') || userRoles.includes('superadmin');
+
+    if (!isOrganizer && !isAdmin) {
+      const error = new Error('Not authorized to update this tournament');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    // Prevent updating certain fields after tournament has started
+    if (tournament.status === 'ongoing' || tournament.status === 'completed') {
+      const restrictedFields = ['type', 'sport', 'minTeams', 'maxTeams'];
+      const hasRestrictedFields = restrictedFields.some((field) => field in data);
+      if (hasRestrictedFields) {
+        const error = new Error('Cannot modify tournament structure after it has started');
+        error.statusCode = 400;
+        throw error;
+      }
+    }
+
+    const updated = await this.tournamentRepository.update(id, data);
+    await this.eventBus.publish('tournament.updated', { tournamentId: id, data });
+    return updated;
   }
 
-  async cancelTournament(id, userId) {
+  async cancelTournament(id, userId, userRoles = []) {
     const tournament = await this.tournamentRepository.findById(id);
-    if (!tournament || tournament.organizerId.toString() !== userId) {
-      throw new Error('Not authorized');
+    if (!tournament) {
+      const error = new Error('Tournament not found');
+      error.statusCode = 404;
+      throw error;
     }
+
+    // Check authorization: must be organizer or admin
+    const isOrganizer = tournament.organizerId.toString() === userId;
+    const isAdmin = userRoles.includes('admin') || userRoles.includes('superadmin');
+
+    if (!isOrganizer && !isAdmin) {
+      const error = new Error('Not authorized to cancel this tournament');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    if (tournament.status === 'completed') {
+      const error = new Error('Cannot cancel a completed tournament');
+      error.statusCode = 400;
+      throw error;
+    }
+
     await this.tournamentRepository.update(id, { status: 'cancelled' });
     await this.eventBus.publish('tournament.cancelled', { tournamentId: id });
+  }
+
+  async joinTournament(tournamentId, teamId, userId) {
+    const tournament = await this.tournamentRepository.findById(tournamentId);
+    if (!tournament) {
+      const error = new Error('Tournament not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Check if tournament is in registration phase
+    if (tournament.status !== 'registration') {
+      const error = new Error('Tournament is not in registration phase');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Check registration window
+    const now = new Date();
+    if (now < new Date(tournament.registrationWindow.start)) {
+      const error = new Error('Registration has not started yet');
+      error.statusCode = 400;
+      throw error;
+    }
+    if (now > new Date(tournament.registrationWindow.end)) {
+      const error = new Error('Registration has ended');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Check if team is already registered
+    if (tournament.teams.some((t) => t.toString() === teamId)) {
+      const error = new Error('Team is already registered for this tournament');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Check if tournament is full
+    if (tournament.maxTeams && tournament.teams.length >= tournament.maxTeams) {
+      const error = new Error('Tournament is full');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    await this.tournamentRepository.addTeam(tournamentId, teamId);
+    await this.eventBus.publish('tournament.team_joined', { tournamentId, teamId, userId });
+  }
+
+  async leaveTournament(tournamentId, teamId, userId) {
+    const tournament = await this.tournamentRepository.findById(tournamentId);
+    if (!tournament) {
+      const error = new Error('Tournament not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Check if team is registered
+    if (!tournament.teams.some((t) => t.toString() === teamId)) {
+      const error = new Error('Team is not registered for this tournament');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Cannot leave after tournament has started
+    if (tournament.status === 'ongoing' || tournament.status === 'completed') {
+      const error = new Error('Cannot leave tournament after it has started');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    await this.tournamentRepository.removeTeam(tournamentId, teamId);
+    await this.eventBus.publish('tournament.team_left', { tournamentId, teamId, userId });
   }
 
   async registerTeam(tournamentId, teamId) {
@@ -60,7 +177,7 @@ export class TournamentService {
     // Generate bracket based on tournament type
     try {
       const bracket = BracketGenerator.generateBracket(tournament);
-      
+
       // Update tournament with bracket and status
       const updateData = {
         status: 'ongoing',
@@ -68,17 +185,17 @@ export class TournamentService {
         bracket: bracket,
         rounds: bracket.totalRounds,
       };
-      
+
       await this.tournamentRepository.update(tournamentId, updateData);
-      await this.eventBus.publish('tournament.started', { 
-        tournamentId, 
+      await this.eventBus.publish('tournament.started', {
+        tournamentId,
         bracket,
         totalRounds: bracket.totalRounds,
       });
-      
+
       this.logger.info(`Tournament ${tournamentId} started with ${bracket.totalRounds} rounds`);
-      
-      return { 
+
+      return {
         message: 'Tournament started successfully',
         bracket,
         totalRounds: bracket.totalRounds,
@@ -95,29 +212,29 @@ export class TournamentService {
     if (!tournament) {
       throw new Error('Tournament not found');
     }
-    
+
     if (!tournament.bracket) {
       throw new Error('Tournament bracket not generated yet');
     }
-    
+
     return tournament.bracket;
   }
 
   async updateMatchResult(tournamentId, matchNumber, result, userId) {
     const tournament = await this.tournamentRepository.findById(tournamentId);
-    
+
     if (!tournament) {
       throw new Error('Tournament not found');
     }
-    
+
     if (tournament.organizerId.toString() !== userId) {
       throw new Error('Not authorized');
     }
-    
+
     if (!tournament.bracket) {
       throw new Error('Tournament bracket not found');
     }
-    
+
     try {
       // Update bracket with match result
       const updatedBracket = BracketGenerator.updateBracketWithResult(
@@ -125,14 +242,16 @@ export class TournamentService {
         matchNumber,
         result
       );
-      
+
       // Determine if we should advance to next round
-      const currentRound = updatedBracket.rounds.find(r => r.roundNumber === tournament.currentRound);
+      const currentRound = updatedBracket.rounds.find(
+        (r) => r.roundNumber === tournament.currentRound
+      );
       let updateData = { bracket: updatedBracket };
-      
+
       if (currentRound && currentRound.completed) {
         updateData.currentRound = tournament.currentRound + 1;
-        
+
         // Check if tournament is completed
         if (tournament.currentRound >= tournament.rounds) {
           updateData.status = 'completed';
@@ -147,14 +266,14 @@ export class TournamentService {
           });
         }
       }
-      
+
       await this.tournamentRepository.update(tournamentId, updateData);
       await this.eventBus.publish('tournament.match_updated', {
         tournamentId,
         matchNumber,
         result,
       });
-      
+
       return updatedBracket;
     } catch (error) {
       this.logger.error(`Failed to update match result:`, error);

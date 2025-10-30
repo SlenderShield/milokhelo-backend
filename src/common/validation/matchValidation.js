@@ -40,10 +40,7 @@ export const createMatchValidation = [
     .isLength({ max: 200 })
     .withMessage('Location must not exceed 200 characters')
     .trim(),
-  body('venueId')
-    .optional()
-    .isMongoId()
-    .withMessage('Invalid venue ID'),
+  body('venueId').optional().isMongoId().withMessage('Invalid venue ID'),
   body('maxParticipants')
     .optional()
     .isInt({ min: 2, max: 100 })
@@ -64,18 +61,13 @@ export const createMatchValidation = [
  * Validation for updating match
  */
 export const updateMatchValidation = [
-  param('matchId')
-    .isMongoId()
-    .withMessage('Invalid match ID'),
+  param('matchId').isMongoId().withMessage('Invalid match ID'),
   body('title')
     .optional()
     .isLength({ min: 3, max: 100 })
     .withMessage('Title must be between 3 and 100 characters')
     .trim(),
-  body('date')
-    .optional()
-    .isISO8601()
-    .withMessage('Date must be a valid ISO 8601 date'),
+  body('date').optional().isISO8601().withMessage('Date must be a valid ISO 8601 date'),
   body('location')
     .optional()
     .isLength({ max: 200 })
@@ -90,31 +82,46 @@ export const updateMatchValidation = [
 /**
  * Validation for match ID param
  */
-export const matchIdValidation = [
-  param('matchId')
-    .isMongoId()
-    .withMessage('Invalid match ID'),
-];
+export const matchIdValidation = [param('matchId').isMongoId().withMessage('Invalid match ID')];
 
 /**
  * Validation for finishing match
  */
 export const finishMatchValidation = [
-  param('matchId')
-    .isMongoId()
-    .withMessage('Invalid match ID'),
-  body('winnerId')
-    .optional()
-    .isMongoId()
-    .withMessage('Invalid winner ID'),
-  body('score')
-    .optional()
+  param('matchId').isMongoId().withMessage('Invalid match ID'),
+  body('winnerId').optional().isMongoId().withMessage('Invalid winner ID'),
+  body('score').optional().isObject().withMessage('Score must be an object'),
+  body('stats').optional().isArray().withMessage('Stats must be an array'),
+];
+
+/**
+ * Validation for updating match score
+ */
+export const updateScoreValidation = [
+  param('id').isMongoId().withMessage('Invalid match ID'),
+  body('scores')
+    .notEmpty()
+    .withMessage('Scores are required')
     .isObject()
-    .withMessage('Score must be an object'),
-  body('stats')
-    .optional()
-    .isArray()
-    .withMessage('Stats must be an array'),
+    .withMessage('Scores must be an object')
+    .custom((scores) => {
+      if (Object.keys(scores).length === 0) {
+        throw new Error('Scores object cannot be empty');
+      }
+      return true;
+    }),
+];
+
+/**
+ * Validation for updating match status
+ */
+export const updateStatusValidation = [
+  param('id').isMongoId().withMessage('Invalid match ID'),
+  body('status')
+    .notEmpty()
+    .withMessage('Status is required')
+    .isIn(['scheduled', 'live', 'finished', 'cancelled'])
+    .withMessage('Invalid status. Must be one of: scheduled, live, finished, cancelled'),
 ];
 
 /**

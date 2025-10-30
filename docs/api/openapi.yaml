@@ -1267,7 +1267,10 @@ paths:
           description: Updated match
     delete:
       tags: [Matches]
-      summary: Cancel match
+      summary: Cancel match (Organizer Only)
+      description: >
+        Cancel a match. Only the match organizer can cancel their match.
+        This endpoint is now restricted to match organizers only.
       security:
         - cookieAuth: []
       parameters:
@@ -1278,11 +1281,18 @@ paths:
       responses:
         "204":
           description: Match cancelled
+        "401":
+          description: Authentication required
+        "403":
+          description: Not authorized - Only the match organizer can cancel
 
   /matches/{id}/join:
     post:
       tags: [Matches]
       summary: Join a match
+      description: >
+        Join a scheduled match as a participant. Users can join matches that are not full
+        and are in 'scheduled' status. Cannot join if already a participant.
       security:
         - cookieAuth: []
       parameters:
@@ -1290,14 +1300,36 @@ paths:
           in: path
           required: true
           schema: { type: string }
+          description: Match ID
       responses:
         "200":
-          description: Joined match
+          description: Successfully joined match
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Successfully joined match
+        "400":
+          description: Bad request - Cannot join (already joined, match full, or not scheduled)
+        "401":
+          description: Authentication required
+        "404":
+          description: Match not found
 
   /matches/{id}/leave:
     post:
       tags: [Matches]
       summary: Leave a match
+      description: >
+        Leave a match as a participant. Participants can leave scheduled matches before
+        they start. Organizers cannot leave their own match (they must cancel it instead).
+        Cannot leave matches that are live or finished.
       security:
         - cookieAuth: []
       parameters:
@@ -1305,14 +1337,168 @@ paths:
           in: path
           required: true
           schema: { type: string }
+          description: Match ID
       responses:
         "200":
-          description: Left match
+          description: Successfully left match
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Successfully left match
+        "400":
+          description: Bad request - Cannot leave (not a participant, organizer, or match already started)
+        "401":
+          description: Authentication required
+        "404":
+          description: Match not found
+
+  /matches/{id}/score:
+    put:
+      tags: [Matches]
+      summary: Update match score
+      description: >
+        Update the score for a live or finished match. Only the match organizer or 
+        participants can update scores. Scores can be updated for matches in 'live' 
+        or 'finished' status.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Match ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - scores
+              properties:
+                scores:
+                  type: object
+                  description: Score object with participant IDs as keys
+                  additionalProperties: true
+                  example:
+                    "userId1": 5
+                    "userId2": 3
+            examples:
+              simpleScores:
+                summary: Simple numeric scores
+                value:
+                  scores:
+                    "507f1f77bcf86cd799439011": 5
+                    "507f1f77bcf86cd799439012": 3
+              detailedScores:
+                summary: Detailed performance stats
+                value:
+                  scores:
+                    "507f1f77bcf86cd799439011":
+                      goals: 3
+                      assists: 2
+                      fouls: 1
+                    "507f1f77bcf86cd799439012":
+                      goals: 1
+                      assists: 0
+                      fouls: 3
+      responses:
+        "200":
+          description: Score updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Score updated successfully
+                  data:
+                    $ref: "#/components/schemas/Match"
+        "400":
+          description: Bad request - Invalid scores or match not in valid status
+        "401":
+          description: Authentication required
+        "403":
+          description: Not authorized - Only organizer or participants can update scores
+        "404":
+          description: Match not found
+
+  /matches/{id}/status:
+    put:
+      tags: [Matches]
+      summary: Update match status
+      description: >
+        Update the status of a match. Only the match organizer can update the status.
+        Valid status transitions:
+        - scheduled → live, cancelled
+        - live → finished, cancelled
+        - finished → (no transitions)
+        - cancelled → (no transitions)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Match ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [scheduled, live, finished, cancelled]
+                  description: New match status
+                  example: live
+      responses:
+        "200":
+          description: Status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Match status updated successfully
+                  data:
+                    $ref: "#/components/schemas/Match"
+        "400":
+          description: Bad request - Invalid status transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Not authorized - Only the match organizer can update status
+        "404":
+          description: Match not found
 
   /matches/{id}/start:
     post:
       tags: [Matches]
-      summary: Mark match as live
+      summary: Mark match as live (Legacy)
+      description: >
+        Legacy endpoint for marking match as live. Consider using PUT /matches/{id}/status instead.
       security:
         - cookieAuth: []
       parameters:
@@ -1327,8 +1513,12 @@ paths:
   /matches/{id}/finish:
     post:
       tags: [Matches]
-      summary: Finish match and automatically update participant stats
+      summary: Finish match and automatically update participant stats (Legacy)
       description: >
+        Legacy endpoint for finishing a match. Consider using PUT /matches/{id}/status 
+        and PUT /matches/{id}/score instead for more granular control.
+
+        **Original Description:**
         Marks match as finished with final scores. Automatically triggers stats updates
         for all participants including wins/losses/draws, ELO ratings, streaks, and
         detailed performance metrics (goals, assists, fouls). Stats are updated via
@@ -1456,9 +1646,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Tournament"
-    patch:
+    put:
       tags: [Tournaments]
       summary: Update tournament
+      description: >
+        Update tournament details. Only the tournament organizer or admin can update.
+        Cannot modify tournament structure (type, sport, team limits) after it has started.
       security:
         - cookieAuth: []
       parameters:
@@ -1466,17 +1659,110 @@ paths:
           in: path
           required: true
           schema: { type: string }
+          description: Tournament ID
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TournamentUpdate"
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                  description: Tournament title
+                sport:
+                  type: string
+                  enum:
+                    [
+                      football,
+                      basketball,
+                      volleyball,
+                      tennis,
+                      badminton,
+                      cricket,
+                      other,
+                    ]
+                  description: Sport type
+                type:
+                  type: string
+                  enum: [knockout, league]
+                  description: Tournament type (cannot be changed after start)
+                registrationWindow:
+                  type: object
+                  properties:
+                    start:
+                      type: string
+                      format: date-time
+                    end:
+                      type: string
+                      format: date-time
+                minTeams:
+                  type: integer
+                  minimum: 2
+                  maximum: 100
+                maxTeams:
+                  type: integer
+                  minimum: 2
+                  maximum: 100
+                entryFee:
+                  type: number
+                  minimum: 0
+                prizePool:
+                  type: string
+                  maxLength: 500
+                rules:
+                  type: string
+                  maxLength: 2000
+                visibility:
+                  type: string
+                  enum: [public, private]
+                status:
+                  type: string
+                  enum: [registration, ongoing, completed, cancelled]
+            examples:
+              updateBasicInfo:
+                summary: Update basic tournament info
+                value:
+                  title: "Updated Summer Basketball Championship"
+                  prizePool: "$2000 + Trophy"
+                  rules: "Updated tournament rules..."
+              extendRegistration:
+                summary: Extend registration window
+                value:
+                  registrationWindow:
+                    end: "2025-12-31T23:59:59Z"
       responses:
         "200":
-          description: Tournament updated
+          description: Tournament updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Tournament updated successfully
+                  data:
+                    $ref: "#/components/schemas/Tournament"
+        "400":
+          description: Bad request - Cannot modify tournament structure after it has started
+        "401":
+          description: Authentication required
+        "403":
+          description: Not authorized - Only organizer or admin can update
+        "404":
+          description: Tournament not found
     delete:
       tags: [Tournaments]
-      summary: Cancel tournament
+      summary: Cancel tournament (Organizer or Admin Only)
+      description: >
+        Cancel a tournament. Only the tournament organizer or admin can cancel.
+        Cannot cancel a completed tournament.
       security:
         - cookieAuth: []
       parameters:
@@ -1484,14 +1770,122 @@ paths:
           in: path
           required: true
           schema: { type: string }
+          description: Tournament ID
       responses:
         "204":
-          description: Tournament cancelled
+          description: Tournament cancelled successfully
+        "400":
+          description: Bad request - Cannot cancel completed tournament
+        "401":
+          description: Authentication required
+        "403":
+          description: Not authorized - Only organizer or admin can cancel
+        "404":
+          description: Tournament not found
+
+  /tournaments/{id}/join:
+    post:
+      tags: [Tournaments]
+      summary: Join tournament with a team
+      description: >
+        Register a team to join the tournament. The tournament must be in registration phase
+        and within the registration window. Cannot join if tournament is full or team is already registered.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Tournament ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - teamId
+              properties:
+                teamId:
+                  type: string
+                  description: ID of the team to register
+                  example: "507f1f77bcf86cd799439011"
+      responses:
+        "200":
+          description: Successfully joined tournament
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Successfully joined tournament
+        "400":
+          description: Bad request - Not in registration phase, registration window closed, tournament full, or already registered
+        "401":
+          description: Authentication required
+        "404":
+          description: Tournament not found
+
+  /tournaments/{id}/leave:
+    post:
+      tags: [Tournaments]
+      summary: Leave tournament
+      description: >
+        Remove a team from the tournament. Can only leave during registration phase
+        before the tournament has started. Cannot leave after tournament is ongoing or completed.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Tournament ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - teamId
+              properties:
+                teamId:
+                  type: string
+                  description: ID of the team to remove
+                  example: "507f1f77bcf86cd799439011"
+      responses:
+        "200":
+          description: Successfully left tournament
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Successfully left tournament
+        "400":
+          description: Bad request - Not registered, or tournament already started
+        "401":
+          description: Authentication required
+        "404":
+          description: Tournament not found
 
   /tournaments/{id}/register:
     post:
       tags: [Tournaments]
-      summary: Register team/user
+      summary: Register team/user (Legacy)
+      description: Legacy endpoint for team registration. Consider using POST /tournaments/{id}/join instead.
       security:
         - cookieAuth: []
       parameters:
@@ -1509,12 +1903,13 @@ paths:
           description: Registered
 
   /tournaments/{id}/start:
-    post:
+    put:
       tags: [Tournaments]
       summary: Start tournament and generate bracket
       description: >
         Starts the tournament and automatically generates the bracket based on tournament type 
         (knockout or league) and registered teams. Validates minimum team requirements.
+        Only the tournament organizer can start the tournament.
       security:
         - cookieAuth: []
       parameters:
@@ -1522,6 +1917,7 @@ paths:
           in: path
           required: true
           schema: { type: string }
+          description: Tournament ID
       responses:
         "200":
           description: Tournament started with generated bracket
@@ -1530,15 +1926,26 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: { type: string }
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Tournament started successfully
                   bracket:
                     $ref: "#/components/schemas/TournamentBracket"
-                  totalRounds: { type: integer }
-                  currentRound: { type: integer }
+                  totalRounds:
+                    type: integer
+                    example: 4
+                  currentRound:
+                    type: integer
+                    example: 1
         "400":
-          description: Bad request (not enough teams, tournament already started, etc.)
+          description: Bad request - Not enough teams, tournament already started, or registration not closed
         "401":
-          description: Unauthorized (not tournament organizer)
+          description: Authentication required
+        "403":
+          description: Not authorized - Only tournament organizer can start
         "404":
           description: Tournament not found
 

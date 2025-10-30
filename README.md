@@ -240,10 +240,13 @@ All API endpoints implement comprehensive input validation with express-validato
 - `GET /nearby` - Find nearby matches
 - `GET /:matchId` - Get match details
 - `PATCH /:matchId` - Update match
-- `POST /:matchId/join` - Join match
-- `POST /:matchId/leave` - Leave match
-- `POST /:matchId/start` - Start match
-- `POST /:matchId/finish` - Finish match (auto-updates participant stats via events)
+- `DELETE /:matchId` - Cancel match (organizer only)
+- `POST /:matchId/join` - Join match (scheduled matches only)
+- `POST /:matchId/leave` - Leave match (scheduled matches only)
+- `PUT /:matchId/score` - Update match score (organizer/participants)
+- `PUT /:matchId/status` - Update match status (organizer only)
+- `POST /:matchId/start` - Start match (legacy, use PUT /status)
+- `POST /:matchId/finish` - Finish match (legacy, use PUT /status + /score)
 
 **Stats Auto-Update Features:**
 
@@ -268,10 +271,13 @@ All API endpoints implement comprehensive input validation with express-validato
 - `POST /` - Create tournament
 - `GET /` - List tournaments
 - `GET /:tournamentId` - Get tournament details
-- `PATCH /:tournamentId` - Update tournament
-- `POST /:tournamentId/register` - Register team
-- `POST /:tournamentId/start` - Start tournament and generate bracket
+- `PUT /:tournamentId` - Update tournament (organizer/admin only)
+- `DELETE /:tournamentId` - Cancel tournament (organizer/admin only)
+- `POST /:tournamentId/join` - Join tournament with team (registration phase only)
+- `POST /:tournamentId/leave` - Leave tournament (before start only)
+- `PUT /:tournamentId/start` - Start tournament and generate bracket (organizer only)
 - `GET /:tournamentId/bracket` - Get tournament bracket
+- `POST /:tournamentId/register` - Register team (legacy, use POST /join)
 - `POST /:tournamentId/match-result` - Update match result
 
 **Bracket Features:**
