@@ -31,7 +31,8 @@ async function createApp(config, logger, container) {
   // app.use(configureCORS(config));
 
   // Session middleware (for cookie-based auth) - MUST be before passport
-  app.use(createSessionMiddleware(config, logger));
+  const sessionMiddleware = await createSessionMiddleware(config, logger);
+  app.use(sessionMiddleware);
 
   // Initialize Passport (if available)
   try {

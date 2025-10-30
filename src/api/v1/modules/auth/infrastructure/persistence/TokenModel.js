@@ -43,6 +43,15 @@ const emailVerificationTokenSchema = new mongoose.Schema(
 // Auto-delete expired tokens after 30 days
 emailVerificationTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 2592000 });
 
+emailVerificationTokenSchema.set('toJSON', {
+  virtuals: true,
+  versionKey: false,
+  transform: function (doc, ret) {
+    ret.id = ret._id;
+    delete ret._id;
+  },
+});
+
 /**
  * Password Reset Token Schema
  */
@@ -81,6 +90,15 @@ const passwordResetTokenSchema = new mongoose.Schema(
 
 // Auto-delete expired tokens after 7 days
 passwordResetTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 604800 });
+
+passwordResetTokenSchema.set('toJSON', {
+  virtuals: true,
+  versionKey: false,
+  transform: function (doc, ret) {
+    ret.id = ret._id;
+    delete ret._id;
+  },
+});
 
 /**
  * Refresh Token Schema
@@ -124,6 +142,14 @@ const refreshTokenSchema = new mongoose.Schema(
 // Auto-delete expired tokens after 30 days
 refreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 2592000 });
 
+refreshTokenSchema.set('toJSON', {
+  virtuals: true,
+  versionKey: false,
+  transform: function (doc, ret) {
+    ret.id = ret._id;
+    delete ret._id;
+  },
+});
 export const EmailVerificationToken = mongoose.model(
   'EmailVerificationToken',
   emailVerificationTokenSchema

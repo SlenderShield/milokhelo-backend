@@ -11,11 +11,11 @@ class AuthRepository {
   }
 
   async findUserByEmail(email) {
-    return UserModel.findOne({ email }).lean();
+    return UserModel.findOne({ email });
   }
 
   async findUserById(id) {
-    return UserModel.findById(id).lean();
+    return UserModel.findById(id);
   }
 
   async createUser(userData) {
@@ -28,7 +28,7 @@ class AuthRepository {
     const user = await UserModel.findByIdAndUpdate(id, userData, {
       new: true,
       runValidators: true,
-    }).lean();
+    });
     return user;
   }
 
@@ -112,7 +112,7 @@ class AuthRepository {
 
   async findRefreshToken(token) {
     this.logger.info('Finding refresh token', { token: token.substring(0, 10) + '...' });
-    return RefreshToken.findOne({ token, revoked: false }).lean();
+    return RefreshToken.findOne({ token, revoked: false });
   }
 
   async revokeRefreshToken(token) {
@@ -149,7 +149,7 @@ class AuthRepository {
   }
 
   async findEmailVerificationToken(token) {
-    return EmailVerificationToken.findOne({ token, used: false }).lean();
+    return EmailVerificationToken.findOne({ token, used: false });
   }
 
   async markEmailVerificationTokenUsed(token) {
@@ -173,7 +173,7 @@ class AuthRepository {
   }
 
   async findPasswordResetToken(token) {
-    return PasswordResetToken.findOne({ token, used: false }).lean();
+    return PasswordResetToken.findOne({ token, used: false });
   }
 
   async markPasswordResetTokenUsed(token) {
@@ -186,7 +186,7 @@ class AuthRepository {
       userId,
       { password: hashedPassword },
       { new: true, runValidators: true }
-    ).lean();
+    );
     return user;
   }
 
@@ -195,7 +195,7 @@ class AuthRepository {
       userId,
       { verified: true },
       { new: true, runValidators: true }
-    ).lean();
+    );
     return user;
   }
 
@@ -207,7 +207,7 @@ class AuthRepository {
         deactivatedAt: new Date(),
       },
       { new: true, runValidators: true }
-    ).lean();
+    );
     return user;
   }
 }

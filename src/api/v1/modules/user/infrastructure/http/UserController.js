@@ -11,7 +11,8 @@ class UserController {
 
   getMe() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      this.logger.info('Fetching current user profile', { user: req.user });
+      const userId = req.user?.id || req.session?.userId;
       if (!userId) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Not authenticated' });
       }
@@ -31,7 +32,7 @@ class UserController {
 
   createOrUpdateUser() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
       if (!userId) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Not authenticated' });
       }
@@ -50,7 +51,7 @@ class UserController {
 
   getMyAchievements() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
       if (!userId) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Not authenticated' });
       }
@@ -69,7 +70,7 @@ class UserController {
 
   updateMe() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
       if (!userId) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Not authenticated' });
       }
@@ -88,7 +89,7 @@ class UserController {
 
   addFriend() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
       if (!userId) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Not authenticated' });
       }
@@ -100,7 +101,7 @@ class UserController {
 
   removeFriend() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
       if (!userId) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Not authenticated' });
       }

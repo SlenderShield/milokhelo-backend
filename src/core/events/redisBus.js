@@ -3,7 +3,7 @@
  * Suitable for distributed applications and microservices
  * Uses Redis Pub/Sub for event distribution
  */
-import Redis from 'ioredis';
+import { createClient } from 'redis';
 import IEventBus from './IEventBus.js';
 
 class RedisEventBus extends IEventBus {
@@ -18,44 +18,23 @@ class RedisEventBus extends IEventBus {
   }
 
   async connect() {
-    if (this.isConnected) {
-      return;
-    }
+    if (this.isConnected) return;
 
     try {
       // Create publisher client
-      this.publisher = new Redis({
-        host: this.config.host,
-        port: this.config.port,
-        password: this.config.password,
-        db: this.config.db,
-        retryStrategy: (times) => {
-          const delay = Math.min(times * 50, 2000);
-          return delay;
+      this.publisher = createClient({
+        socket: {
+          host: this.config.host,
+          port: this.config.port,
         },
-      });
-
-      // Create subscriber client
-      this.subscriber = new Redis({
-        host: this.config.host,
-        port: this.config.port,
         password: this.config.password,
-        db: this.config.db,
-        retryStrategy: (times) => {
-          const delay = Math.min(times * 50, 2000);
-          return delay;
-        },
+        database: this.config.db,
       });
 
-      // Handle connection events
-      this.publisher.on('connect', () => {
-        this.logger.info('Redis publisher connected');
-      });
+      // Duplicate for subscriber
+      this.subscriber = this.publisher.duplicate();
 
-      this.subscriber.on('connect', () => {
-        this.logger.info('Redis subscriber connected');
-      });
-
+      // Connection event handlers
       this.publisher.on('error', (error) => {
         this.logger.error('Redis publisher error', { error: error.message });
       });
@@ -64,10 +43,17 @@ class RedisEventBus extends IEventBus {
         this.logger.error('Redis subscriber error', { error: error.message });
       });
 
-      // Handle messages
-      this.subscriber.on('message', async (channel, message) => {
-        await this.handleMessage(channel, message);
+      this.publisher.on('ready', () => {
+        this.logger.info('Redis publisher ready');
       });
+
+      this.subscriber.on('ready', () => {
+        this.logger.info('Redis subscriber ready');
+      });
+
+      // Connect both clients
+      await this.publisher.connect();
+      await this.subscriber.connect();
 
       this.isConnected = true;
       this.logger.info('RedisEventBus connected');
@@ -81,12 +67,8 @@ class RedisEventBus extends IEventBus {
     try {
       const data = JSON.parse(message);
       const handlers = this.handlers.get(event);
+      if (!handlers || handlers.size === 0) return;
 
-      if (!handlers || handlers.size === 0) {
-        return;
-      }
-
-      // Execute all handlers asynchronously
       const promises = Array.from(handlers).map(async (handler) => {
         try {
           await handler(data);
@@ -132,10 +114,13 @@ class RedisEventBus extends IEventBus {
       throw new Error('Handler must be a function');
     }
 
+    // Add handler
     if (!this.handlers.has(event)) {
       this.handlers.set(event, new Set());
-      // Subscribe to the channel only once per event
-      await this.subscriber.subscribe(event);
+      // Subscribe directly
+      await this.subscriber.subscribe(event, (message) => {
+        this.handleMessage(event, message);
+      });
       this.logger.info(`Subscribed to Redis channel: ${event}`);
     }
 
@@ -149,7 +134,6 @@ class RedisEventBus extends IEventBus {
       handlers.delete(handler);
       this.logger.debug(`Handler unsubscribed from event: ${event}`);
 
-      // If no more handlers, unsubscribe from Redis channel
       if (handlers.size === 0) {
         this.handlers.delete(event);
         await this.subscriber.unsubscribe(event);
@@ -159,23 +143,26 @@ class RedisEventBus extends IEventBus {
   }
 
   async close() {
-    if (this.publisher) {
-      await this.publisher.quit();
+    try {
+      if (this.publisher?.isOpen) {
+        await this.publisher.quit();
+      }
+      if (this.subscriber?.isOpen) {
+        await this.subscriber.quit();
+      }
+      this.handlers.clear();
+      this.isConnected = false;
+      this.logger.info('RedisEventBus closed');
+    } catch (error) {
+      this.logger.error('Error closing RedisEventBus', { error: error.message });
     }
-    if (this.subscriber) {
-      await this.subscriber.quit();
-    }
-    this.handlers.clear();
-    this.isConnected = false;
-    this.logger.info('RedisEventBus closed');
   }
 
-  // Helper method to get all subscribed events
+  // Helper methods
   getRegisteredEvents() {
     return Array.from(this.handlers.keys());
   }
 
-  // Helper method to get handler count for an event
   getHandlerCount(event) {
     const handlers = this.handlers.get(event);
     return handlers ? handlers.size : 0;

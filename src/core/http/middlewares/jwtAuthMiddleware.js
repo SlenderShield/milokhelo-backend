@@ -52,7 +52,6 @@ export function createJwtAuthMiddleware(config) {
         email: decoded.email,
         roles: decoded.roles || ['user'],
       };
-
       // Also set userId for backward compatibility
       req.userId = decoded.userId;
 

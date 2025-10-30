@@ -199,18 +199,10 @@ class AuthController {
 
       // Generate tokens
       const accessToken = this.authService.generateToken(user);
-      const refreshTokenData = this.authService.generateRefreshToken(user, {
+      const refreshTokenData = await this.authService.generateRefreshToken(user, {
         userAgent: req.headers['user-agent'],
         ip: req.ip,
       });
-
-      // Store refresh token
-      await this.authService.authRepository.storeRefreshToken(
-        refreshTokenData.userId,
-        refreshTokenData.token,
-        refreshTokenData.expiresAt,
-        refreshTokenData.deviceInfo
-      );
 
       // Set session
       req.session.userId = user.id;
@@ -232,21 +224,13 @@ class AuthController {
       const { email, password } = req.body;
 
       const user = await this.authService.login(email, password);
-
+      this.logger.debug('Fetched user for login', { user, userId: user?.id });
       // Generate tokens
       const accessToken = this.authService.generateToken(user);
-      const refreshTokenData = this.authService.generateRefreshToken(user, {
+      const refreshTokenData = await this.authService.generateRefreshToken(user, {
         userAgent: req.headers['user-agent'],
         ip: req.ip,
       });
-
-      // Store refresh token
-      await this.authService.authRepository.storeRefreshToken(
-        refreshTokenData.userId,
-        refreshTokenData.token,
-        refreshTokenData.expiresAt,
-        refreshTokenData.deviceInfo
-      );
 
       // Set session
       req.session.userId = user.id;

@@ -145,10 +145,16 @@ class AuthService {
    * Remove sensitive data from user object
    */
   sanitizeUser(user) {
-    // Handle Mongoose document
-    const userObj = user.toObject ? user.toObject() : { ...user };
+    if (!user) return null;
 
-    // Remove sensitive fields
+    // Convert Mongoose document to plain object if needed
+    const userObj = user.toObject ? user.toObject({ virtuals: true }) : { ...user };
+
+    // Normalize _id → id
+    userObj.id = userObj._id?.toString();
+    delete userObj._id;
+
+    // Remove sensitive or internal fields
     delete userObj.password;
     delete userObj.oauthTokens;
     delete userObj.__v;
@@ -395,7 +401,7 @@ class AuthService {
 
     // Store refresh token in database
     await this.authRepository.storeRefreshToken(user.id, token, expiresAt, deviceInfo);
-
+    this.logger.info('Generated refresh token', { token, expiresAt });
     return { token, expiresAt };
   }
 

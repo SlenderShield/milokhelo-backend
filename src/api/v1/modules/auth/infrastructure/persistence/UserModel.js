@@ -81,6 +81,8 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
     toJSON: {
+      virtuals: true,
+      versionKey: false,
       transform: function (_doc, ret) {
         ret.id = ret._id.toString();
         delete ret._id;

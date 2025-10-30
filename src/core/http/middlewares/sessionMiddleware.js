@@ -4,14 +4,16 @@
  */
 import session from 'express-session';
 import { RedisStore } from 'connect-redis';
-import Redis from 'ioredis';
+import { createClient } from 'redis';
 
-export function createSessionMiddleware(config, logger) {
-  const redisClient = new Redis({
-    host: config.get('redis.host'),
-    port: config.get('redis.port'),
+export async function createSessionMiddleware(config, logger) {
+  const redisClient = createClient({
+    socket: {
+      host: config.get('redis.host'),
+      port: config.get('redis.port'),
+    },
     password: config.get('redis.password'),
-    db: config.get('redis.db'),
+    database: config.get('redis.db'),
   });
 
   redisClient.on('error', (err) => {
@@ -21,6 +23,8 @@ export function createSessionMiddleware(config, logger) {
   redisClient.on('connect', () => {
     logger.info('Redis session store connected');
   });
+
+  await redisClient.connect();
 
   const sessionStore = new RedisStore({
     client: redisClient,
