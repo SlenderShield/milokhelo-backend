@@ -61,22 +61,31 @@ const PERMISSIONS = {
 
 /**
  * Middleware to check if user is authenticated
+ * Works with both JWT (req.user) and session-based auth (req.session)
  * @returns {Function} Express middleware
  */
 export function requireAuth() {
   return (req, res, next) => {
-    if (!req.session || !req.session.userId) {
-      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        status: 'error',
-        message: 'Authentication required',
-      });
+    // Check JWT authentication (primary)
+    if (req.user && req.user.id) {
+      return next();
     }
-    next();
+
+    // Fallback to session authentication
+    if (req.session && req.session.userId) {
+      return next();
+    }
+
+    return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      status: 'error',
+      message: 'Authentication required',
+    });
   };
 }
 
 /**
  * Middleware to check if user has required role(s)
+ * Works with both JWT (req.user) and session-based auth (req.session)
  * @param {string|string[]} requiredRoles - Role or array of roles
  * @returns {Function} Express middleware
  */
@@ -84,14 +93,16 @@ export function requireRole(requiredRoles) {
   const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
 
   return (req, res, next) => {
-    if (!req.session || !req.session.userId) {
+    // Check JWT authentication first
+    if (!req.user?.id && (!req.session || !req.session.userId)) {
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         status: 'error',
         message: 'Authentication required',
       });
     }
 
-    const userRoles = req.session.user?.roles || ['user'];
+    // Get user roles from JWT or session
+    const userRoles = req.user?.roles || req.session?.user?.roles || ['user'];
 
     const hasRequiredRole = roles.some((role) => userRoles.includes(role));
 
@@ -110,19 +121,22 @@ export function requireRole(requiredRoles) {
 
 /**
  * Middleware to check if user has required permission
+ * Works with both JWT (req.user) and session-based auth (req.session)
  * @param {string} permission - Permission string (e.g., 'venue:create')
  * @returns {Function} Express middleware
  */
 export function requirePermission(permission) {
   return (req, res, next) => {
-    if (!req.session || !req.session.userId) {
+    // Check JWT authentication first
+    if (!req.user?.id && (!req.session || !req.session.userId)) {
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         status: 'error',
         message: 'Authentication required',
       });
     }
 
-    const userRoles = req.session.user?.roles || ['user'];
+    // Get user roles from JWT or session
+    const userRoles = req.user?.roles || req.session?.user?.roles || ['user'];
     const allowedRoles = PERMISSIONS[permission];
 
     if (!allowedRoles) {
@@ -149,6 +163,7 @@ export function requirePermission(permission) {
 
 /**
  * Middleware to check if user has minimum role level
+ * Works with both JWT (req.user) and session-based auth (req.session)
  * @param {string} minRole - Minimum role required
  * @returns {Function} Express middleware
  */
@@ -160,14 +175,16 @@ export function requireMinRole(minRole) {
   }
 
   return (req, res, next) => {
-    if (!req.session || !req.session.userId) {
+    // Check JWT authentication first
+    if (!req.user?.id && (!req.session || !req.session.userId)) {
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         status: 'error',
         message: 'Authentication required',
       });
     }
 
-    const userRoles = req.session.user?.roles || ['user'];
+    // Get user roles from JWT or session
+    const userRoles = req.user?.roles || req.session?.user?.roles || ['user'];
     const maxUserLevel = Math.max(...userRoles.map((role) => ROLE_HIERARCHY[role] || 0));
 
     if (maxUserLevel < minLevel) {
@@ -185,29 +202,37 @@ export function requireMinRole(minRole) {
 /**
  * Middleware to check if user owns the resource
  * Combines with role check - admins bypass ownership check
+ * Works with both JWT (req.user) and session-based auth (req.session)
  * @param {Function} getResourceUserId - Function to extract resource owner ID from request
  * @returns {Function} Express middleware
  */
 export function requireOwnership(getResourceUserId) {
   return async (req, res, next) => {
-    if (!req.session || !req.session.userId) {
+    // Check JWT authentication first
+    if (!req.user?.id && (!req.session || !req.session.userId)) {
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         status: 'error',
         message: 'Authentication required',
       });
     }
 
-    const userRoles = req.session.user?.roles || ['user'];
+    // Get user info from JWT or session
+    const userId = req.user?.id || req.session?.userId;
+    const userRoles = req.user?.roles || req.session?.user?.roles || ['user'];
 
     // Admins and moderators bypass ownership check
-    if (userRoles.includes('admin') || userRoles.includes('superadmin') || userRoles.includes('moderator')) {
+    if (
+      userRoles.includes('admin') ||
+      userRoles.includes('superadmin') ||
+      userRoles.includes('moderator')
+    ) {
       return next();
     }
 
     try {
       const resourceUserId = await getResourceUserId(req);
 
-      if (!resourceUserId || resourceUserId.toString() !== req.session.userId.toString()) {
+      if (!resourceUserId || resourceUserId.toString() !== userId.toString()) {
         return res.status(HTTP_STATUS.FORBIDDEN).json({
           status: 'error',
           message: 'You do not have permission to access this resource',
@@ -248,9 +273,9 @@ export function hasPermission(user, permission) {
   if (!user) return false;
   const userRoles = user.roles || ['user'];
   const allowedRoles = PERMISSIONS[permission];
-  
+
   if (!allowedRoles) return false;
-  
+
   return userRoles.some((role) => allowedRoles.includes(role));
 }
 

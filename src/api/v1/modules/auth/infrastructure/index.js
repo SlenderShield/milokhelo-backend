@@ -6,5 +6,13 @@ import AuthRepository from './persistence/AuthRepository.js';
 import AuthController from './http/AuthController.js';
 import { createAuthRoutes } from './http/AuthRoutes.js';
 import { PassportConfig } from './passport/index.js';
+import EmailService from './email/EmailService.js';
 
-export { UserModel, AuthRepository, AuthController, createAuthRoutes, PassportConfig };
+export {
+  UserModel,
+  AuthRepository,
+  AuthController,
+  createAuthRoutes,
+  PassportConfig,
+  EmailService,
+};

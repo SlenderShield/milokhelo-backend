@@ -44,6 +44,33 @@ export default {
     authRateLimitMax: 50,
   },
 
+  auth: {
+    jwtSecret: 'test-jwt-secret',
+    jwtExpiration: '1h',
+    refreshTokenExpiration: 86400000, // 1 day in ms
+    sessionSecret: 'test-session-secret',
+    sessionMaxAge: 3600000, // 1 hour
+    googleClientId: '',
+    googleClientSecret: '',
+    facebookAppId: '',
+    facebookAppSecret: '',
+    oauthCallbackUrl: 'http://localhost:4001/api/v1/auth/oauth/callback',
+    frontendUrl: 'http://localhost:3000',
+  },
+
+  email: {
+    from: 'test@milokhelo.com',
+    provider: 'console',
+    sendgrid: {
+      apiKey: '',
+    },
+    ses: {
+      region: 'us-east-1',
+      accessKeyId: '',
+      secretAccessKey: '',
+    },
+  },
+
   features: {
     enableMetrics: process.env.ENABLE_METRICS === 'true',
     enableHealthCheck: process.env.ENABLE_HEALTH_CHECK !== 'false',

@@ -4,7 +4,15 @@
  */
 import { IAuthRepository } from './domain/index.js';
 import { AuthService } from './application/index.js';
-import { UserModel, AuthRepository, AuthController, createAuthRoutes, PassportConfig } from './infrastructure/index.js';
+import {
+  UserModel,
+  AuthRepository,
+  AuthController,
+  createAuthRoutes,
+  PassportConfig,
+  EmailService,
+} from './infrastructure/index.js';
+import { createJwtAuthMiddleware } from '@/core/http/index.js';
 
 /**
  * Initialize the Auth module
@@ -15,6 +23,16 @@ function initializeAuthModule(container) {
   const eventBus = container.resolve('eventBus');
   const config = container.resolve('config');
 
+  // Register JWT authentication middleware
+  container.registerSingleton('jwtAuthMiddleware', () => {
+    return createJwtAuthMiddleware(config);
+  });
+
+  // Register email service
+  container.registerSingleton('emailService', () => {
+    return new EmailService(config, logger);
+  });
+
   // Register repository
   container.registerSingleton('authRepository', () => {
     return new AuthRepository(logger);
@@ -23,7 +41,8 @@ function initializeAuthModule(container) {
   // Register service
   container.registerSingleton('authService', () => {
     const repository = container.resolve('authRepository');
-    return new AuthService(repository, eventBus, logger, config);
+    const emailService = container.resolve('emailService');
+    return new AuthService(repository, eventBus, logger, config, emailService);
   });
 
   // Register controller
@@ -50,5 +69,6 @@ export {
   AuthController,
   createAuthRoutes,
   PassportConfig,
+  EmailService,
   initializeAuthModule,
 };

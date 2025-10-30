@@ -25,6 +25,11 @@ import {
   ROLE_HIERARCHY,
   PERMISSIONS,
 } from './authorizationMiddleware.js';
+import {
+  createJwtAuthMiddleware,
+  createOptionalJwtAuthMiddleware,
+  verifyJwtToken,
+} from './jwtAuthMiddleware.js';
 
 export {
   errorHandler,
@@ -47,4 +52,7 @@ export {
   hasPermission,
   ROLE_HIERARCHY,
   PERMISSIONS,
+  createJwtAuthMiddleware,
+  createOptionalJwtAuthMiddleware,
+  verifyJwtToken,
 };

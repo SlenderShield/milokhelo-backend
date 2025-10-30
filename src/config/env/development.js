@@ -49,6 +49,7 @@ export default {
   auth: {
     jwtSecret: process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production',
     jwtExpiration: process.env.JWT_EXPIRATION || '7d',
+    refreshTokenExpiration: parseInt(process.env.REFRESH_TOKEN_EXPIRATION || '2592000000', 10), // 30 days in ms
     sessionSecret: process.env.SESSION_SECRET || 'dev-session-secret-change-in-production',
     sessionMaxAge: parseInt(process.env.SESSION_MAX_AGE || '604800000', 10), // 7 days
     googleClientId: process.env.GOOGLE_CLIENT_ID || '',
@@ -58,6 +59,19 @@ export default {
     oauthCallbackUrl:
       process.env.OAUTH_CALLBACK_URL || 'http://localhost:4000/api/v1/auth/oauth/callback',
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+  },
+
+  email: {
+    from: process.env.EMAIL_FROM || 'noreply@milokhelo.com',
+    provider: process.env.EMAIL_PROVIDER || 'console', // 'console', 'sendgrid', 'ses'
+    sendgrid: {
+      apiKey: process.env.SENDGRID_API_KEY || '',
+    },
+    ses: {
+      region: process.env.AWS_REGION || 'us-east-1',
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+    },
   },
 
   // OAuth configuration accessor for consistency

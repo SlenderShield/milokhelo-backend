@@ -33,6 +33,13 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    deactivatedAt: {
+      type: Date,
+    },
     privacy: {
       showPhone: { type: Boolean, default: false },
       showStats: { type: Boolean, default: true },

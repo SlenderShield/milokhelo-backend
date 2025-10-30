@@ -3,6 +3,7 @@
  * Handles database operations for authentication
  */
 import UserModel from './UserModel.js';
+import { EmailVerificationToken, PasswordResetToken, RefreshToken } from './TokenModel.js';
 
 class AuthRepository {
   constructor(logger) {
@@ -97,22 +98,117 @@ class AuthRepository {
     return user.toJSON();
   }
 
-  async storeRefreshToken(userId, token, expiresAt) {
-    // TODO: Implement with Redis or separate token collection
+  async storeRefreshToken(userId, token, expiresAt, deviceInfo = {}) {
     this.logger.info('Storing refresh token', { userId });
-    return { userId, token, expiresAt };
+    const refreshToken = new RefreshToken({
+      userId,
+      token,
+      expiresAt,
+      deviceInfo,
+    });
+    await refreshToken.save();
+    return refreshToken.toJSON();
   }
 
   async findRefreshToken(token) {
-    // TODO: Implement with Redis or separate token collection
     this.logger.info('Finding refresh token', { token: token.substring(0, 10) + '...' });
-    return null;
+    return RefreshToken.findOne({ token, revoked: false }).lean();
   }
 
   async revokeRefreshToken(token) {
-    // TODO: Implement with Redis or separate token collection
     this.logger.info('Revoking refresh token', { token: token.substring(0, 10) + '...' });
-    return true;
+    const result = await RefreshToken.updateOne(
+      { token },
+      { revoked: true, revokedAt: new Date() }
+    );
+    return result.modifiedCount > 0;
+  }
+
+  async revokeAllUserTokens(userId) {
+    this.logger.info('Revoking all user tokens', { userId });
+    const result = await RefreshToken.updateMany(
+      { userId, revoked: false },
+      { revoked: true, revokedAt: new Date() }
+    );
+    return result.modifiedCount;
+  }
+
+  async createEmailVerificationToken(userId, email, token, expiresAt) {
+    this.logger.info('Creating email verification token', { userId, email });
+    // Delete any existing tokens for this user
+    await EmailVerificationToken.deleteMany({ userId, used: false });
+
+    const verificationToken = new EmailVerificationToken({
+      userId,
+      email,
+      token,
+      expiresAt,
+    });
+    await verificationToken.save();
+    return verificationToken.toJSON();
+  }
+
+  async findEmailVerificationToken(token) {
+    return EmailVerificationToken.findOne({ token, used: false }).lean();
+  }
+
+  async markEmailVerificationTokenUsed(token) {
+    const result = await EmailVerificationToken.updateOne({ token }, { used: true });
+    return result.modifiedCount > 0;
+  }
+
+  async createPasswordResetToken(userId, email, token, expiresAt) {
+    this.logger.info('Creating password reset token', { userId, email });
+    // Delete any existing tokens for this user
+    await PasswordResetToken.deleteMany({ userId, used: false });
+
+    const resetToken = new PasswordResetToken({
+      userId,
+      email,
+      token,
+      expiresAt,
+    });
+    await resetToken.save();
+    return resetToken.toJSON();
+  }
+
+  async findPasswordResetToken(token) {
+    return PasswordResetToken.findOne({ token, used: false }).lean();
+  }
+
+  async markPasswordResetTokenUsed(token) {
+    const result = await PasswordResetToken.updateOne({ token }, { used: true });
+    return result.modifiedCount > 0;
+  }
+
+  async updateUserPassword(userId, hashedPassword) {
+    const user = await UserModel.findByIdAndUpdate(
+      userId,
+      { password: hashedPassword },
+      { new: true, runValidators: true }
+    ).lean();
+    return user;
+  }
+
+  async verifyUserEmail(userId) {
+    const user = await UserModel.findByIdAndUpdate(
+      userId,
+      { verified: true },
+      { new: true, runValidators: true }
+    ).lean();
+    return user;
+  }
+
+  async deactivateUser(userId) {
+    const user = await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        isActive: false,
+        deactivatedAt: new Date(),
+      },
+      { new: true, runValidators: true }
+    ).lean();
+    return user;
   }
 }
 

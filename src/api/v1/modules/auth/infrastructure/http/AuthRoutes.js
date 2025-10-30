@@ -3,8 +3,17 @@
  * Defines HTTP routes for authentication
  */
 import express from 'express';
+import { validate } from '@/core/http/index.js';
+import {
+  registerValidation,
+  loginValidation,
+  emailValidation,
+  resetPasswordValidation,
+  changePasswordValidation,
+  refreshTokenValidation,
+} from '@/common/validation/authValidation.js';
 
-export function createAuthRoutes(authController) {
+export function createAuthRoutes(authController, jwtAuthMiddleware) {
   const router = express.Router();
 
   // OAuth providers list
@@ -33,8 +42,38 @@ export function createAuthRoutes(authController) {
   router.post('/logout', authController.logout());
 
   // Email/password auth
-  router.post('/register', authController.register());
-  router.post('/login', authController.login());
+  router.post('/register', validate(registerValidation), authController.register());
+  router.post('/login', validate(loginValidation), authController.login());
+
+  // Email verification
+  router.post('/verify-email/:token', authController.verifyEmail());
+  router.post(
+    '/resend-verification',
+    validate(emailValidation),
+    authController.resendVerification()
+  );
+
+  // Password reset
+  router.post('/forgot-password', validate(emailValidation), authController.forgotPassword());
+  router.get('/validate-reset-token/:token', authController.validateResetToken());
+  router.post(
+    '/reset-password/:token',
+    validate(resetPasswordValidation),
+    authController.resetPassword()
+  );
+
+  // Token management
+  router.post('/refresh-token', validate(refreshTokenValidation), authController.refreshToken());
+
+  // Account management (requires JWT authentication)
+  router.get('/me', jwtAuthMiddleware, authController.getCurrentUser());
+  router.put(
+    '/change-password',
+    jwtAuthMiddleware,
+    validate(changePasswordValidation),
+    authController.changePassword()
+  );
+  router.delete('/deactivate', jwtAuthMiddleware, authController.deactivateAccount());
 
   return router;
 }

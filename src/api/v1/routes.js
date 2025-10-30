@@ -30,7 +30,8 @@ export function createV1Router(container) {
 
   // Auth routes
   const authController = container.resolve('authController');
-  router.use('/auth', createAuthRoutes(authController));
+  const jwtAuthMiddleware = container.resolve('jwtAuthMiddleware');
+  router.use('/auth', createAuthRoutes(authController, jwtAuthMiddleware));
 
   // User routes
   const userController = container.resolve('userController');
