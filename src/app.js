@@ -13,7 +13,6 @@ import {
   errorHandler,
   notFoundHandler,
   configureHelmet,
-  configureCORS,
   configureRateLimit,
 } from '@/core/http/index.js';
 import { createHealthRoutes } from '@/core/http/index.js';
@@ -28,7 +27,8 @@ async function createApp(config, logger, container) {
 
   // Security middleware - must be first
   app.use(configureHelmet());
-  app.use(configureCORS(config));
+  // cors not required as its a same-origin API server
+  // app.use(configureCORS(config));
 
   // Session middleware (for cookie-based auth) - MUST be before passport
   app.use(createSessionMiddleware(config, logger));
