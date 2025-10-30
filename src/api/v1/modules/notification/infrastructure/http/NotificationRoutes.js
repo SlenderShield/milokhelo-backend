@@ -8,6 +8,7 @@ import {
   registerPushTokenValidation,
   markAsReadValidation,
   getNotificationsValidation,
+  notificationIdValidation,
 } from '@/common/validation/index.js';
 
 export function createNotificationRoutes(controller) {
@@ -19,13 +20,14 @@ export function createNotificationRoutes(controller) {
   // Get notifications
   router.get('/', validate(getNotificationsValidation), controller.getNotifications());
   router.get('/unread/count', controller.getUnreadCount());
+  router.get('/:id', validate(notificationIdValidation), controller.getNotificationById());
 
   // Mark as read
-  router.patch('/:id/read', validate(markAsReadValidation), controller.markAsRead());
+  router.put('/:id/read', validate(markAsReadValidation), controller.markAsRead());
   router.patch('/read-all', controller.markAllAsRead());
 
   // Delete notification
-  router.delete('/:id', validate(markAsReadValidation), controller.deleteNotification());
+  router.delete('/:id', validate(notificationIdValidation), controller.deleteNotification());
 
   // Device token management
   router.post('/push-token', validate(registerPushTokenValidation), controller.registerPushToken());

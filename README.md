@@ -228,10 +228,10 @@ All API endpoints implement comprehensive input validation with express-validato
 - `POST /` - Create team
 - `GET /` - List teams
 - `GET /:teamId` - Get team details
-- `PATCH /:teamId` - Update team
-- `DELETE /:teamId` - Delete team
-- `POST /:teamId/join` - Join team
-- `POST /:teamId/leave` - Leave team
+- `PUT /:teamId` - Update team (captain or admin only)
+- `DELETE /:teamId` - Delete team (captain or admin only)
+- `POST /:teamId/join` - Join team (with optional join code for private teams)
+- `POST /:teamId/leave` - Leave team (captain must transfer captaincy first)
 
 ### ⚽ Matches (`/api/v1/matches`)
 
@@ -343,8 +343,10 @@ All API endpoints implement comprehensive input validation with express-validato
 
 ### 🔔 Notifications (`/api/v1/notifications`)
 
-- `GET /` - List notifications
-- `PATCH /:id/read` - Mark notification as read
+- `GET /` - List notifications (with pagination and filtering)
+- `GET /:id` - Get notification by ID
+- `PUT /:id/read` - Mark notification as read
+- `DELETE /:id` - Delete notification
 - `GET /unread/count` - Get unread count
 - `PATCH /read-all` - Mark all as read
 - `POST /push-token` - Register device for push notifications

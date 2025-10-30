@@ -9,3 +9,4 @@ export * from './calendarValidation.js';
 export * from './notificationValidation.js';
 export * from './matchValidation.js';
 export * from './tournamentValidation.js';
+export * from './teamValidation.js';

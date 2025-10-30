@@ -23,12 +23,41 @@ class NotificationService {
   }
 
   /**
+   * Get notification by ID
+   * @param {string} notificationId - Notification ID
+   * @param {string} userId - User ID (for authorization)
+   * @returns {Promise<Object>} Notification
+   */
+  async getNotificationById(notificationId, userId) {
+    this.logger.debug({ notificationId, userId }, 'Fetching notification by ID');
+    const notification = await this.notificationRepository.findById(notificationId);
+
+    if (!notification) {
+      const error = new Error('Notification not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Check if the notification belongs to the requesting user
+    if (notification.userId.toString() !== userId) {
+      const error = new Error('Not authorized to view this notification');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    return notification;
+  }
+
+  /**
    * Create and send a notification
    * @param {Object} notificationData - Notification data
    * @returns {Promise<Object>} Created notification
    */
   async createNotification(notificationData) {
-    this.logger.info({ userId: notificationData.userId, type: notificationData.type }, 'Creating notification');
+    this.logger.info(
+      { userId: notificationData.userId, type: notificationData.type },
+      'Creating notification'
+    );
 
     // Create notification in database
     const notification = await this.notificationRepository.create(notificationData);
@@ -36,8 +65,10 @@ class NotificationService {
     // Send push notification if available
     if (this.pushNotificationService.isAvailable()) {
       try {
-        const deviceTokens = await this.notificationRepository.getUserDeviceTokens(notificationData.userId);
-        
+        const deviceTokens = await this.notificationRepository.getUserDeviceTokens(
+          notificationData.userId
+        );
+
         if (deviceTokens && deviceTokens.length > 0) {
           await this.pushNotificationService.sendToMultipleDevices(
             deviceTokens,
@@ -73,10 +104,26 @@ class NotificationService {
   /**
    * Mark notification as read
    * @param {string} notificationId - Notification ID
+   * @param {string} userId - User ID (for authorization)
    * @returns {Promise<Object>} Updated notification
    */
-  async markAsRead(notificationId) {
-    this.logger.debug({ notificationId }, 'Marking notification as read');
+  async markAsRead(notificationId, userId) {
+    this.logger.debug({ notificationId, userId }, 'Marking notification as read');
+
+    // Verify notification belongs to user
+    const notification = await this.notificationRepository.findById(notificationId);
+    if (!notification) {
+      const error = new Error('Notification not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (notification.userId.toString() !== userId) {
+      const error = new Error('Not authorized to modify this notification');
+      error.statusCode = 403;
+      throw error;
+    }
+
     return this.notificationRepository.markAsRead(notificationId);
   }
 
@@ -131,10 +178,26 @@ class NotificationService {
   /**
    * Delete notification
    * @param {string} notificationId - Notification ID
+   * @param {string} userId - User ID (for authorization)
    * @returns {Promise<void>}
    */
-  async deleteNotification(notificationId) {
-    this.logger.info({ notificationId }, 'Deleting notification');
+  async deleteNotification(notificationId, userId) {
+    this.logger.info({ notificationId, userId }, 'Deleting notification');
+
+    // Verify notification belongs to user
+    const notification = await this.notificationRepository.findById(notificationId);
+    if (!notification) {
+      const error = new Error('Notification not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (notification.userId.toString() !== userId) {
+      const error = new Error('Not authorized to delete this notification');
+      error.statusCode = 403;
+      throw error;
+    }
+
     return this.notificationRepository.delete(notificationId);
   }
 

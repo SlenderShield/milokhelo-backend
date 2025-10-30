@@ -1119,10 +1119,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Team"
-    patch:
+                type: object
+                properties:
+                  status: { type: string, example: "success" }
+                  data:
+                    $ref: "#/components/schemas/Team"
+        "404":
+          description: Team not found
+    put:
       tags: [Teams]
-      summary: Update team (captain/manager)
+      summary: Update team
+      description: >
+        Update team details. Only the team captain or admin can update.
+        Supports updating name, description, captain transfer, join code, privacy settings, and avatar.
       security:
         - cookieAuth: []
       parameters:
@@ -1141,10 +1150,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Team"
+                type: object
+                properties:
+                  status: { type: string, example: "success" }
+                  data:
+                    $ref: "#/components/schemas/Team"
+        "400":
+          description: Validation error or invalid captain
+        "403":
+          description: Not authorized (captain or admin only)
+        "404":
+          description: Team not found
     delete:
       tags: [Teams]
       summary: Delete a team
+      description: Delete a team. Only the team captain or admin can delete the team.
       security:
         - cookieAuth: []
       parameters:
@@ -1154,12 +1174,19 @@ paths:
           schema: { type: string }
       responses:
         "204":
-          description: Team deleted
+          description: Team deleted successfully
+        "403":
+          description: Not authorized (captain or admin only)
+        "404":
+          description: Team not found
 
   /teams/{id}/join:
     post:
       tags: [Teams]
-      summary: Request to join team
+      summary: Join a team
+      description: >
+        Request to join a team. If the team is private and requires a join code, 
+        it must be provided. Users cannot join if they are already members.
       security:
         - cookieAuth: []
       parameters:
@@ -1167,14 +1194,40 @@ paths:
           in: path
           required: true
           schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                joinCode:
+                  type: string
+                  description: Required for private teams with join code
+                  example: "TEAM2024"
       responses:
         "200":
-          description: Join request submitted or auto-joined based on team settings
+          description: Successfully joined team
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "success" }
+                  message: { type: string, example: "Successfully joined team" }
+        "400":
+          description: Already a member or validation error
+        "403":
+          description: Invalid or missing join code for private team
+        "404":
+          description: Team not found
 
   /teams/{id}/leave:
     post:
       tags: [Teams]
-      summary: Leave team
+      summary: Leave a team
+      description: >
+        Leave a team. Captain cannot leave the team - they must transfer 
+        captaincy first or delete the team.
       security:
         - cookieAuth: []
       parameters:
@@ -1184,7 +1237,18 @@ paths:
           schema: { type: string }
       responses:
         "200":
-          description: Left the team
+          description: Successfully left team
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "success" }
+                  message: { type: string, example: "Successfully left team" }
+        "400":
+          description: Not a member or captain trying to leave
+        "404":
+          description: Team not found
 
   ################################################################
   # MATCHES                                                       #
@@ -2767,29 +2831,43 @@ paths:
     get:
       tags: [Notifications]
       summary: List notifications
+      description: Get all notifications for the authenticated user with pagination support
       security:
         - cookieAuth: []
       parameters:
         - name: limit
           in: query
-          schema: { type: integer, default: 50 }
+          schema: { type: integer, default: 50, minimum: 1, maximum: 100 }
+          description: Maximum number of notifications to return
         - name: skip
           in: query
-          schema: { type: integer, default: 0 }
+          schema: { type: integer, default: 0, minimum: 0 }
+          description: Number of notifications to skip (for pagination)
+        - name: unreadOnly
+          in: query
+          schema: { type: boolean, default: false }
+          description: Return only unread notifications
       responses:
         "200":
-          description: Notifications
+          description: List of notifications
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Notification"
+                type: object
+                properties:
+                  status: { type: string, example: "success" }
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Notification"
+        "401":
+          description: Not authenticated
 
-  /notifications/{id}/read:
-    patch:
+  /notifications/{id}:
+    get:
       tags: [Notifications]
-      summary: Mark notification read
+      summary: Get notification by ID
+      description: Get a specific notification by its ID. User can only view their own notifications.
       security:
         - cookieAuth: []
       parameters:
@@ -2797,9 +2875,70 @@ paths:
           in: path
           required: true
           schema: { type: string }
+          description: Notification ID
       responses:
         "200":
-          description: Marked read
+          description: Notification details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "success" }
+                  data:
+                    $ref: "#/components/schemas/Notification"
+        "403":
+          description: Not authorized to view this notification
+        "404":
+          description: Notification not found
+    delete:
+      tags: [Notifications]
+      summary: Delete notification
+      description: Delete a specific notification. User can only delete their own notifications.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Notification ID
+      responses:
+        "204":
+          description: Notification deleted successfully
+        "403":
+          description: Not authorized to delete this notification
+        "404":
+          description: Notification not found
+
+  /notifications/{id}/read:
+    put:
+      tags: [Notifications]
+      summary: Mark notification as read
+      description: Mark a specific notification as read. User can only mark their own notifications.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Notification ID
+      responses:
+        "200":
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "success" }
+                  data:
+                    $ref: "#/components/schemas/Notification"
+        "403":
+          description: Not authorized to modify this notification
+        "404":
+          description: Notification not found
 
   /notifications/unread/count:
     get:
@@ -3265,40 +3404,147 @@ components:
     #########################################################
     TeamCreate:
       type: object
-      required: [name]
+      required: [name, sport]
       properties:
-        name: { type: string }
-        sport: { type: string }
-        description: { type: string }
-        joinCode: { type: string }
+        name:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Team name (3-50 characters)
+          example: "Thunder Strikers"
+        sport:
+          type: string
+          enum:
+            [
+              football,
+              basketball,
+              volleyball,
+              tennis,
+              badminton,
+              cricket,
+              other,
+            ]
+          description: Sport type
+          example: "football"
+        description:
+          type: string
+          maxLength: 500
+          description: Team description (optional, max 500 characters)
+          example: "Competitive football team looking for skilled players"
+        joinCode:
+          type: string
+          minLength: 4
+          maxLength: 20
+          description: Optional join code for private teams
+          example: "THUNDER2024"
+        isPrivate:
+          type: boolean
+          description: Whether the team is private (requires join code)
+          default: false
 
     TeamUpdate:
       type: object
       properties:
-        name: { type: string }
-        description: { type: string }
-        joinCode: { type: string }
+        name:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Team name
+          example: "Thunder Strikers United"
+        description:
+          type: string
+          maxLength: 500
+          description: Team description
+          example: "Updated team description"
+        captainId:
+          type: string
+          description: Transfer captaincy to another team member (must be existing member)
+          example: "507f1f77bcf86cd799439011"
+        joinCode:
+          type: string
+          minLength: 4
+          maxLength: 20
+          description: Join code for private teams
+          example: "NEWCODE2024"
+        isPrivate:
+          type: boolean
+          description: Whether the team is private
+        avatar:
+          type: string
+          format: uri
+          description: Team avatar URL
+          example: "https://example.com/avatar.jpg"
 
     Team:
       type: object
       properties:
-        id: { type: string }
-        name: { type: string }
-        sport: { type: string }
-        description: { type: string }
+        id:
+          type: string
+          description: Team ID
+          example: "507f1f77bcf86cd799439011"
+        name:
+          type: string
+          description: Team name
+          example: "Thunder Strikers"
+        sport:
+          type: string
+          description: Sport type
+          example: "football"
+        description:
+          type: string
+          description: Team description
+          example: "Competitive football team"
+        captainId:
+          type: string
+          description: Team captain user ID
+          example: "507f191e810c19729de860ea"
         members:
           type: array
-          items: { type: string }
-        captainId: { type: string }
+          description: Team members
+          items:
+            type: object
+            properties:
+              userId: { type: string, example: "507f191e810c19729de860ea" }
+              role: { type: string, enum: [captain, member], example: "member" }
+              joinedAt:
+                {
+                  type: string,
+                  format: date-time,
+                  example: "2024-01-15T10:00:00Z",
+                }
+        joinCode:
+          type: string
+          description: Join code (only shown to captain)
+          example: "THUNDER2024"
+        isPrivate:
+          type: boolean
+          description: Whether team is private
+          example: false
+        avatar:
+          type: string
+          format: uri
+          description: Team avatar URL
+          example: "https://example.com/avatar.jpg"
         stats:
           type: object
+          description: Team statistics
           properties:
-            matchesPlayed: { type: integer }
-            wins: { type: integer }
-            losses: { type: integer }
-            rating: { type: number }
-        createdAt: { type: string, format: date-time }
-        updatedAt: { type: string, format: date-time }
+            matchesPlayed: { type: integer, example: 25 }
+            wins: { type: integer, example: 15 }
+            losses: { type: integer, example: 8 }
+            draws: { type: integer, example: 2 }
+            rating: { type: number, example: 1450.5 }
+            elo: { type: number, example: 1050 }
+        createdAt:
+          type: string
+          format: date-time
+          description: Team creation timestamp
+          example: "2024-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2024-03-15T14:30:00Z"
 
     #########################################################
     # MATCH / TOURNAMENT SCHEMAS                            #

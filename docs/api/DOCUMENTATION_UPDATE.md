@@ -2,6 +2,112 @@
 
 ## Recent Changes (October 30, 2025)
 
+### Team and Notification Endpoints Enhanced
+
+**Updated Implementation:**
+
+1. **Team Endpoints** - Enhanced with proper validation, authorization, and captain transfer
+   - ✅ **PUT /teams/{id}** - Changed from PATCH to PUT with comprehensive validation
+     - Captain or admin authorization (role-based)
+     - Support for captain transfer to existing members
+     - Automatic member role updates on captain change
+     - Validates: name (3-50 chars), description (max 500), captainId, joinCode (4-20), isPrivate, avatar (URL)
+     - Returns proper error codes (400, 403, 404)
+   - ✅ **DELETE /teams/{id}** - Enhanced with authorization checks
+     - Captain or admin only (role-based)
+     - Service layer checks user roles
+     - Returns 403 if not authorized, 404 if not found
+   - ✅ **POST /teams/{id}/join** - Enhanced with join code support
+     - Validates team exists and user not already a member
+     - Supports optional join code for private teams
+     - Returns 400 if already member, 403 if invalid/missing join code
+   - ✅ **POST /teams/{id}/leave** - Enhanced with business logic
+     - Captain cannot leave (must transfer captaincy first)
+     - Validates user is actually a member
+     - Returns 400 if not member or captain trying to leave
+
+2. **Notification Endpoints** - Enhanced with new endpoint and improved authorization
+   - ✅ **GET /notifications/{id}** - NEW endpoint to get single notification
+     - User can only view their own notifications
+     - Returns 403 if trying to access another user's notification
+     - Returns 404 if notification not found
+     - Consistent response format with status and data
+   - ✅ **PUT /notifications/{id}/read** - Changed from PATCH to PUT
+     - RESTful best practice (PUT for state changes)
+     - User can only mark their own notifications as read
+     - Returns 403 if trying to modify another user's notification
+     - Returns updated notification data
+   - ✅ **DELETE /notifications/{id}** - Enhanced with authorization
+     - User can only delete their own notifications
+     - Returns 403 if trying to delete another user's notification
+     - Returns 204 No Content on success
+
+**Updated Documentation:**
+
+1. **docs/api/openapi.yaml** (OpenAPI specification)
+   - Enhanced team endpoints with detailed descriptions and examples
+   - Changed `PATCH /teams/{id}` to `PUT /teams/{id}` with complete schema
+   - Updated `DELETE /teams/{id}` to clarify captain/admin access
+   - Enhanced `POST /teams/{id}/join` with join code parameter and descriptions
+   - Enhanced `POST /teams/{id}/leave` with captain restriction details
+   - Updated TeamCreate, TeamUpdate, and Team schemas with:
+     - Comprehensive field descriptions and examples
+     - Validation rules (minLength, maxLength, enum values)
+     - New fields: isPrivate, avatar
+     - Member structure with role and joinedAt
+   - Added `GET /notifications/{id}` endpoint documentation
+   - Changed `PATCH /notifications/{id}/read` to `PUT /notifications/{id}/read`
+   - Enhanced `DELETE /notifications/{id}` with authorization details
+   - Updated all notification endpoints with comprehensive error responses
+   - Added query parameters for notification list (limit, skip, unreadOnly)
+
+2. **README.md** (Main project documentation)
+   - Updated Teams API section:
+     - Changed `PATCH /:teamId` to `PUT /:teamId` with authorization note
+     - Updated `DELETE /:teamId` with authorization note
+     - Enhanced `POST /:teamId/join` description with join code note
+     - Enhanced `POST /:teamId/leave` description with captain restriction
+   - Updated Notifications API section:
+     - Added `GET /:id` - Get notification by ID
+     - Changed `PATCH /:id/read` to `PUT /:id/read`
+     - Added `DELETE /:id` - Delete notification
+     - Enhanced descriptions for all endpoints
+
+3. **src/common/validation/teamValidation.js** (NEW file)
+   - Created comprehensive validation schemas:
+     - `createTeamValidation` - Full team creation (name, sport, description, joinCode, isPrivate)
+     - `updateTeamValidation` - Team updates (name, description, captainId, joinCode, isPrivate, avatar)
+     - `teamIdValidation` - MongoDB ObjectId validation
+     - `joinTeamValidation` - Join with optional join code
+     - `leaveTeamValidation` - Leave team validation
+   - All schemas with proper length limits and enum validation
+
+4. **src/common/validation/notificationValidation.js** (Updated)
+   - Added `notificationIdValidation` - Reusable ID validation for all endpoints
+
+**Implementation Details:**
+
+- ✅ **Enhanced Business Logic**: Comprehensive validation in service layer for both modules
+- ✅ **Role-Based Authorization**: Admin and captain checks for team operations
+- ✅ **User Authorization**: Users can only access/modify their own notifications
+- ✅ **Captain Transfer**: Automatic member role updates when captain changes
+- ✅ **Join Code Support**: Private teams can require join codes
+- ✅ **Event Publishing**: All operations publish appropriate events
+- ✅ **Error Handling**: Custom error objects with proper HTTP status codes (400, 403, 404)
+- ✅ **RESTful Design**: Changed state operations from PATCH to PUT
+- ✅ **Input Validation**: Express-validator schemas for all endpoints
+- ✅ **Consistent Responses**: Standardized format with status and data/message
+- ✅ **Dual Authentication**: Support for both JWT and session authentication
+
+**Routes Updated:**
+- PUT /teams/{id} - Update team (captain or admin)
+- DELETE /teams/{id} - Delete team (captain or admin)
+- POST /teams/{id}/join - Join with optional code
+- POST /teams/{id}/leave - Leave team (not captain)
+- GET /notifications/{id} - Get single notification
+- PUT /notifications/{id}/read - Mark as read
+- DELETE /notifications/{id} - Delete notification
+
 ### Match and Tournament Endpoints Enhanced
 
 **Updated Implementation:**

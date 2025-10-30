@@ -471,13 +471,13 @@ export async function runBookingExamples(container) {
 
   // Get dependencies from container
   const venueService = container.resolve('venueService');
-  const venueRepository = container.resolve('venueRepository');
+  // const venueRepository = container.resolve('venueRepository');
 
   // Mock IDs for demo
   const venueId = 'mock-venue-id-123';
   const userId1 = 'mock-user-id-1';
-  const userId2 = 'mock-user-id-2';
-  const userId3 = 'mock-user-id-3';
+  // const userId2 = 'mock-user-id-2';
+  // const userId3 = 'mock-user-id-3';
 
   try {
     // Run examples (comment out as needed)

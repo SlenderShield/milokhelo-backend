@@ -3,11 +3,11 @@
  */
 import '../helpers/setup.js';
 import { describe, it, beforeEach, afterEach } from 'mocha';
-import { body, validationResult } from 'express-validator';
+import { body } from 'express-validator';
 import { validateRequest, validate } from '../../src/core/http/middlewares/validationMiddleware.js';
 
 describe('Validation Middleware', () => {
-  let req, res, next;
+  // let req, res, next;
 
   beforeEach(() => {
     req = {
@@ -61,10 +61,7 @@ describe('Validation Middleware', () => {
 
   describe('validate()', () => {
     it('should return array with validations and validateRequest', () => {
-      const validations = [
-        body('email').isEmail(),
-        body('password').isLength({ min: 8 }),
-      ];
+      const validations = [body('email').isEmail(), body('password').isLength({ min: 8 })];
 
       const result = validate(validations);
 

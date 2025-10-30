@@ -14,7 +14,14 @@ class NotificationController {
    */
   getNotifications() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+
       const { limit, skip, unreadOnly } = req.query;
       const notifications = await this.notificationService.getUserNotifications(
         userId,
@@ -22,7 +29,32 @@ class NotificationController {
         skip,
         unreadOnly
       );
-      res.status(HTTP_STATUS.OK).json(notifications);
+      res.status(HTTP_STATUS.OK).json({
+        status: 'success',
+        data: notifications,
+      });
+    });
+  }
+
+  /**
+   * Get notification by ID
+   */
+  getNotificationById() {
+    return asyncHandler(async (req, res) => {
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+
+      const { id } = req.params;
+      const notification = await this.notificationService.getNotificationById(id, userId);
+      res.status(HTTP_STATUS.OK).json({
+        status: 'success',
+        data: notification,
+      });
     });
   }
 
@@ -31,9 +63,19 @@ class NotificationController {
    */
   getUnreadCount() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+
       const count = await this.notificationService.getUnreadCount(userId);
-      res.status(HTTP_STATUS.OK).json({ count });
+      res.status(HTTP_STATUS.OK).json({
+        status: 'success',
+        data: { count },
+      });
     });
   }
 
@@ -42,9 +84,20 @@ class NotificationController {
    */
   markAsRead() {
     return asyncHandler(async (req, res) => {
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+
       const { id } = req.params;
-      const notification = await this.notificationService.markAsRead(id);
-      res.status(HTTP_STATUS.OK).json(notification);
+      const notification = await this.notificationService.markAsRead(id, userId);
+      res.status(HTTP_STATUS.OK).json({
+        status: 'success',
+        data: notification,
+      });
     });
   }
 
@@ -53,7 +106,14 @@ class NotificationController {
    */
   markAllAsRead() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+
       const result = await this.notificationService.markAllAsRead(userId);
       res.status(HTTP_STATUS.OK).json({
         status: 'success',
@@ -68,7 +128,14 @@ class NotificationController {
    */
   registerPushToken() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+
       const { token, platform, deviceId } = req.body;
       const deviceToken = await this.notificationService.registerDeviceToken(
         userId,
@@ -76,7 +143,10 @@ class NotificationController {
         platform,
         deviceId
       );
-      res.status(HTTP_STATUS.CREATED).json(deviceToken);
+      res.status(HTTP_STATUS.CREATED).json({
+        status: 'success',
+        data: deviceToken,
+      });
     });
   }
 
@@ -85,7 +155,14 @@ class NotificationController {
    */
   unregisterPushToken() {
     return asyncHandler(async (req, res) => {
-      const userId = req.session?.userId;
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+
       const { token } = req.body;
       await this.notificationService.unregisterDeviceToken(userId, token);
       res.status(HTTP_STATUS.OK).json({
@@ -100,12 +177,17 @@ class NotificationController {
    */
   deleteNotification() {
     return asyncHandler(async (req, res) => {
+      const userId = req.user?.id || req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          status: 'error',
+          message: 'Authentication required',
+        });
+      }
+
       const { id } = req.params;
-      await this.notificationService.deleteNotification(id);
-      res.status(HTTP_STATUS.OK).json({
-        status: 'success',
-        message: 'Notification deleted successfully',
-      });
+      await this.notificationService.deleteNotification(id, userId);
+      res.status(HTTP_STATUS.NO_CONTENT).send();
     });
   }
 }

@@ -27,12 +27,17 @@ export const registerPushTokenValidation = [
 ];
 
 /**
+ * Validation for notification ID param
+ */
+export const notificationIdValidation = [
+  param('id').isMongoId().withMessage('Invalid notification ID'),
+];
+
+/**
  * Validation for marking notification as read
  */
 export const markAsReadValidation = [
-  param('id')
-    .isMongoId()
-    .withMessage('Invalid notification ID'),
+  param('id').isMongoId().withMessage('Invalid notification ID'),
 ];
 
 /**
@@ -82,10 +87,7 @@ export const createNotificationValidation = [
     .isLength({ min: 1, max: 500 })
     .withMessage('Message must be between 1 and 500 characters')
     .trim(),
-  body('relatedEntityId')
-    .optional()
-    .isMongoId()
-    .withMessage('Invalid entity ID'),
+  body('relatedEntityId').optional().isMongoId().withMessage('Invalid entity ID'),
   body('priority')
     .optional()
     .isIn(['low', 'normal', 'high', 'urgent'])
