@@ -35,26 +35,24 @@ export const updateUserValidation = [
     .isLength({ max: 100 })
     .withMessage('Location must not exceed 100 characters')
     .trim(),
-  body('favoriteVenue')
-    .optional()
-    .isMongoId()
-    .withMessage('Invalid venue ID'),
+  body('favoriteVenue').optional().isMongoId().withMessage('Invalid venue ID'),
 ];
 
 /**
  * Validation for user ID param
  */
-export const userIdValidation = [
-  param('id')
-    .isMongoId()
-    .withMessage('Invalid user ID'),
-];
+export const userIdValidation = [param('id').isMongoId().withMessage('Invalid user ID')];
 
 /**
  * Validation for user search
  */
 export const searchUsersValidation = [
   query('query')
+    .optional()
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Search query must be between 1 and 100 characters')
+    .trim(),
+  query('q')
     .optional()
     .isLength({ min: 1, max: 100 })
     .withMessage('Search query must be between 1 and 100 characters')
@@ -70,3 +68,8 @@ export const searchUsersValidation = [
     .withMessage('Skip must be a non-negative integer')
     .toInt(),
 ];
+
+/**
+ * Validation for friend ID param
+ */
+export const friendIdValidation = [param('friendId').isMongoId().withMessage('Invalid friend ID')];

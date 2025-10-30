@@ -40,20 +40,20 @@ class UserRepository {
   async updateStats(userId, sport, stats) {
     // Handle streak separately as it has special logic
     const { streak, ...incrementStats } = stats;
-    
+
     const options = { new: true, upsert: true };
-    
+
     if (streak !== undefined) {
       // Get current stats to determine streak update logic
       const currentStats = await UserStatModel.findOne({ userId, sport });
-      
+
       let newStreak;
       if (!currentStats) {
         // New stat record
         newStreak = streak;
       } else {
         const currentStreak = currentStats.streak || 0;
-        
+
         if (streak > 0) {
           // Win: increment if positive, start new positive streak if negative
           newStreak = currentStreak > 0 ? currentStreak + 1 : 1;
@@ -65,16 +65,20 @@ class UserRepository {
           newStreak = currentStreak;
         }
       }
-      
+
       return UserStatModel.findOneAndUpdate(
         { userId, sport },
         { $inc: incrementStats, $set: { streak: newStreak } },
         options
       ).lean();
     }
-    
+
     // No streak update, just increment other stats
-    return UserStatModel.findOneAndUpdate({ userId, sport }, { $inc: incrementStats }, options).lean();
+    return UserStatModel.findOneAndUpdate(
+      { userId, sport },
+      { $inc: incrementStats },
+      options
+    ).lean();
   }
 
   async getAchievements(userId) {
@@ -86,6 +90,29 @@ class UserRepository {
     return this.UserModel.findByIdAndUpdate(
       userId,
       { $addToSet: { achievements: achievementId } },
+      { new: true }
+    ).lean();
+  }
+
+  async getFriends(userId) {
+    const user = await this.UserModel.findById(userId)
+      .populate('friends', 'username name email avatar bio sportsPreferences location')
+      .lean();
+    return user?.friends || [];
+  }
+
+  async addFriend(userId, friendId) {
+    return this.UserModel.findByIdAndUpdate(
+      userId,
+      { $addToSet: { friends: friendId } },
+      { new: true }
+    ).lean();
+  }
+
+  async removeFriend(userId, friendId) {
+    return this.UserModel.findByIdAndUpdate(
+      userId,
+      { $pull: { friends: friendId } },
       { new: true }
     ).lean();
   }

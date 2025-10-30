@@ -74,6 +74,7 @@ const userSchema = new mongoose.Schema(
       select: false, // Don't return by default
     },
     achievements: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Achievement' }],
+    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     // Last login tracking
     lastLogin: Date,
   },

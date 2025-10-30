@@ -66,6 +66,49 @@ class UserController {
       res.status(HTTP_STATUS.OK).json(achievements);
     });
   }
+
+  updateMe() {
+    return asyncHandler(async (req, res) => {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Not authenticated' });
+      }
+      const user = await this.userService.updateProfile(userId, req.body);
+      res.status(HTTP_STATUS.OK).json(user);
+    });
+  }
+
+  getUserFriends() {
+    return asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const friends = await this.userService.getUserFriends(id);
+      res.status(HTTP_STATUS.OK).json(friends);
+    });
+  }
+
+  addFriend() {
+    return asyncHandler(async (req, res) => {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Not authenticated' });
+      }
+      const { friendId } = req.params;
+      const result = await this.userService.addFriend(userId, friendId);
+      res.status(HTTP_STATUS.OK).json(result);
+    });
+  }
+
+  removeFriend() {
+    return asyncHandler(async (req, res) => {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json({ message: 'Not authenticated' });
+      }
+      const { friendId } = req.params;
+      const result = await this.userService.removeFriend(userId, friendId);
+      res.status(HTTP_STATUS.OK).json(result);
+    });
+  }
 }
 
 export default UserController;

@@ -2,6 +2,72 @@
 
 ## Recent Changes (October 30, 2025)
 
+### User Endpoints & Friend Management Added
+
+**Updated Documentation:**
+
+1. **docs/api/openapi.yaml** (OpenAPI specification)
+   - Updated `/users/me` endpoint with PUT method for full profile updates
+   - Added `PUT /users/me` endpoint
+     - Full profile update capability
+     - Supports personal info, preferences, and privacy settings
+     - Comprehensive validation and examples
+   - Added `GET /users/search` endpoint (dedicated search endpoint)
+     - Search users by username, name, or email
+     - Filter by sport preferences
+     - Pagination support (limit, skip)
+   - Added `GET /users/{id}/friends` endpoint
+     - Get user's friends list with populated data
+     - Returns username, name, email, avatar, bio, sports preferences, location
+   - Added `POST /users/{friendId}/friend` endpoint
+     - Add user as friend (bidirectional)
+     - Validates friend exists and prevents duplicates
+     - Cannot add self as friend
+     - Publishes `user.friend_added` event
+   - Added `DELETE /users/{friendId}/friend` endpoint
+     - Remove friend (bidirectional removal)
+     - Publishes `user.friend_removed` event
+   - Enhanced `UserProfile` schema
+     - Added `bio` field for user biography
+     - Added `friends` array for friend user IDs
+   - Added new `UserUpdate` schema
+     - Comprehensive validation rules
+     - Username pattern validation (alphanumeric with underscores/hyphens)
+     - Bio max length (500 chars)
+     - Location coordinates format
+     - Privacy settings
+
+2. **README.md** (Main project documentation)
+   - Updated Users API section with new endpoints:
+     - PUT /users/me - Update profile
+     - GET /users/search - Search users
+     - GET /users/{id}/friends - Get friends list
+     - POST /users/{friendId}/friend - Add friend
+     - DELETE /users/{friendId}/friend - Remove friend
+
+**Implementation Details:**
+
+- ✅ **User Model Update**: Added `friends` field to User schema (bidirectional friendships)
+- ✅ **UserController Methods**: Added updateMe(), getUserFriends(), addFriend(), removeFriend()
+- ✅ **UserService Logic**: Bidirectional friendship management with validation
+- ✅ **UserRepository**: Added getFriends(), addFriend(), removeFriend() methods
+- ✅ **Validation**: Added friendIdValidation for MongoDB ObjectId validation
+- ✅ **Event Publishing**: friend_added and friend_removed events for integrations
+- ✅ **Populated Data**: Friends endpoint returns full user profiles (not just IDs)
+- ✅ **Error Handling**: Comprehensive validation (self-friending, duplicates, not found)
+
+**Routes Added:**
+- PUT /users/me - Update authenticated user profile
+- GET /users/search - Search users (dedicated endpoint)
+- GET /users/{id}/friends - Get user's friends list
+- POST /users/{friendId}/friend - Add friend
+- DELETE /users/{friendId}/friend - Remove friend
+
+**Documentation Consolidation:**
+
+- ❌ **Removed docs/api/USER_ENDPOINTS.md** - All user endpoint documentation consolidated into openapi.yaml
+- ✅ **Single Source of Truth** - OpenAPI spec is the authoritative source for all API documentation
+
 ### Input Validation Documentation Added
 
 **New Documentation:**

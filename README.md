@@ -213,12 +213,15 @@ All API endpoints implement comprehensive input validation with express-validato
 ### 👤 Users (`/api/v1/users`)
 
 - `GET /me` - Get current user profile
-- `PATCH /me` - Update profile
-- `GET /me/stats` - Get user statistics (auto-updated from matches)
+- `PUT /me` - Update user profile (full update)
+- `PATCH /me` - Update profile (partial update, legacy)
 - `GET /me/achievements` - List user's earned achievements
-- `GET /:userId` - Get user by ID
+- `GET /search` - Search users by username, name, or email
+- `GET /:userId/stats` - Get user statistics (auto-updated from matches)
 - `GET /:userId/achievements` - Get user's achievements
-- `GET /search` - Search users
+- `GET /:userId/friends` - Get user's friends list
+- `POST /:friendId/friend` - Add user as friend (bidirectional)
+- `DELETE /:friendId/friend` - Remove friend (bidirectional)
 
 ### 👥 Teams (`/api/v1/teams`)
 

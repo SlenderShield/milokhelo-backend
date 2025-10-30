@@ -41,6 +41,51 @@ class UserService {
     await this.eventBus.publish('user.achievement_awarded', { userId, achievementId });
     return user;
   }
+
+  async getUserFriends(userId) {
+    return this.userRepository.getFriends(userId);
+  }
+
+  async addFriend(userId, friendId) {
+    if (userId === friendId) {
+      throw new Error('Cannot add yourself as a friend');
+    }
+
+    // Check if friend exists
+    const friend = await this.userRepository.findById(friendId);
+    if (!friend) {
+      throw new Error('User not found');
+    }
+
+    // Check if already friends
+    const friends = await this.userRepository.getFriends(userId);
+    const isFriend = friends.some((f) => f.id === friendId || f._id?.toString() === friendId);
+    if (isFriend) {
+      throw new Error('Already friends with this user');
+    }
+
+    // Add friend bidirectionally
+    await this.userRepository.addFriend(userId, friendId);
+    await this.userRepository.addFriend(friendId, userId);
+
+    await this.eventBus.publish('user.friend_added', { userId, friendId });
+
+    return { message: 'Friend added successfully', friendId };
+  }
+
+  async removeFriend(userId, friendId) {
+    if (userId === friendId) {
+      throw new Error('Invalid friend ID');
+    }
+
+    // Remove friend bidirectionally
+    await this.userRepository.removeFriend(userId, friendId);
+    await this.userRepository.removeFriend(friendId, userId);
+
+    await this.eventBus.publish('user.friend_removed', { userId, friendId });
+
+    return { message: 'Friend removed successfully', friendId };
+  }
 }
 
 export default UserService;
