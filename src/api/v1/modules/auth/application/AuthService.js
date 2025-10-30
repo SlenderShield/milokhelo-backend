@@ -150,11 +150,19 @@ class AuthService {
     // Convert Mongoose document to plain object if needed
     const userObj = user.toObject ? user.toObject({ virtuals: true }) : { ...user };
 
-    // Normalize _id → id
-    userObj.id = userObj._id?.toString();
-    delete userObj._id;
+    // Extract the ID safely
+    const userId = (userObj._id ?? userObj.id)?.toString();
 
-    // Remove sensitive or internal fields
+    // Assign normalized id
+    if (userId) {
+      userObj.id = userId;
+    }
+
+    // Log before deleting _id
+    this.logger.debug('Sanitizing user object', { userId });
+
+    // Remove Mongo-specific and sensitive fields
+    delete userObj._id;
     delete userObj.password;
     delete userObj.oauthTokens;
     delete userObj.__v;
@@ -398,6 +406,7 @@ class AuthService {
     const expiresAt = new Date(
       Date.now() + (this.config.get('auth.refreshTokenExpiration') || 30 * 24 * 60 * 60 * 1000) // 30 days
     );
+    this.logger.info('Generating refresh token', { user });
 
     // Store refresh token in database
     await this.authRepository.storeRefreshToken(user.id, token, expiresAt, deviceInfo);
