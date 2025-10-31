@@ -112,19 +112,37 @@ class CacheManager {
   }
 
   /**
-   * Invalidate cache by pattern
+   * Invalidate cache by pattern using SCAN (non-blocking)
    */
   async invalidate(pattern) {
     try {
       const fullPattern = this._buildKey(pattern);
-      const keys = await this.redis.keys(fullPattern);
+      const keys = [];
+      let cursor = 0;
+
+      // Use SCAN instead of KEYS for better performance
+      do {
+        const result = await this.redis.scan(cursor, {
+          MATCH: fullPattern,
+          COUNT: 100,
+        });
+        cursor = result.cursor;
+        keys.push(...result.keys);
+      } while (cursor !== 0);
 
       if (keys.length === 0) {
         this.logger.debug('No keys to invalidate', { pattern, namespace: this.namespace });
         return 0;
       }
 
-      const deleted = await this.redis.del(keys);
+      // Delete in batches to avoid blocking
+      const batchSize = 100;
+      let deleted = 0;
+      
+      for (let i = 0; i < keys.length; i += batchSize) {
+        const batch = keys.slice(i, i + batchSize);
+        deleted += await this.redis.del(batch);
+      }
       
       this.stats.deletes += deleted;
       this.logger.info('Cache invalidated', {

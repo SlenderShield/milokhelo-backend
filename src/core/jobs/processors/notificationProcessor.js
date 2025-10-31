@@ -1,10 +1,17 @@
 /**
  * Notification Job Processor
  * Handles background notification dispatch jobs
+ * 
+ * NOTE: These are example processors. In production, you should:
+ * 1. Replace console.log/error with proper logger
+ * 2. Implement actual notification/email service calls
+ * 3. Add proper error handling and validation
  */
 
 /**
  * Process notification dispatch job
+ * @param {Object} job - BullMQ job object
+ * @param {Object} logger - Optional logger instance (pass via worker options)
  */
 export async function processNotificationDispatch(job) {
   const { notificationId, userId, type } = job.data;
@@ -12,7 +19,8 @@ export async function processNotificationDispatch(job) {
   // Update progress
   await job.updateProgress(10);
 
-  // Log job start
+  // TODO: Replace with proper logger in production
+  // const logger = job.opts.logger || console;
   console.log(`Processing notification dispatch`, {
     jobId: job.id,
     notificationId,
@@ -36,6 +44,7 @@ export async function processNotificationDispatch(job) {
       sentAt: new Date().toISOString(),
     };
   } catch (error) {
+    // TODO: Replace with proper logger in production
     console.error(`Failed to send notification`, {
       jobId: job.id,
       notificationId,
@@ -53,6 +62,7 @@ export async function processBatchNotificationDispatch(job) {
   const total = notifications.length;
   const results = [];
 
+  // TODO: Replace with proper logger in production
   console.log(`Processing batch notification dispatch`, {
     jobId: job.id,
     count: total,
@@ -99,6 +109,7 @@ export async function processBatchNotificationDispatch(job) {
 export async function processEmailDispatch(job) {
   const { to, subject } = job.data;
 
+  // TODO: Replace with proper logger in production
   console.log(`Processing email dispatch`, {
     jobId: job.id,
     to,
@@ -120,6 +131,7 @@ export async function processEmailDispatch(job) {
       sentAt: new Date().toISOString(),
     };
   } catch (error) {
+    // TODO: Replace with proper logger in production
     console.error(`Failed to send email`, {
       jobId: job.id,
       to,

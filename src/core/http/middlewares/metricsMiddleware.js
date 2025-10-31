@@ -4,13 +4,14 @@
  */
 
 function metricsMiddleware(metricsCollector) {
+  let activeConnections = 0;
+
   return (req, res, next) => {
     const start = process.hrtime.bigint();
 
-    // Track active connections
-    metricsCollector.setActiveConnections(
-      metricsCollector.httpActiveConnections._getValue() + 1
-    );
+    // Track active connections using local counter
+    activeConnections++;
+    metricsCollector.setActiveConnections(activeConnections);
 
     res.on('finish', () => {
       const end = process.hrtime.bigint();
@@ -28,9 +29,8 @@ function metricsMiddleware(metricsCollector) {
       );
 
       // Decrement active connections
-      metricsCollector.setActiveConnections(
-        metricsCollector.httpActiveConnections._getValue() - 1
-      );
+      activeConnections--;
+      metricsCollector.setActiveConnections(activeConnections);
     });
 
     next();
