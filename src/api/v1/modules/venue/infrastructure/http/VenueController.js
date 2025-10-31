@@ -2,6 +2,7 @@
  * Venue Controller
  */
 import { asyncHandler, HTTP_STATUS } from '@/core/http/index.js';
+import { VenueDTO } from '@/common/dto/index.js';
 
 class VenueController {
   constructor(venueService, logger) {
@@ -13,7 +14,10 @@ class VenueController {
     return asyncHandler(async (req, res) => {
       const { page, limit } = req.query;
       const venues = await this.venueService.listVenues(page, limit);
-      res.status(HTTP_STATUS.OK).json(venues);
+      const safeVenues = Array.isArray(venues)
+        ? venues.map((v) => VenueDTO.transformMinimal(v))
+        : venues;
+      res.status(HTTP_STATUS.OK).json(safeVenues);
     });
   }
 
@@ -24,7 +28,8 @@ class VenueController {
       if (city) filters.city = city;
       if (sport) filters.sportsSupported = sport;
       const venues = await this.venueService.searchVenues(q || '', filters);
-      res.status(HTTP_STATUS.OK).json(venues);
+      const safeVenues = venues.map((v) => VenueDTO.transformMinimal(v));
+      res.status(HTTP_STATUS.OK).json(safeVenues);
     });
   }
 
@@ -37,14 +42,16 @@ class VenueController {
         parseFloat(radius || 10),
         sport
       );
-      res.status(HTTP_STATUS.OK).json(venues);
+      const safeVenues = venues.map((v) => VenueDTO.transformMinimal(v));
+      res.status(HTTP_STATUS.OK).json(safeVenues);
     });
   }
 
   getById() {
     return asyncHandler(async (req, res) => {
       const venue = await this.venueService.getVenueById(req.params.venueId);
-      res.status(HTTP_STATUS.OK).json(venue);
+      const safeVenue = VenueDTO.transform(venue, { includeTimestamps: true });
+      res.status(HTTP_STATUS.OK).json(safeVenue);
     });
   }
 

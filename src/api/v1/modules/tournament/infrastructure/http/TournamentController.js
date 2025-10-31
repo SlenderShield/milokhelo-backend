@@ -10,6 +10,7 @@ import {
   tournamentIdValidation,
   startTournamentValidation,
 } from '@/common/validation/index.js';
+import { TournamentDTO } from '@/common/dto/index.js';
 
 export class TournamentController {
   constructor(tournamentService, logger) {
@@ -21,7 +22,8 @@ export class TournamentController {
     return asyncHandler(async (req, res) => {
       const userId = req.session?.userId;
       const tournament = await this.tournamentService.createTournament(req.body, userId);
-      res.status(HTTP_STATUS.CREATED).json(tournament);
+      const safeTournament = TournamentDTO.transform(tournament, { includeTimestamps: true });
+      res.status(HTTP_STATUS.CREATED).json(safeTournament);
     });
   }
 
@@ -32,14 +34,16 @@ export class TournamentController {
       if (sport) filters.sport = sport;
       if (type) filters.type = type;
       const tournaments = await this.tournamentService.listTournaments(filters);
-      res.status(HTTP_STATUS.OK).json(tournaments);
+      const safeTournaments = tournaments.map((t) => TournamentDTO.transformMinimal(t));
+      res.status(HTTP_STATUS.OK).json(safeTournaments);
     });
   }
 
   getById() {
     return asyncHandler(async (req, res) => {
       const tournament = await this.tournamentService.getTournamentById(req.params.id);
-      res.status(HTTP_STATUS.OK).json(tournament);
+      const safeTournament = TournamentDTO.transform(tournament, { includeTimestamps: true });
+      res.status(HTTP_STATUS.OK).json(safeTournament);
     });
   }
 
@@ -59,10 +63,11 @@ export class TournamentController {
         userId,
         userRoles
       );
+      const safeTournament = TournamentDTO.transform(tournament, { includeTimestamps: true });
       res.status(HTTP_STATUS.OK).json({
         status: 'success',
         message: 'Tournament updated successfully',
-        data: tournament,
+        data: safeTournament,
       });
     });
   }

@@ -2,6 +2,7 @@
  * Notification Controller
  */
 import { asyncHandler, HTTP_STATUS } from '@/core/http/index.js';
+import { NotificationDTO } from '@/common/dto/index.js';
 
 class NotificationController {
   constructor(notificationService, logger) {
@@ -29,9 +30,10 @@ class NotificationController {
         skip,
         unreadOnly
       );
+      const safeNotifications = notifications.map((n) => NotificationDTO.transformMinimal(n));
       res.status(HTTP_STATUS.OK).json({
         status: 'success',
-        data: notifications,
+        data: safeNotifications,
       });
     });
   }
@@ -51,9 +53,12 @@ class NotificationController {
 
       const { id } = req.params;
       const notification = await this.notificationService.getNotificationById(id, userId);
+      const safeNotification = NotificationDTO.transform(notification, {
+        includeTimestamps: true,
+      });
       res.status(HTTP_STATUS.OK).json({
         status: 'success',
-        data: notification,
+        data: safeNotification,
       });
     });
   }
@@ -94,9 +99,12 @@ class NotificationController {
 
       const { id } = req.params;
       const notification = await this.notificationService.markAsRead(id, userId);
+      const safeNotification = NotificationDTO.transform(notification, {
+        includeTimestamps: true,
+      });
       res.status(HTTP_STATUS.OK).json({
         status: 'success',
-        data: notification,
+        data: safeNotification,
       });
     });
   }
