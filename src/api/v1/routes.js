@@ -5,20 +5,17 @@
 import express from 'express';
 import { createAuthRoutes } from '@/new-modules/auth/index.js';
 import { createUserRoutes } from '@/new-modules/user/index.js';
-import { createTeamRoutes } from './modules/team/index.js';
-import { createMatchRoutes } from './modules/match/index.js';
+import { createTeamRoutes } from '@/new-modules/team/index.js';
+import { createMatchRoutes } from '@/new-modules/match/index.js';
 import { createTournamentRoutes } from '@/new-modules/tournament/index.js';
-import { createChatRoutes } from './modules/chat/index.js';
-import { createVenueRoutes, createVenueManagementRoutes } from './modules/venue/index.js';
-import {
-  initializeNotificationModule,
-  createNotificationRoutes,
-} from './modules/notification/index.js';
-import { initializeMapsModule, createMapsRoutes } from './modules/maps/index.js';
-import { initializeCalendarModule, createCalendarRoutes } from './modules/calendar/index.js';
-import { initializeInvitationModule, createInvitationRoutes } from './modules/invitation/index.js';
-import { initializeFeedbackModule, createFeedbackRoutes } from './modules/feedback/index.js';
-import { initializeAdminModule, createAdminRoutes } from './modules/admin/index.js';
+import { createChatRoutes } from '@/new-modules/chat/index.js';
+import { createVenueRoutes, createVenueManagementRoutes } from '@/new-modules/venue/index.js';
+import { createNotificationRoutes } from '@/new-modules/notification/index.js';
+import { createMapsRoutes } from '@/new-modules/maps/index.js';
+import { createCalendarRoutes } from '@/new-modules/calendar/index.js';
+import { createInvitationRoutes } from '@/new-modules/invitation/index.js';
+import { createFeedbackRoutes } from '@/new-modules/feedback/index.js';
+import { createAdminRoutes } from '@/new-modules/admin/index.js';
 
 /**
  * Create API v1 router with all module routes
@@ -58,33 +55,27 @@ export function createV1Router(container) {
   router.use('/venues', createVenueRoutes(venueController));
   router.use('/venue-management', createVenueManagementRoutes(venueController));
 
-  // Initialize and use Maps module
-  initializeMapsModule(container);
+  // Maps module
   const mapsController = container.resolve('mapsController');
   router.use('/maps', createMapsRoutes(mapsController));
 
-  // Initialize and use Calendar module
-  initializeCalendarModule(container);
+  // Calendar module
   const calendarController = container.resolve('calendarController');
   router.use('/calendar', createCalendarRoutes(calendarController));
 
-  // Initialize and use Notification module
-  initializeNotificationModule(container);
+  // Notification module
   const notificationController = container.resolve('notificationController');
   router.use('/notifications', createNotificationRoutes(notificationController));
 
-  // Initialize and use Invitation module
-  initializeInvitationModule(container);
+  // Invitation module
   const invitationController = container.resolve('invitationController');
   router.use('/invitations', createInvitationRoutes(invitationController));
 
-  // Initialize and use Feedback module
-  initializeFeedbackModule(container);
+  // Feedback module
   const feedbackController = container.resolve('feedbackController');
   router.use('/feedback', createFeedbackRoutes(feedbackController));
 
-  // Initialize and use Admin module
-  initializeAdminModule(container);
+  // Admin module
   const adminController = container.resolve('adminController');
   router.use('/admin', createAdminRoutes(adminController));
 
