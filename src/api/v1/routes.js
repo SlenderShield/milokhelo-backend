@@ -4,7 +4,7 @@
  */
 import express from 'express';
 import { createAuthRoutes } from './modules/auth/index.js';
-import { createUserRoutes } from './modules/user/infrastructure/http/UserRoutes.js';
+import { createUserRoutes } from '@/new-modules/user/index.js';
 import { createTeamRoutes } from './modules/team/index.js';
 import { createMatchRoutes } from './modules/match/index.js';
 import { createTournamentRoutes } from './modules/tournament/infrastructure/http/TournamentController.js';

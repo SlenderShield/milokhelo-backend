@@ -16,6 +16,7 @@ const aliases = {
   '@/common': pathResolve(__dirname, 'src/common'),
   '@/config': pathResolve(__dirname, 'src/config'),
   '@/modules': pathResolve(__dirname, 'src/api/v1/modules'),
+  '@/new-modules': pathResolve(__dirname, 'src/modules'),
   '@/test': pathResolve(__dirname, 'test'),
 };
 

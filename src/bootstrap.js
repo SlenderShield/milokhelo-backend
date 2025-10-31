@@ -11,7 +11,7 @@ import { EVENTS } from '@/common/constants/index.js';
 
 // Import module initializers
 import { initializeAuthModule } from '@/modules/auth/index.js';
-import { initializeUserModule } from '@/modules/user/index.js';
+import { initializeUserModule } from '@/new-modules/user/index.js';
 import { initializeTeamModule } from '@/modules/team/index.js';
 import { initializeMatchModule } from '@/modules/match/index.js';
 import { initializeTournamentModule } from '@/modules/tournament/index.js';
