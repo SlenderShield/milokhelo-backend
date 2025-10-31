@@ -7,7 +7,7 @@ import { createAuthRoutes } from './modules/auth/index.js';
 import { createUserRoutes } from '@/new-modules/user/index.js';
 import { createTeamRoutes } from './modules/team/index.js';
 import { createMatchRoutes } from './modules/match/index.js';
-import { createTournamentRoutes } from './modules/tournament/infrastructure/http/TournamentController.js';
+import { createTournamentRoutes } from '@/new-modules/tournament/index.js';
 import { createChatRoutes } from './modules/chat/index.js';
 import { createVenueRoutes, createVenueManagementRoutes } from './modules/venue/index.js';
 import {

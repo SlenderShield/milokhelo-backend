@@ -14,7 +14,7 @@ import { initializeAuthModule } from '@/modules/auth/index.js';
 import { initializeUserModule } from '@/new-modules/user/index.js';
 import { initializeTeamModule } from '@/modules/team/index.js';
 import { initializeMatchModule } from '@/modules/match/index.js';
-import { initializeTournamentModule } from '@/modules/tournament/index.js';
+import { initializeTournamentModule } from '@/new-modules/tournament/index.js';
 import { initializeChatModule } from '@/modules/chat/index.js';
 import { initializeVenueModule } from '@/modules/venue/index.js';
 import { initializeMapsModule } from '@/modules/maps/index.js';
