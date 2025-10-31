@@ -2,7 +2,6 @@
  * Auth Module
  * Handles authentication and authorization
  */
-import { IAuthRepository } from '@/modules/auth/domain/index.js';
 import { AuthService } from './service/auth.service.js';
 import UserModel from './model/user.model.js';
 import { AuthRepository } from './repository/auth.repository.js';
@@ -60,7 +59,6 @@ function initializeAuthModule(container) {
 }
 
 export {
-  IAuthRepository,
   AuthService,
   UserModel,
   AuthRepository,

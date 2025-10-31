@@ -3,8 +3,8 @@
  * Handles user management and profiles
  */
 
-// Import UserModel from auth module (shared model - still in old location)
-import UserModel from '@/modules/auth/infrastructure/persistence/UserModel.js';
+// Import UserModel from auth module (shared model)
+import UserModel from '@/new-modules/auth/model/user.model.js';
 
 // Service exports
 import UserServiceClass from './service/user.service.js';
