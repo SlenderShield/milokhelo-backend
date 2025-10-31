@@ -29,6 +29,7 @@
   "dependencies": {
     "@parse/node-apn": "^6.5.0",
     "bcrypt": "^6.0.0",
+    "bullmq": "^5.63.0",
     "connect-redis": "^9.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -44,6 +45,7 @@
     "passport": "^0.7.0",
     "passport-facebook": "^3.0.0",
     "passport-google-oauth20": "^2.0.0",
+    "prom-client": "^15.1.3",
     "redis": "^5.9.0",
     "socket.io": "^4.8.1",
     "swagger-ui-express": "^5.0.1",

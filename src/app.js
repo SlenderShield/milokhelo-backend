@@ -62,6 +62,13 @@ async function createApp(config, logger, container) {
   // Request logging middleware
   app.use(requestLogger(logger));
 
+  // Metrics middleware
+  const metricsCollector = container.resolve('metricsCollector');
+  if (metricsCollector) {
+    const metricsMiddleware = (await import('@/core/http/middlewares/metricsMiddleware.js')).default;
+    app.use(metricsMiddleware(metricsCollector));
+  }
+
   // Swagger UI Documentation
   try {
     const openapiPath = join(__dirname, '../docs/api/openapi.yaml');

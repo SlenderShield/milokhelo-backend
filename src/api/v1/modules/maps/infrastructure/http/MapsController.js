@@ -2,6 +2,7 @@
  * Maps Controller
  */
 import { asyncHandler, HTTP_STATUS } from '@/core/http/index.js';
+import { MapsDTO } from '@/common/dto/index.js';
 
 class MapsController {
   constructor(mapsService, logger) {
@@ -17,7 +18,8 @@ class MapsController {
         parseFloat(lng),
         parseFloat(radius || 5)
       );
-      res.status(HTTP_STATUS.OK).json(venues);
+      const safeVenues = venues.map((v) => MapsDTO.transformForMap(v));
+      res.status(HTTP_STATUS.OK).json(safeVenues);
     });
   }
 
@@ -31,7 +33,8 @@ class MapsController {
         { name, lat, lng, address },
         userId
       );
-      res.status(HTTP_STATUS.CREATED).json(location);
+      const safeLocation = MapsDTO.transform(location, { includeTimestamps: true });
+      res.status(HTTP_STATUS.CREATED).json(safeLocation);
     });
   }
 
@@ -39,7 +42,8 @@ class MapsController {
     return asyncHandler(async (req, res) => {
       const { entityType, entityId } = req.params;
       const location = await this.mapsService.getLocation(entityType, entityId);
-      res.status(HTTP_STATUS.OK).json(location);
+      const safeLocation = MapsDTO.transform(location, { includeTimestamps: true });
+      res.status(HTTP_STATUS.OK).json(safeLocation);
     });
   }
 }

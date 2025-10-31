@@ -2,6 +2,7 @@
  * Chat Controller
  */
 import { asyncHandler, HTTP_STATUS } from '@/core/http/index.js';
+import { ChatDTO } from '@/common/dto/index.js';
 
 class ChatController {
   constructor(chatService, logger) {
@@ -12,7 +13,8 @@ class ChatController {
   createRoom() {
     return asyncHandler(async (req, res) => {
       const room = await this.chatService.createRoom(req.body);
-      res.status(HTTP_STATUS.CREATED).json(room);
+      const safeRoom = ChatDTO.transformRoom(room);
+      res.status(HTTP_STATUS.CREATED).json(safeRoom);
     });
   }
 
@@ -20,14 +22,16 @@ class ChatController {
     return asyncHandler(async (req, res) => {
       const userId = req.session?.userId;
       const rooms = await this.chatService.getUserRooms(userId);
-      res.status(HTTP_STATUS.OK).json(rooms);
+      const safeRooms = rooms.map((r) => ChatDTO.transformRoom(r));
+      res.status(HTTP_STATUS.OK).json(safeRooms);
     });
   }
 
   getRoomById() {
     return asyncHandler(async (req, res) => {
       const room = await this.chatService.getRoomById(req.params.roomId);
-      res.status(HTTP_STATUS.OK).json(room);
+      const safeRoom = ChatDTO.transformRoom(room);
+      res.status(HTTP_STATUS.OK).json(safeRoom);
     });
   }
 
@@ -35,7 +39,8 @@ class ChatController {
     return asyncHandler(async (req, res) => {
       const userId = req.session?.userId;
       const room = await this.chatService.updateRoom(req.params.roomId, req.body, userId);
-      res.status(HTTP_STATUS.OK).json(room);
+      const safeRoom = ChatDTO.transformRoom(room);
+      res.status(HTTP_STATUS.OK).json(safeRoom);
     });
   }
 
@@ -58,7 +63,8 @@ class ChatController {
         limit ? parseInt(limit) : 50,
         before
       );
-      res.status(HTTP_STATUS.OK).json(messages);
+      const safeMessages = ChatDTO.transformMany(messages);
+      res.status(HTTP_STATUS.OK).json(safeMessages);
     });
   }
 

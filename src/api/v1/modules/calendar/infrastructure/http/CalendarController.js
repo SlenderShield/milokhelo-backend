@@ -2,6 +2,7 @@
  * Calendar Controller
  */
 import { asyncHandler, HTTP_STATUS } from '@/core/http/index.js';
+import { CalendarDTO } from '@/common/dto/index.js';
 
 class CalendarController {
   constructor(calendarService, logger) {
@@ -23,7 +24,8 @@ class CalendarController {
         eventType,
       });
       
-      res.status(HTTP_STATUS.OK).json(events);
+      const safeEvents = CalendarDTO.transformMany(events, { isOwner: true });
+      res.status(HTTP_STATUS.OK).json(safeEvents);
     });
   }
 
@@ -34,7 +36,11 @@ class CalendarController {
     return asyncHandler(async (req, res) => {
       const userId = req.session?.userId;
       const event = await this.calendarService.createEvent(userId, req.body);
-      res.status(HTTP_STATUS.CREATED).json(event);
+      const safeEvent = CalendarDTO.transform(event, {
+        isOwner: true,
+        includeTimestamps: true,
+      });
+      res.status(HTTP_STATUS.CREATED).json(safeEvent);
     });
   }
 

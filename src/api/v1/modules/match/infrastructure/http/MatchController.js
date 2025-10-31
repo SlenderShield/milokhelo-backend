@@ -2,6 +2,7 @@
  * Match Controller
  */
 import { asyncHandler, HTTP_STATUS } from '@/core/http/index.js';
+import { MatchDTO } from '@/common/dto/index.js';
 
 class MatchController {
   constructor(matchService, logger) {
@@ -13,7 +14,8 @@ class MatchController {
     return asyncHandler(async (req, res) => {
       const userId = req.session?.userId;
       const match = await this.matchService.createMatch(req.body, userId);
-      res.status(HTTP_STATUS.CREATED).json(match);
+      const safeMatch = MatchDTO.transform(match, { includeTimestamps: true });
+      res.status(HTTP_STATUS.CREATED).json(safeMatch);
     });
   }
 
@@ -25,14 +27,16 @@ class MatchController {
       if (city) filters['location.city'] = city;
       if (startAt) filters.startAt = { $gte: new Date(startAt) };
       const matches = await this.matchService.listMatches(filters);
-      res.status(HTTP_STATUS.OK).json(matches);
+      const safeMatches = matches.map((m) => MatchDTO.transformMinimal(m));
+      res.status(HTTP_STATUS.OK).json(safeMatches);
     });
   }
 
   getById() {
     return asyncHandler(async (req, res) => {
       const match = await this.matchService.getMatchById(req.params.id);
-      res.status(HTTP_STATUS.OK).json(match);
+      const safeMatch = MatchDTO.transform(match, { includeTimestamps: true });
+      res.status(HTTP_STATUS.OK).json(safeMatch);
     });
   }
 
@@ -40,7 +44,8 @@ class MatchController {
     return asyncHandler(async (req, res) => {
       const userId = req.session?.userId;
       const match = await this.matchService.updateMatch(req.params.id, req.body, userId);
-      res.status(HTTP_STATUS.OK).json(match);
+      const safeMatch = MatchDTO.transform(match, { includeTimestamps: true });
+      res.status(HTTP_STATUS.OK).json(safeMatch);
     });
   }
 
