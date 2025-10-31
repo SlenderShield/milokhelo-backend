@@ -3,7 +3,7 @@
  * Central routing configuration for API version 1
  */
 import express from 'express';
-import { createAuthRoutes } from './modules/auth/index.js';
+import { createAuthRoutes } from '@/new-modules/auth/index.js';
 import { createUserRoutes } from '@/new-modules/user/index.js';
 import { createTeamRoutes } from './modules/team/index.js';
 import { createMatchRoutes } from './modules/match/index.js';
