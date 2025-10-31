@@ -5,6 +5,7 @@
 import errorHandler from './errorHandler.js';
 import notFoundHandler from './notFoundHandler.js';
 import requestLogger from './requestLogger.js';
+import metricsMiddleware from './metricsMiddleware.js';
 import {
   configureHelmet,
   configureCORS,
@@ -35,6 +36,7 @@ export {
   errorHandler,
   notFoundHandler,
   requestLogger,
+  metricsMiddleware,
   configureHelmet,
   configureCORS,
   configureRateLimit,

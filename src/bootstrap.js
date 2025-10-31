@@ -3,10 +3,12 @@
  * Initializes all infrastructure and modules
  */
 import { getConfig } from '@/config/index.js';
+import ConfigValidator from '@/config/validator.js';
 import { createLogger } from '@/core/logging/index.js';
 import { getContainer } from '@/core/container/index.js';
 import { MongoDBConnection, DatabaseHealthCheck } from '@/core/database/index.js';
 import { EventBusFactory } from '@/core/events/index.js';
+import MetricsCollector from '@/core/libs/metrics.js';
 import { EVENTS } from '@/common/constants/index.js';
 
 // Import module initializers
@@ -29,7 +31,11 @@ async function bootstrap() {
   const config = await getConfig();
   console.log(`🚀 Starting ${config.get('app.name')} in ${config.env} mode...`);
 
-  // 2. Initialize logger
+  // 2. Validate configuration (fail-fast)
+  const validator = new ConfigValidator(config);
+  validator.validate();
+
+  // 3. Initialize logger
   const logger = createLogger({
     level: config.get('logging.level'),
     format: config.get('logging.format'),
@@ -37,7 +43,7 @@ async function bootstrap() {
   });
   logger.info('Logger initialized', { level: config.get('logging.level') });
 
-  // 3. Initialize DI container
+  // 4. Initialize DI container
   const container = getContainer();
   logger.info('DI Container initialized');
 
@@ -45,7 +51,12 @@ async function bootstrap() {
   container.registerInstance('config', config);
   container.registerInstance('logger', logger);
 
-  // 4. Initialize database
+  // 5. Initialize metrics collector
+  const metricsCollector = new MetricsCollector({ prefix: 'milokhelo_' });
+  container.registerInstance('metricsCollector', metricsCollector);
+  logger.info('Metrics collector initialized');
+
+  // 6. Initialize database
   const dbConnection = new MongoDBConnection(config.getAll(), logger);
   await dbConnection.connect();
   container.registerInstance('dbConnection', dbConnection);
@@ -54,7 +65,7 @@ async function bootstrap() {
   const dbHealthCheck = new DatabaseHealthCheck(dbConnection);
   container.registerInstance('dbHealthCheck', dbHealthCheck);
 
-  // 5. Initialize event bus
+  // 7. Initialize event bus
   const eventBus = EventBusFactory.create(config.getAll(), logger);
   if (eventBus.connect) {
     await eventBus.connect();
@@ -62,7 +73,7 @@ async function bootstrap() {
   container.registerInstance('eventBus', eventBus);
   logger.info('EventBus initialized', { adapter: config.get('eventBus.adapter') });
 
-  // 6. Initialize modules
+  // 8. Initialize modules
   logger.info('Initializing modules...');
 
   // Initialize all application modules
@@ -82,13 +93,13 @@ async function bootstrap() {
 
   logger.info('All modules initialized');
 
-  // 7. Publish system startup event
+  // 9. Publish system startup event
   await eventBus.publish(EVENTS.SYSTEM.STARTUP, {
     timestamp: new Date().toISOString(),
     environment: config.env,
   });
 
-  return { config, logger, container, dbConnection, eventBus };
+  return { config, logger, container, dbConnection, eventBus, metricsCollector };
 }
 
 /**

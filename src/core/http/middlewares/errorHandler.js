@@ -1,14 +1,39 @@
 /**
  * Global Error Handler Middleware
- * Handles all errors in the application
+ * Handles all errors in the application with AppError classification
  */
 import { HTTP_STATUS, ERROR_CODES } from '@/common/constants/index.js';
+import { AppError } from '@/core/http/errors/index.js';
 import { BookingConflictError } from '@/core/http/errors/BookingConflictError.js';
 
 function errorHandler(logger, config) {
   // eslint-disable-next-line no-unused-vars
   return (err, req, res, next) => {
-    // Handle BookingConflictError specifically
+    // Handle AppError and its subclasses
+    if (err instanceof AppError) {
+      const level = err.isOperational ? 'warn' : 'error';
+      logger[level]('Application error', {
+        name: err.name,
+        code: err.errorCode,
+        message: err.message,
+        context: err.context,
+        url: req.url,
+        method: req.method,
+        ...(level === 'error' && { stack: err.stack }),
+      });
+
+      return res.status(err.statusCode).json({
+        success: false,
+        error: {
+          code: err.errorCode,
+          message: err.message,
+          ...(err.context && Object.keys(err.context).length > 0 && { context: err.context }),
+          ...(config.isDevelopment() && { stack: err.stack }),
+        },
+      });
+    }
+
+    // Handle BookingConflictError specifically (legacy support)
     if (err instanceof BookingConflictError) {
       logger.warn('Booking conflict detected', {
         error: err.message,
@@ -27,8 +52,8 @@ function errorHandler(logger, config) {
       });
     }
 
-    // Log all other errors
-    logger.error('Unhandled error', {
+    // Log all other errors as unexpected
+    logger.error('Unexpected error', {
       error: err.message,
       stack: err.stack,
       url: req.url,
