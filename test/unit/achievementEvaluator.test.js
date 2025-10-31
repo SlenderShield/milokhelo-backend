@@ -3,7 +3,7 @@
  */
 import { describe, it, beforeEach } from 'mocha';
 import assert from 'node:assert';
-import AchievementEvaluator from '@/modules/user/application/AchievementEvaluator.js';
+import AchievementEvaluator from '@/modules/user/service/achievementEvaluator.service.js';
 
 describe('AchievementEvaluator', () => {
   let evaluator;

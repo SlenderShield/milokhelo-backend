@@ -4,7 +4,7 @@
  */
 import { describe, it, beforeEach } from 'mocha';
 import '../helpers/setup.js';
-import StatsUpdateHandler from '@/modules/user/application/StatsUpdateHandler.js';
+import StatsUpdateHandler from '@/modules/user/service/statsUpdateHandler.service.js';
 
 describe('StatsUpdateHandler', () => {
   let handler;

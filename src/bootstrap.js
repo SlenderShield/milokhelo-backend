@@ -10,19 +10,19 @@ import { EventBusFactory } from '@/core/events/index.js';
 import { EVENTS } from '@/common/constants/index.js';
 
 // Import module initializers
-import { initializeAuthModule } from '@/modules/auth/index.js';
-import { initializeUserModule } from '@/modules/user/index.js';
-import { initializeTeamModule } from '@/modules/team/index.js';
-import { initializeMatchModule } from '@/modules/match/index.js';
-import { initializeTournamentModule } from '@/modules/tournament/index.js';
-import { initializeChatModule } from '@/modules/chat/index.js';
-import { initializeVenueModule } from '@/modules/venue/index.js';
-import { initializeMapsModule } from '@/modules/maps/index.js';
-import { initializeCalendarModule } from '@/modules/calendar/index.js';
-import { initializeNotificationModule } from '@/modules/notification/index.js';
-import { initializeInvitationModule } from '@/modules/invitation/index.js';
-import { initializeFeedbackModule } from '@/modules/feedback/index.js';
-import { initializeAdminModule } from '@/modules/admin/index.js';
+import { initializeAuthModule } from '@/new-modules/auth/index.js';
+import { initializeUserModule } from '@/new-modules/user/index.js';
+import { initializeTeamModule } from '@/new-modules/team/index.js';
+import { initializeMatchModule } from '@/new-modules/match/index.js';
+import { initializeTournamentModule } from '@/new-modules/tournament/index.js';
+import { initializeChatModule } from '@/new-modules/chat/index.js';
+import { initializeVenueModule } from '@/new-modules/venue/index.js';
+import { initializeMapsModule } from '@/new-modules/maps/index.js';
+import { initializeCalendarModule } from '@/new-modules/calendar/index.js';
+import { initializeNotificationModule } from '@/new-modules/notification/index.js';
+import { initializeInvitationModule } from '@/new-modules/invitation/index.js';
+import { initializeFeedbackModule } from '@/new-modules/feedback/index.js';
+import { initializeAdminModule } from '@/new-modules/admin/index.js';
 
 async function bootstrap() {
   // 1. Load configuration

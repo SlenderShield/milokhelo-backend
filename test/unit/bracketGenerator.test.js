@@ -3,7 +3,7 @@
  */
 import { describe, it, beforeEach } from 'mocha';
 import '../helpers/setup.js';
-import BracketGenerator from '@/modules/tournament/domain/BracketGenerator.js';
+import BracketGenerator from '@/modules/tournament/service/bracketGenerator.service.js';
 
 describe('BracketGenerator', () => {
   describe('Knockout Tournament', () => {

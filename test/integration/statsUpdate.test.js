@@ -6,13 +6,13 @@ import { describe, it, before, after, beforeEach } from 'mocha';
 import '../helpers/setup.js';
 import mongoose from 'mongoose';
 import InMemoryEventBus from '../../src/core/events/inMemoryBus.js';
-import MatchRepository from '@/modules/match/infrastructure/persistence/MatchRepository.js';
-import MatchService from '@/modules/match/application/MatchService.js';
-import UserRepository from '@/modules/user/infrastructure/persistence/UserRepository.js';
-import StatsUpdateHandler from '@/modules/user/application/StatsUpdateHandler.js';
-import MatchModel from '@/modules/match/infrastructure/persistence/MatchModel.js';
-import UserStatModel from '@/modules/user/infrastructure/persistence/UserStatModel.js';
-import UserModel from '@/modules/auth/infrastructure/persistence/UserModel.js';
+import MatchRepository from '@/modules/match/repository/match.repository.js';
+import MatchService from '@/modules/match/service/match.service.js';
+import UserRepository from '@/modules/user/repository/user.repository.js';
+import StatsUpdateHandler from '@/modules/user/service/statsUpdateHandler.service.js';
+import MatchModel from '@/modules/match/model/match.model.js';
+import UserStatModel from '@/modules/user/model/userStat.model.js';
+import UserModel from '@/modules/auth/model/user.model.js';
 
 describe('Stats Auto-Update Integration', () => {
   let eventBus;
