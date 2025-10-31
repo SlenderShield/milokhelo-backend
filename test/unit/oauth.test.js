@@ -6,9 +6,9 @@ import '../helpers/setup.js';
 import { describe, it, beforeEach } from 'mocha';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import PassportConfig from '@/modules/auth/infrastructure/passport/PassportConfig.js';
-import { GoogleStrategy } from '@/modules/auth/infrastructure/passport/strategies/index.js';
-import { FacebookStrategy } from '@/modules/auth/infrastructure/passport/strategies/index.js';
+import PassportConfig from '@/modules/auth/service/passport/PassportConfig.js';
+import { GoogleStrategy } from '@/modules/auth/service/passport/strategies/index.js';
+import { FacebookStrategy } from '@/modules/auth/service/passport/strategies/index.js';
 
 describe('OAuth Strategies', () => {
   let mockAuthService;

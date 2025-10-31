@@ -6,13 +6,13 @@ import { describe, it, before, after, beforeEach } from 'mocha';
 import '../helpers/setup.js';
 import assert from 'node:assert';
 import mongoose from 'mongoose';
-import AchievementEvaluator from '@/modules/user/application/AchievementEvaluator.js';
-import AchievementRepository from '@/modules/user/infrastructure/persistence/AchievementRepository.js';
-import UserRepository from '@/modules/user/infrastructure/persistence/UserRepository.js';
-import UserModel from '@/modules/auth/infrastructure/persistence/UserModel.js';
-import AchievementModel from '@/modules/user/infrastructure/persistence/AchievementModel.js';
-import UserStatModel from '@/modules/user/infrastructure/persistence/UserStatModel.js';
-import { achievementSeeds } from '@/modules/user/infrastructure/persistence/achievementSeeds.js';
+import AchievementEvaluator from '@/modules/user/service/achievementEvaluator.service.js';
+import AchievementRepository from '@/modules/user/repository/achievement.repository.js';
+import UserRepository from '@/modules/user/repository/user.repository.js';
+import UserModel from '@/modules/auth/model/user.model.js';
+import AchievementModel from '@/modules/user/model/achievement.model.js';
+import UserStatModel from '@/modules/user/model/userStat.model.js';
+import { achievementSeeds } from '@/modules/user/repository/achievementSeeds.js';
 
 describe('Achievement System Integration', () => {
   let achievementRepository;
