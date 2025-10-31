@@ -29,6 +29,7 @@
   "dependencies": {
     "@parse/node-apn": "^6.5.0",
     "bcrypt": "^6.0.0",
+    "bullmq": "^5.63.0",
     "connect-redis": "^9.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
