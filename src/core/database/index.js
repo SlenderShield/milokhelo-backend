@@ -4,5 +4,6 @@
  */
 import MongoDBConnection from './connection.js';
 import DatabaseHealthCheck from './healthCheck.js';
+import BaseRepository from './BaseRepository.js';
 
-export { MongoDBConnection, DatabaseHealthCheck };
+export { MongoDBConnection, DatabaseHealthCheck, BaseRepository };
