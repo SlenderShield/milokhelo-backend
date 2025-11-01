@@ -12,7 +12,7 @@
 1. [System Overview](#system-overview)
 2. [Project Structure](#project-structure)
 3. [Core Infrastructure](#core-infrastructure)
-4. [Business Modules (14)](#business-modules)
+4. [Business Modules (13)](#business-modules)
 5. [Shared Components](#shared-components)
 6. [Design Patterns & Conventions](#design-patterns--conventions)
 7. [Dependencies & Integrations](#dependencies--integrations)
@@ -26,9 +26,11 @@
 ### Architecture Style
 **Modular Monolith** with Clean Architecture principles, designed for future microservices migration
 
+> **Note:** The system has 13 business modules. The 14th count in some documentation refers to the dual nature of the venue module which has both user-facing routes (/venues) and management routes (/venue-management).
+
 ### Key Metrics
 - **Total Files:** 303 JavaScript files
-- **Business Modules:** 14 independent modules
+- **Business Modules:** 13 independent modules
 - **API Endpoints:** 70+ REST endpoints
 - **Lines of Code:** ~15,000+ lines
 - **Test Coverage:** Unit + Integration tests
@@ -81,7 +83,7 @@ milokhelo-backend/
 │   │   ├── constants/            # Application constants
 │   │   ├── dto/                  # Data Transfer Objects (14 DTOs)
 │   │   ├── utils/                # Common utilities
-│   │   └── validation/           # Express-validator schemas (8 modules)
+│   │   └── validation/           # Express-validator schemas (7 modules)
 │   ├── app.js                     # Express app factory
 │   ├── bootstrap.js               # Application initialization
 │   └── server.js                  # Server entry point
@@ -496,7 +498,7 @@ module-name/
 
 ---
 
-### Module Inventory (14 Modules)
+### Module Inventory (13 Modules)
 
 #### 1. Authentication Module (`auth`)
 **Location:** `src/api/v1/modules/auth/`  
@@ -657,7 +659,7 @@ Exports: EVENTS, HTTP_STATUS, ERROR_CODES
 Functions: delay, isEmpty, deepClone, pick, omit, retry
 
 ### 4. Validation Schemas (`src/common/validation/`)
-8 validation modules using express-validator
+7 validation modules using express-validator (auth, user, team, match, tournament, calendar, notification)
 
 ---
 
