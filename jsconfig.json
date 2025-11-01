@@ -8,8 +8,9 @@
       "@/core/*": ["src/core/*"],
       "@/api/*": ["src/api/*"],
       "@/common/*": ["src/common/*"],
-      "@/config/*": ["src/config/*"],
+      "@/config/*": ["src/core/config/*"],
       "@/modules/*": ["src/api/v1/modules/*"],
+      "@/new-modules/*": ["src/api/v1/modules/*"],
       "@/test/*": ["test/*"]
     }
   },
