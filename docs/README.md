@@ -19,7 +19,10 @@ docs/
 
 System design, architecture patterns, and historical context:
 
+- **[SYSTEM_ARCHITECTURE_MAP.md](architecture/SYSTEM_ARCHITECTURE_MAP.md)** - 🆕 **Complete system map** - All files, modules, features, patterns, dependencies (Master Reference)
 - **[ARCHITECTURE.md](architecture/ARCHITECTURE.md)** - System architecture and design patterns
+- **[CODEBASE_FEATURE_INDEX.md](architecture/CODEBASE_FEATURE_INDEX.md)** - Complete feature and module index
+- **[DEPENDENCY_MAP.md](architecture/DEPENDENCY_MAP.md)** - Visual dependency and integration map
 - **[CODEBASE_ANALYSIS.md](architecture/CODEBASE_ANALYSIS.md)** - Comprehensive codebase analysis (historical)
 - **[REFACTORING_HISTORY.md](architecture/REFACTORING_HISTORY.md)** - Complete refactoring history (Phase 1 & Phase 2)
 - **[RESTRUCTURING.md](architecture/RESTRUCTURING.md)** - Codebase restructuring documentation and migration guide
@@ -130,7 +133,9 @@ For scratch work or temporary outputs, use `temp_docs/` instead.
 ## 🔍 Quick Links
 
 **New Developer?** Start with [guides/QUICKSTART.md](guides/QUICKSTART.md)  
+**Complete System Map?** Read [architecture/SYSTEM_ARCHITECTURE_MAP.md](architecture/SYSTEM_ARCHITECTURE_MAP.md) ⭐  
 **Understanding the System?** Read [architecture/ARCHITECTURE.md](architecture/ARCHITECTURE.md)  
+**Feature Index?** Check [architecture/CODEBASE_FEATURE_INDEX.md](architecture/CODEBASE_FEATURE_INDEX.md)  
 **Need API Reference?** Check [api/openapi.yaml](api/openapi.yaml)  
 **Working on a Feature?** Browse [features/](features/) directory
 
