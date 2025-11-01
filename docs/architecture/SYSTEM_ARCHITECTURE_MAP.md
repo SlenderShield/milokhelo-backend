@@ -29,10 +29,10 @@
 > **Note:** The system has 13 business modules. The 14th count in some documentation refers to the dual nature of the venue module which has both user-facing routes (/venues) and management routes (/venue-management).
 
 ### Key Metrics
-- **Total Files:** 187 JavaScript files (after cleanup)
+- **Total Files:** 303 JavaScript files
 - **Business Modules:** 13 independent modules
 - **API Endpoints:** 70+ REST endpoints
-- **Documentation Files:** 40 files (organized in subdirectories)
+- **Documentation Files:** 40+ files (organized in subdirectories)
 - **Test Coverage:** 13 test files (unit + integration)
 
 ### Technology Stack
