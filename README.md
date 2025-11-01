@@ -473,7 +473,10 @@ docs/
 
 ### 🏗️ Architecture & Design
 
+- [`docs/architecture/SYSTEM_ARCHITECTURE_MAP.md`](docs/architecture/SYSTEM_ARCHITECTURE_MAP.md) - 🆕 **Complete system map** - Master reference for entire codebase
 - [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) - System architecture and design patterns
+- [`docs/architecture/CODEBASE_FEATURE_INDEX.md`](docs/architecture/CODEBASE_FEATURE_INDEX.md) - Complete feature and module index
+- [`docs/architecture/DEPENDENCY_MAP.md`](docs/architecture/DEPENDENCY_MAP.md) - Visual dependency and integration map
 - [`docs/architecture/REFACTORING_HISTORY.md`](docs/architecture/REFACTORING_HISTORY.md) - Complete refactoring history
 - [`docs/architecture/CODEBASE_ANALYSIS.md`](docs/architecture/CODEBASE_ANALYSIS.md) - Comprehensive codebase analysis (historical)
 
